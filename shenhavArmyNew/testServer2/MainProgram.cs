@@ -105,8 +105,6 @@ namespace testServer2
                 AddToLogString(filePath, "ERROR IN SyntaxCheck");
                 ConnectionServer.CloseConnection(threadNumber, "ERROR IN SyntaxCheck " + e.ToString(), GeneralConsts.ERROR);
             }
-            GeneralCompilerFunctions.printArrayList(filePath, keywords);
-            AddToLogString(filePath, keywords.Count.ToString());
             Console.WriteLine("finished");
 
             if (!compileError)
@@ -116,7 +114,8 @@ namespace testServer2
                 //just tests.
                 try
                 {
-                    GeneralRestApiServerMethods.CreateFinalJson(filePath, includes, globalVariable, funcVariables, defines, final_json);
+                    GeneralRestApiServerMethods.CreateFinalJson(filePath, includes, globalVariable, funcVariables, defines, final_json,fileType);
+                    Console.WriteLine("after final json");
                 }
                 catch (Exception e)
                 {

@@ -12,6 +12,13 @@ namespace ClassesSolution
         public string documentation;
         public int codeLength;
         public ParametersType[] variables;
+        public FunctionInfoJson()
+        {
+            this.content = null;
+            this.codeLength = 0;
+            this.variables = null;
+        }
+
     }
     public class CodeInfoJson
     {

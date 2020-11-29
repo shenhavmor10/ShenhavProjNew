@@ -47,3 +47,10 @@ C:\Users\student\Desktop\NewArmy\ShenhavProj\shenhavArmyNew\ClassesSolution\obj\
 C:\Users\student\Desktop\NewArmy\ShenhavProj\shenhavArmyNew\ClassesSolution\obj\Debug\ClassesSolution.csproj.CoreCompileInputs.cache
 C:\Users\student\Desktop\NewArmy\ShenhavProj\shenhavArmyNew\ClassesSolution\obj\Debug\ClassesSolution.exe
 C:\Users\student\Desktop\NewArmy\ShenhavProj\shenhavArmyNew\ClassesSolution\obj\Debug\ClassesSolution.pdb
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ClassesSolution\bin\Debug\ClassesSolution.exe.config
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ClassesSolution\bin\Debug\ClassesSolution.exe
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ClassesSolution\bin\Debug\ClassesSolution.pdb
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ClassesSolution\obj\Debug\ClassesSolution.csprojAssemblyReference.cache
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ClassesSolution\obj\Debug\ClassesSolution.csproj.CoreCompileInputs.cache
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ClassesSolution\obj\Debug\ClassesSolution.exe
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ClassesSolution\obj\Debug\ClassesSolution.pdb

@@ -11,6 +11,7 @@ namespace testServer2
     {
         //Patterns Declaration.
         const int NOT_FOUND_STRING = -1;
+        static Regex functionPatternInH = new Regex(@"^[a-zA-Z]+.*\s[a-zA-Z].*[(].*[)]\;$");
         static Regex OpenBlockPattern = new Regex(@".*{.*");
         static Regex CloseBlockPattern = new Regex(@".*}.*");
         static Regex FunctionPatternInC = new Regex(@"^([^ ]+\s)?[^ ]+\s(.*\s)?[^ ]+\([^()]*\)$");
@@ -244,9 +245,19 @@ namespace testServer2
         /// <param name="path"> path of the code.</param>
         /// <param name="pattern"> function pattern type string</param>
         /// <returns> return a json for the functions get in "SyncServer".</returns>
-        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Object>>final_json)
+        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Object>>final_json,string typeEnding)
         {
-            CreateFunctionsJsonFile(filePath, FunctionPatternInC, variables, final_json);
+            //if its h type file.
+            if(typeEnding=="h")
+            {
+                CreateFunctionsJsonFile(filePath, functionPatternInH, typeEnding, final_json);
+            }
+            //if its a c type file for now.
+            else 
+            {
+                CreateFunctionsJsonFile(filePath, FunctionPatternInC, typeEnding, final_json,variables);
+            }
+            //for both files
             CreateCodeJsonFile(filePath,includes,globalVariables,defines,final_json);
         }
         /// Function - FindVariables
@@ -275,7 +286,7 @@ namespace testServer2
         /// type "ParameterType" of all of his variables.
         /// </param>
         /// <param name="final_json"> the final big json.</param>
-        static void CreateFunctionsJsonFile(string path, Regex pattern, Dictionary<string,ArrayList> variables, Dictionary<string, Dictionary<string,Object>> final_json)
+        static void CreateFunctionsJsonFile(string path, Regex pattern, string typeEnding, Dictionary<string, Dictionary<string, Object>> final_json, Dictionary<string,ArrayList> variables=null)
         {
             string codeLine = GeneralConsts.EMPTY_STRING;
             string fName;
@@ -289,13 +300,11 @@ namespace testServer2
             uint documentPos = sr.Pos;
             while (codeLine != null)
             {
+                codeLine = sr.ReadLine();
                 //saves the last documentation.
-                while (!exitFlag && !FunctionPatternInC.IsMatch(codeLine))
+                while (!exitFlag && !pattern.IsMatch(codeLine))
                 {
-                    if (codeLine != null)
-                    {
-                        codeLine = sr.ReadLine();
-                    }
+
                     firstLineDocumentation = GeneralConsts.EMPTY_STRING;
                     if (codeLine == null)
                     {
@@ -327,7 +336,11 @@ namespace testServer2
                                 codeLine = sr.ReadLine();
                         }
                     }
-                    if (codeLine == null)
+                    if (codeLine != null)
+                    {
+                        codeLine = sr.ReadLine();
+                    }
+                    if(codeLine==null)
                     {
                         exitFlag = true;
                     }
@@ -354,14 +367,21 @@ namespace testServer2
                         returnType = returnType.Trim();
                         //enter function to where i store it. 
                         Object tempStorage = new FunctionInfoJson();
-                        GeneralCompilerFunctions.NextScopeLength(sr, ref codeLine, ref ((FunctionInfoJson)tempStorage).codeLength, true);
-                        ((FunctionInfoJson)tempStorage).content = FunctionCode(sr, ref codeLine);
+                        if(typeEnding=="c")
+                        {
+                            GeneralCompilerFunctions.NextScopeLength(sr, ref codeLine, ref ((FunctionInfoJson)tempStorage).codeLength, true);
+                            ((FunctionInfoJson)tempStorage).content = FunctionCode(sr, ref codeLine);
+                            ((FunctionInfoJson)tempStorage).variables = FindVariables(variables[fName]);
+                        }
                         ((FunctionInfoJson)tempStorage).parameters = FindParameters(fName);
                         ((FunctionInfoJson)tempStorage).returnType = returnType;
-                        ((FunctionInfoJson)tempStorage).variables = FindVariables(variables[fName]);
                         curPos = sr.Pos;
                         ((FunctionInfoJson)tempStorage).documentation = FindDocumentation(sr, documentPos, firstLineDocumentation, curPos);
-                       ((Dictionary<string,FunctionInfoJson>)tempDict).Add(fName, (FunctionInfoJson)tempStorage);
+                        if(!((Dictionary<string, FunctionInfoJson>)tempDict).ContainsKey(fName))
+                        {
+                            ((Dictionary<string, FunctionInfoJson>)tempDict).Add(fName, (FunctionInfoJson)tempStorage);
+                        }
+                       
                     }
                     else
                     {
@@ -396,7 +416,6 @@ namespace testServer2
             code.Globalvariables = FindVariables(globalVariables);
             //Serialize.
             final_json[path].Add("codeInfo",code);
-
         }
         /// Function - ReadAllScope
         /// <summary>

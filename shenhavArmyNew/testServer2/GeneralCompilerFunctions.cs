@@ -19,8 +19,9 @@ namespace testServer2
         static Regex functionPatternInH = new Regex(@"^[a-zA-Z]+.*\s[a-zA-Z].*[(].*[)]\;$");
         static Regex staticFunctionPatternInC = new Regex(@"^.*static.*\s.*[a-zA-Z]+.*\s[a-zA-Z].*[(].*[)]$");
         static Regex FunctionPatternInC = new Regex(@"^([^ ]+\s)?[^ ]+\s(.*\s)?[^ ]+\([^()]*\)$");
-        static Regex StructPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?(struct\s(.+{$|.*{$|[^\s;]+$))");
-        static Regex TypedefOneLine = new Regex(@"^.*typedef\sstruct\s[^\s]+\s[^\s]+;$");
+        static Regex StructPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?struct(([^;]*$)|(\s(.+{$|.*{$|[^\s;]+$)))");
+        static Regex EnumPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?(enum\s(.+{$|.*{$;?|[^\s;]+;?$))");
+        static Regex TypedefOneLine = new Regex(@"^.*typedef\s(struct|enum)\s[^\s]+\s[^\s]+;$");
         static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?[^\s()]+\s((\*)*(\s))?[^\s()=]+(\s?=.+;|[^()=]*;))");
         static Regex VariableEquation = new Regex(@"^(?!.*return)(?=(\s)?([^\s()]+\s)?((\*)*(\s))?[^\s()]+(\s)?=(\s)?[A-Za-z][^\s()]*;$)");
         static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^\d][^ ()]*( [^ ()]+)?$");
@@ -399,6 +400,12 @@ namespace testServer2
             }
             return isSameType;
         }
+        /// Function - cleanLineFromDoc
+        /// <summary>
+        /// cleaning the codeLine from documentation options so it gets only the pure coding.
+        /// </summary>
+        /// <param name="codeLine"> the line of the code type string.</param>
+        /// <returns> returns the pure code with no documentation string.</returns>
         static string cleanLineFromDoc(string codeLine)
         {
             char[] trimChar = { '\t', ' ' };
@@ -424,28 +431,36 @@ namespace testServer2
         /// <param name="blocksAndNames"> blocksAndNames type ArrayList that conatins the code variables in the scope.</param>
         /// <param name="parameters"> parameters type ArrayList conatins the function parameters.</param>
         /// <param name="functionLength"> scopeLength type int default is 0 if the code line is outside any scopes.</param>
+        /// <param name="typeEnding"> the file type (for an example h or c).</param>
         static void ChecksInSyntaxCheck(string path, MyStream sr, string codeLine, bool IsScope, Hashtable keywords, int threadNumber,string typeEnding, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames, ArrayList parameters = null, int functionLength = 0)
         {
             //adds the parameters of the function to the current ArrayList of variables.
             int i;
+            bool keywordCheck = true;
             if (parameters != null)
             {
+                //if its type ending c.
                 if(typeEnding=="c")
                 {
+                    //adds the parameters of the function to the blocksAndNames.
                     blocksAndNames.Add(new ArrayList());
                     ((ArrayList)blocksAndNames[1]).AddRange(parameters);
                 }
-                else if(typeEnding=="h")
+                for (i = 0; i < parameters.Count; i++)
                 {
-                    for (i = 0; i < parameters.Count; i++)
+                    //checks if there is an error in the parameters of the function.
+                    
+                    if (!keywords.ContainsKey(CreateMD5(((ParametersType)parameters[i]).parameterType.Trim(CharsToTrim))))
                     {
-                        if (!keywords.ContainsKey(((ParametersType)parameters[i]).parameterType))
-                        {
-                            CompileError = true;
-                        }
+                        CompileError = true;
+                        string error = (codeLine + " keyword does not exist. row : " + sr.curRow);
+                        MainProgram.AddToLogString(path, error);
+                        Server.ConnectionServer.CloseConnection(threadNumber, error, GeneralConsts.ERROR);
                     }
                 }
+                
             }
+            //cleaning code.
             codeLine = cleanLineFromDoc(codeLine);
             if (StructPattern.IsMatch(codeLine))
             {
@@ -457,7 +472,7 @@ namespace testServer2
                 codeLine = sr.ReadLine();
             }
             //how to convert to array list
-            bool keywordCheck = true;
+            
             bool DifferentTypesCheck = true;
             int pos = 0;
             ArrayList keywordResults = new ArrayList();
@@ -547,79 +562,6 @@ namespace testServer2
                 }
             }
         }
-        static bool CheckInSyntaxCheckH(string path, MyStream sr, string codeLine, Hashtable keywords, bool IsScope, int threadNumber, ArrayList parameters = null, int functionLength = 0)
-        {
-            int i;
-            if (parameters != null)
-            {
-                for (i = 0; i < parameters.Count; i++)
-                {
-                    if (!keywords.ContainsKey(((ParametersType)parameters[i]).parameterType))
-                    {
-                        CompileError = true;
-                    }
-                }
-            }
-            if (StructPattern.IsMatch(codeLine))
-            {
-                //Add struct keywords to the keywords Hashtable.
-                AddStructNames(sr, codeLine, keywords);
-            }
-            if (codeLine.Trim(GeneralConsts.TAB_SPACE).IndexOf("{") != GeneralConsts.NOT_FOUND_STRING)
-            {
-                codeLine = sr.ReadLine();
-            }
-            int pos = 0;
-            bool keywordCheck = true;
-            ArrayList keywordResults = new ArrayList();
-            for (i = 0; i < functionLength + 1; i++)
-            {
-                if (codeLine.Trim(GeneralConsts.TAB_SPACE) == GeneralConsts.EMPTY_STRING)
-                {
-                    codeLine = sr.ReadLine();
-                }
-                //take cares to all of those situations.
-                if (StructPattern.IsMatch(codeLine) || TypedefOneLine.IsMatch(codeLine))
-                {
-                    keywordResults = AddStructNames(sr, codeLine, keywords);
-                }
-                if (VariableDecleration.IsMatch(codeLine) && !(codeLine.IndexOf("typedef") != GeneralConsts.NOT_FOUND_STRING))
-                {
-                    //keywordCheck = VariableDeclarationHandler(ref codeLine, ref pos, keywords, threadNumber, variables, globalVariables, blocksAndNames, IsScope, sr);
-                }
-                if (!keywordCheck)
-                {
-                    string error = (codeLine + " keyword does not exist. row : " + sr.curRow);
-                    try
-                    {
-                        MainProgram.AddToLogString(path, sr.curRow.ToString());
-                    }
-                    catch (Exception e)
-                    {
-                        MainProgram.AddToLogString(path, e.ToString());
-                    }
-                    MainProgram.AddToLogString(path, error);
-                    Server.ConnectionServer.CloseConnection(threadNumber, error, GeneralConsts.ERROR);
-                    CompileError = true;
-
-                }
-                pos = 0;
-                keywordCheck = true;
-                if (codeLine.IndexOf("//") != GeneralConsts.NOT_FOUND_STRING || codeLine.IndexOf("/*") != GeneralConsts.NOT_FOUND_STRING)
-                {
-                    //skips documentation if needed.
-                    i += skipDocumentation(sr, codeLine);
-                }
-                if (IsScope && i != functionLength)
-                {
-                    codeLine = sr.ReadLine();
-                }
-
-            }
-            return CompileError;
-
-        }
-           
         /// Function - SyntaxCheck
         /// <summary>
         /// that function uses the Function "ChecksInSyntaxCheck" if that is in a scope
@@ -660,7 +602,7 @@ namespace testServer2
                         ChecksInSyntaxCheck(path, sr, codeLine, true, keywords, threadNumber,typeEnding, variables, globalVariable, blocksAndNames, parameters, scopeLength + 1);
                         parameters.Clear();
                     }
-                    // if there is a function it saves its parameters.
+                    // if there is a function it saves its parameters (only if its C)..
                     else if (FunctionPatternInC.IsMatch(codeLine))
                     {
                         
@@ -672,6 +614,7 @@ namespace testServer2
                         }
                         lastFuncLine = codeLine;
                     }
+                    // if there is a function in h it checks it keywords to see if they are good.
                     else if (functionPatternInH.IsMatch(codeLine))
                     {
                         parameters.AddRange(GeneralRestApiServerMethods.FindParameters(cleanLineFromDoc(codeLine)));
@@ -835,7 +778,7 @@ namespace testServer2
 
                 }
                 //Handling almost the same patterns as the syntaxCheck function.
-                if (StructPattern.IsMatch(codeLine) && threadNumber != 0)
+                if (StructPattern.IsMatch(codeLine)||EnumPattern.IsMatch(codeLine) && threadNumber != 0)
                 {
                     AddStructNames(sr, codeLine, keywords);
                 }
@@ -914,6 +857,20 @@ namespace testServer2
             result = result.Trim();
             return result;
         }
+        public static void AddKeywordsFromArray(string[] arrayString, Hashtable keywords, ArrayList keywords2 = null)
+        {
+            for (int i = 0; i < arrayString.Length; i++)
+            {
+                arrayString[i] = arrayString[i].Trim(CharsToTrim);
+                if (!keywords.ContainsKey(CreateMD5(arrayString[i])))
+                {
+                    //adds the keywords.
+                    keywords.Add(CreateMD5(arrayString[i]), arrayString[i]);
+                    keywords2.Add(CreateMD5(arrayString[i]));
+                }
+
+            }
+        }
         /// Function - AddStructNames
         /// <summary>
         /// adds all the names of the struct or typedef struct to the keywords Hashtable.
@@ -939,29 +896,27 @@ namespace testServer2
                 if (!TypedefOneLine.IsMatch(codeLine))
                 {
                     string structKeyword = codeLine.Trim(CharsToTrim);
-                    structKeyword = structKeyword.Substring(structKeyword.IndexOf("struct"));
-                    if (!keywords.Contains(CreateMD5(structKeyword)))
+                    structKeyword = (structKeyword.IndexOf("enum") != -1) ? structKeyword.Substring(structKeyword.IndexOf("enum")):structKeyword.Substring(structKeyword.IndexOf("struct"));
+                    if (!keywords.Contains(CreateMD5(structKeyword))&&(structKeyword!="struct"|| structKeyword != "enum"))
                     {
                         //adds the new keyword.
                         keywords.Add(CreateMD5(structKeyword), structKeyword);
                         results.Add(CreateMD5(structKeyword));
                     }
-                    if (NextScopeLength(sr, ref codeLine, ref count,false))
+                    if(codeLine.IndexOf("}")!=-1)
+                    {
+                        codeLine = codeLine.Substring(codeLine.IndexOf("}")+1);
+                        codeLine = codeLine.Trim(';');
+                        if(!keywords.Contains(CreateMD5(codeLine)))
+                        {
+                            keywords.Add(CreateMD5(codeLine), codeLine);
+                        }
+                    }
+                    else if (NextScopeLength(sr, ref codeLine, ref count,false))
                     {
                         codeLine = codeLine.Trim(CharsToTrim);
-
                         tempSplit = Regex.Split(codeLine, @",");
-                        for (int i = 0; i < tempSplit.Length; i++)
-                        {
-                            tempSplit[i] = tempSplit[i].Trim(CharsToTrim);
-                            if (!keywords.ContainsKey(CreateMD5(tempSplit[i])))
-                            {
-                                //adds the keywords.
-                                keywords.Add(CreateMD5(tempSplit[i]), tempSplit[i]);
-                                results.Add(CreateMD5(tempSplit[i]));
-                            }
-
-                        }
+                        AddKeywordsFromArray(tempSplit, keywords, results);
                     }
                 }
                 else

@@ -1,10 +1,10 @@
 #ifndef GRAPHALGORITHMS
 #define GRAPHALGORITHMS
 #include "Graph.h"
-#include "DYNQUEUE"
+#include "DYNQUEUE.h"
 #include "heap.h"
 
-int** cloneGraphMat(GraphPtr a, BOOLEAN gogo, BOOLEAN spsp);
+int** cloneGraphMat(graphPtr a, BOOLEAN gogo, BOOLEAN spsp);
 
 /*
 * sends a message to a client.

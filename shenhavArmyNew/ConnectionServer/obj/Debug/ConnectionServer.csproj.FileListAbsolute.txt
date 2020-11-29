@@ -56,3 +56,14 @@ C:\Users\student\Desktop\NewArmy\ShenhavProj\shenhavArmyNew\ConnectionServer\obj
 C:\Users\student\Desktop\NewArmy\ShenhavProj\shenhavArmyNew\ConnectionServer\obj\Debug\ConnectionServer.csproj.CopyComplete
 C:\Users\student\Desktop\NewArmy\ShenhavProj\shenhavArmyNew\ConnectionServer\obj\Debug\ConnectionServer.exe
 C:\Users\student\Desktop\NewArmy\ShenhavProj\shenhavArmyNew\ConnectionServer\obj\Debug\ConnectionServer.pdb
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ConnectionServer\bin\Debug\ConnectionServer.exe.config
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ConnectionServer\bin\Debug\ConnectionServer.exe
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ConnectionServer\bin\Debug\ConnectionServer.pdb
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ConnectionServer\bin\Debug\ClassesSolution.exe
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ConnectionServer\bin\Debug\ClassesSolution.pdb
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ConnectionServer\bin\Debug\ClassesSolution.exe.config
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ConnectionServer\obj\Debug\ConnectionServer.csprojAssemblyReference.cache
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ConnectionServer\obj\Debug\ConnectionServer.csproj.CoreCompileInputs.cache
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ConnectionServer\obj\Debug\ConnectionServer.csproj.CopyComplete
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ConnectionServer\obj\Debug\ConnectionServer.exe
+C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\ConnectionServer\obj\Debug\ConnectionServer.pdb
