@@ -12,11 +12,19 @@ namespace ClassesSolution
         public string documentation;
         public int codeLength;
         public ParametersType[] variables;
+        public string fName;
+        public int exitPointsAmount;
+        public string[] allExitPoints;
+        public string pattern;
+        public string[] memoryHandles;
         public FunctionInfoJson()
         {
             this.content = null;
             this.codeLength = 0;
             this.variables = null;
+            this.allExitPoints = null;
+            this.exitPointsAmount = 0;
+            this.memoryHandles = null;
         }
 
     }

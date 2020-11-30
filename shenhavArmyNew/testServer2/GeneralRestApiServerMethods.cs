@@ -3,6 +3,7 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using ClassesSolution;
 using System;
+using System.Data;
 
 namespace testServer2
 {
@@ -15,6 +16,7 @@ namespace testServer2
         static Regex OpenBlockPattern = new Regex(@".*{.*");
         static Regex CloseBlockPattern = new Regex(@".*}.*");
         static Regex FunctionPatternInC = new Regex(@"^([^ ]+\s)?[^ ]+\s(.*\s)?[^ ]+\([^()]*\)$");
+        const string RegexPattern = @"(\s)+?return(\s)?[^\s]+;";
         const string patternFilePath = @"..\..\..\Patterns.txt";
 
         /// Function - FunctionCode
@@ -276,6 +278,55 @@ namespace testServer2
             }
             return parameterTypeVariables;
         }
+        /// Function - FindNameFromCodeLine
+        /// <summary>
+        /// Gets a code line of a function decleration and returns the name of the function.
+        /// </summary>
+        /// <param name="codeLine"> The code line of the function declaration</param>
+        /// <returns></returns>
+        public static string FindNameFromCodeLine(string codeLine)
+        {
+            codeLine = codeLine.Split('(')[0];
+            codeLine = codeLine.Substring(codeLine.LastIndexOf(" "));
+            codeLine = codeLine.Trim();
+            return codeLine;
+        }
+        static string CreatePatternForFunction(ParametersType [] parameters,string functionName,string returnType)
+        {
+            string pattern = @"([^\s]+)?" +returnType+@"[\s*]+"+functionName + @"[\s(]+";
+            for(int i=0;i<parameters.Length;i++)
+            {
+                if(parameters.Length>i+1)
+                {
+                    pattern += parameters[i].parameterType + @"[\s*]+" + parameters[i].parameterName + @"[,\s]+";
+                }
+                else
+                {
+                    pattern += parameters[i].parameterType + @"[\s*]+" + parameters[i].parameterName;
+                }
+                
+            }
+            pattern += @"[)\s]+$";
+            pattern = pattern.Replace("*", @"\*");
+            return pattern;
+        }
+        /// Function - TakeExitPoints
+        /// <summary>
+        /// Searches for all exit points in the code and returns them in an array string.
+        /// </summary>
+        /// <param name="content"> The whole function content.</param>
+        /// <returns> An array type string that contains the whole exit points code lines.</returns>
+        static string [] TakeExitPoints(string content)
+        {
+            MatchCollection m = Regex.Matches(content, RegexPattern);
+            string[] result = new string[m.Count];
+            for(int i=0;i<result.Length;i++)
+            {
+                result[i] = m[i].ToString();
+                result[i] = result[i].Trim();
+            }
+            return result;
+        }
         /// Fubnction - CreateFunctionsJsonFile
         /// <summary>
         /// function is creating the json file for the "Function" GET request.
@@ -296,47 +347,48 @@ namespace testServer2
             string firstLineDocumentation = GeneralConsts.EMPTY_STRING;
             uint curPos;
             Object tempDict = new Dictionary<string, FunctionInfoJson>();
+            string[] allExitPoints;
             MyStream sr = new MyStream(path, System.Text.Encoding.UTF8);
             uint documentPos = sr.Pos;
             while (codeLine != null)
             {
                 codeLine = sr.ReadLine();
+                if (codeLine == null)
+                    exitFlag = true;
                 //saves the last documentation.
                 while (!exitFlag && !pattern.IsMatch(codeLine))
                 {
 
                     firstLineDocumentation = GeneralConsts.EMPTY_STRING;
-                    if (codeLine == null)
+                    if(codeLine!=null)
                     {
-                        exitFlag = true;
-                        break;
-                    }
-                    if (codeLine.IndexOf("//") != NOT_FOUND_STRING)
-                    {
-                        documentPos = sr.Pos;
-                        firstLineDocumentation = codeLine;
-                    }
-                    while ((codeLine.IndexOf("//") != NOT_FOUND_STRING))
-                    {
-                        if (codeLine != null)
-                            codeLine = sr.ReadLine();
-                    }
-                    if ((codeLine.IndexOf("/*") != NOT_FOUND_STRING))
-                    {
-                        documentPos = sr.Pos;
-                        firstLineDocumentation = codeLine;
-                        while (!(codeLine.IndexOf("*/") != NOT_FOUND_STRING))
+                        if (codeLine.IndexOf("//") != NOT_FOUND_STRING)
+                        {
+                            documentPos = sr.Pos;
+                            firstLineDocumentation = codeLine;
+                        }
+                        while ((codeLine.IndexOf("//") != NOT_FOUND_STRING))
                         {
                             if (codeLine != null)
                                 codeLine = sr.ReadLine();
                         }
-                        if ((codeLine.IndexOf("*/") != NOT_FOUND_STRING))
+                        if ((codeLine.IndexOf("/*") != NOT_FOUND_STRING))
                         {
-                            if (codeLine != null)
-                                codeLine = sr.ReadLine();
+                            documentPos = sr.Pos;
+                            firstLineDocumentation = codeLine;
+                            while (!(codeLine.IndexOf("*/") != NOT_FOUND_STRING))
+                            {
+                                if (codeLine != null)
+                                    codeLine = sr.ReadLine();
+                            }
+                            if ((codeLine.IndexOf("*/") != NOT_FOUND_STRING))
+                            {
+                                if (codeLine != null)
+                                    codeLine = sr.ReadLine();
+                            }
                         }
                     }
-                    if (codeLine != null)
+                    if (codeLine != null&&!pattern.IsMatch(codeLine))
                     {
                         codeLine = sr.ReadLine();
                     }
@@ -344,10 +396,6 @@ namespace testServer2
                     {
                         exitFlag = true;
                     }
-                }
-                if (codeLine == null)
-                {
-                    exitFlag = true;
                 }
                 if (!exitFlag)
                 {
@@ -372,12 +420,16 @@ namespace testServer2
                             GeneralCompilerFunctions.NextScopeLength(sr, ref codeLine, ref ((FunctionInfoJson)tempStorage).codeLength, true);
                             ((FunctionInfoJson)tempStorage).content = FunctionCode(sr, ref codeLine);
                             ((FunctionInfoJson)tempStorage).variables = FindVariables(variables[fName]);
+                            ((FunctionInfoJson)tempStorage).allExitPoints = TakeExitPoints(((FunctionInfoJson)tempStorage).content);
+                            ((FunctionInfoJson)tempStorage).exitPointsAmount = ((FunctionInfoJson)tempStorage).allExitPoints.Length;
                         }
                         ((FunctionInfoJson)tempStorage).parameters = FindParameters(fName);
                         ((FunctionInfoJson)tempStorage).returnType = returnType;
                         curPos = sr.Pos;
                         ((FunctionInfoJson)tempStorage).documentation = FindDocumentation(sr, documentPos, firstLineDocumentation, curPos);
-                        if(!((Dictionary<string, FunctionInfoJson>)tempDict).ContainsKey(fName))
+                        ((FunctionInfoJson)tempStorage).fName = FindNameFromCodeLine(fName);
+                        ((FunctionInfoJson)tempStorage).pattern = CreatePatternForFunction(((FunctionInfoJson)tempStorage).parameters, ((FunctionInfoJson)tempStorage).fName, ((FunctionInfoJson)tempStorage).returnType);
+                        if (!((Dictionary<string, FunctionInfoJson>)tempDict).ContainsKey(fName))
                         {
                             ((Dictionary<string, FunctionInfoJson>)tempDict).Add(fName, (FunctionInfoJson)tempStorage);
                         }
