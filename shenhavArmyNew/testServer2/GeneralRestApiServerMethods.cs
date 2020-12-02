@@ -16,7 +16,7 @@ namespace testServer2
         static Regex OpenBlockPattern = new Regex(@".*{.*");
         static Regex CloseBlockPattern = new Regex(@".*}.*");
         static Regex FunctionPatternInC = new Regex(@"^([^ ]+\s)?[^ ]+\s(.*\s)?[^ ]+\([^()]*\)$");
-        const string RegexPattern = @"(\s)+?return(\s)?[^\s]+;";
+        const string ReturnPattern = @"(\s)+?return(\s)?[^\s]+;";
         const string patternFilePath = @"..\..\..\Patterns.txt";
 
         /// Function - FunctionCode
@@ -247,7 +247,7 @@ namespace testServer2
         /// <param name="path"> path of the code.</param>
         /// <param name="pattern"> function pattern type string</param>
         /// <returns> return a json for the functions get in "SyncServer".</returns>
-        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Object>>final_json,string typeEnding)
+        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Object>>final_json,string typeEnding,Hashtable memoryHandleFuncs)
         {
             //if its h type file.
             if(typeEnding=="h")
@@ -257,7 +257,7 @@ namespace testServer2
             //if its a c type file for now.
             else 
             {
-                CreateFunctionsJsonFile(filePath, FunctionPatternInC, typeEnding, final_json,variables);
+                CreateFunctionsJsonFile(filePath, FunctionPatternInC, typeEnding, final_json,variables,memoryHandleFuncs);
             }
             //for both files
             CreateCodeJsonFile(filePath,includes,globalVariables,defines,final_json);
@@ -316,9 +316,9 @@ namespace testServer2
         /// </summary>
         /// <param name="content"> The whole function content.</param>
         /// <returns> An array type string that contains the whole exit points code lines.</returns>
-        static string [] TakeExitPoints(string content)
+        static string [] FindPatternInCode(string content,string regexPattern)
         {
-            MatchCollection m = Regex.Matches(content, RegexPattern);
+            MatchCollection m = Regex.Matches(content, regexPattern);
             string[] result = new string[m.Count];
             for(int i=0;i<result.Length;i++)
             {
@@ -337,7 +337,7 @@ namespace testServer2
         /// type "ParameterType" of all of his variables.
         /// </param>
         /// <param name="final_json"> the final big json.</param>
-        static void CreateFunctionsJsonFile(string path, Regex pattern, string typeEnding, Dictionary<string, Dictionary<string, Object>> final_json, Dictionary<string,ArrayList> variables=null)
+        static void CreateFunctionsJsonFile(string path, Regex pattern, string typeEnding, Dictionary<string, Dictionary<string, Object>> final_json, Dictionary<string,ArrayList> variables=null,Hashtable memoryHandleFuncs=null)
         {
             string codeLine = GeneralConsts.EMPTY_STRING;
             string fName;
@@ -420,8 +420,25 @@ namespace testServer2
                             GeneralCompilerFunctions.NextScopeLength(sr, ref codeLine, ref ((FunctionInfoJson)tempStorage).codeLength, true);
                             ((FunctionInfoJson)tempStorage).content = FunctionCode(sr, ref codeLine);
                             ((FunctionInfoJson)tempStorage).variables = FindVariables(variables[fName]);
-                            ((FunctionInfoJson)tempStorage).allExitPoints = TakeExitPoints(((FunctionInfoJson)tempStorage).content);
+                            ((FunctionInfoJson)tempStorage).allExitPoints = FindPatternInCode(((FunctionInfoJson)tempStorage).content,ReturnPattern);
                             ((FunctionInfoJson)tempStorage).exitPointsAmount = ((FunctionInfoJson)tempStorage).allExitPoints.Length;
+                            if(memoryHandleFuncs.ContainsKey(GeneralCompilerFunctions.CreateMD5(fName)))
+                            {
+                                string tempIfCheck = (string)memoryHandleFuncs[GeneralCompilerFunctions.CreateMD5(fName)];
+                                if (tempIfCheck==GeneralConsts.MEMORY_MANAGEMENT)
+                                {
+                                    ((FunctionInfoJson)tempStorage).memoryAllocation = true;
+                                    ((FunctionInfoJson)tempStorage).memoryRelease = true;
+                                }
+                                else if(tempIfCheck== GeneralConsts.MEMORY_ALLOCATION)
+                                {
+                                    ((FunctionInfoJson)tempStorage).memoryAllocation = true;
+                                }
+                                else
+                                {
+                                    ((FunctionInfoJson)tempStorage).memoryRelease = true;
+                                }
+                            }
                         }
                         ((FunctionInfoJson)tempStorage).parameters = FindParameters(fName);
                         ((FunctionInfoJson)tempStorage).returnType = returnType;

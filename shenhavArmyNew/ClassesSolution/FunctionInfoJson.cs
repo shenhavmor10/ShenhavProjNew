@@ -16,7 +16,8 @@ namespace ClassesSolution
         public int exitPointsAmount;
         public string[] allExitPoints;
         public string pattern;
-        public string[] memoryHandles;
+        public bool memoryAllocation;
+        public bool memoryRelease;
         public FunctionInfoJson()
         {
             this.content = null;
@@ -24,7 +25,8 @@ namespace ClassesSolution
             this.variables = null;
             this.allExitPoints = null;
             this.exitPointsAmount = 0;
-            this.memoryHandles = null;
+            this.memoryAllocation = false;
+            this.memoryAllocation = false;
         }
 
     }

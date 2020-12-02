@@ -75,6 +75,7 @@ namespace testServer2
         static void RunAllChecks(string filePath,string destPath, string [] pathes,ArrayList tools,string fileType)
         {
             //variable declaration.
+            Hashtable memoryHandleFuncs=new Hashtable();
             Hashtable keywords = new Hashtable();
             Hashtable includes = new Hashtable();
             Dictionary<string, string> defines = new Dictionary<string, string>();
@@ -98,7 +99,7 @@ namespace testServer2
             //Syntax Check.
             try
             {
-                compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable, keywords, funcVariables, threadNumber, fileType);
+                compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable, memoryHandleFuncs, keywords, funcVariables, threadNumber, fileType);
             }
             catch(Exception e)
             {
@@ -114,7 +115,7 @@ namespace testServer2
                 //just tests.
                 try
                 {
-                    GeneralRestApiServerMethods.CreateFinalJson(filePath, includes, globalVariable, funcVariables, defines, final_json,fileType);
+                    GeneralRestApiServerMethods.CreateFinalJson(filePath, includes, globalVariable, funcVariables, defines, final_json,fileType,memoryHandleFuncs);
                     Console.WriteLine("after final json");
                 }
                 catch (Exception e)
@@ -139,6 +140,14 @@ namespace testServer2
             }
 
         }
+        static string createLogFile(string filePath)
+        {
+            filePath = filePath.Substring(0, filePath.LastIndexOf("\\"));
+            System.DateTime moment = DateTime.Today;
+            string newPath = filePath + @"\" + moment.Day + "-" + moment.Month+".txt";
+            StreamWriter outputFile = new StreamWriter(newPath);
+            return newPath;
+        }
         /// Function - RunAllTasks
         /// <summary>
         /// runs all tools picked by the client by the order.
@@ -148,6 +157,7 @@ namespace testServer2
         /// <param name="tools"> The array of the tools sorted from low to high priority.</param>
         static void RunAllTasks(string filePath,string destPath,ArrayList tools)
         {
+            string logFilePath=createLogFile(filePath);
             //runs on all tools recieved and adds to them .exe
             for (int i = START_INDEX_OF_TOOLS; i < tools.Count; i++)
             {
@@ -156,7 +166,7 @@ namespace testServer2
             //runs the tools one by one.
             for (int i= START_INDEX_OF_TOOLS; i<tools.Count;i++)
             {
-                RunProcessAsync((string)tools[i],filePath,destPath);
+                RunProcessAsync((string)tools[i],filePath,destPath, logFilePath);
             }
         }
         /// Function - RunProcessAsync
@@ -167,13 +177,13 @@ namespace testServer2
         /// <param name="srcPath"> the source path of the file</param>
         /// <param name="destPath"> the destination of the new file.</param>
         /// <returns></returns>
-        static Task<int> RunProcessAsync(string fileName,string srcPath,string destPath)
+        static Task<int> RunProcessAsync(string fileName,string srcPath,string destPath,string logTextPath)
         {
             var tcs = new TaskCompletionSource<int>();
 
             var process = new Process
             {
-                StartInfo = { FileName = fileName, Arguments = String.Format("{0} {1}",srcPath,destPath) },
+                StartInfo = { FileName = fileName, Arguments = String.Format("{0} {1} {2}",srcPath,destPath,logTextPath) },
                 EnableRaisingEvents = true
             };
 
@@ -182,8 +192,10 @@ namespace testServer2
                 tcs.SetResult(process.ExitCode);
                 process.Dispose();
             };
-
             process.Start();
+            process.WaitForExit(20000);
+            string returnLog=process.StandardOutput.ReadToEnd();
+            AddToLogString(srcPath, returnLog);
             //process.WaitForExit(); might need for synchronize.
             return tcs.Task;
         }

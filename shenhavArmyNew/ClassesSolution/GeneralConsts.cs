@@ -19,5 +19,8 @@ namespace ClassesSolution
         public const int FINISHED_SUCCESFULLY = 2;
         public const int TIMEOUT_JOIN = 20000;
         public const string NEW_LINE = "\n\r";
+        public const string MEMORY_ALLOCATION = "Memory Allocation";
+        public const string MEMORY_FREE = "Memory Release (Free)";
+        public const string MEMORY_MANAGEMENT = "Memory Management (Allocates And Frees)";
     }
 }

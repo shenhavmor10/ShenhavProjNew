@@ -24,6 +24,8 @@ namespace testServer2
         static Regex TypedefOneLine = new Regex(@"^.*typedef\s(struct|enum)\s[^\s]+\s[^\s]+;$");
         static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?[^\s()]+\s((\*)*(\s))?[^\s()=]+(\s?=.+;|[^()=]*;))");
         static Regex VariableEquation = new Regex(@"^(?!.*return)(?=(\s)?([^\s()]+\s)?((\*)*(\s))?[^\s()]+(\s)?=(\s)?[A-Za-z][^\s()]*;$)");
+        static Regex MemoryPattern = new Regex(@"(?!.*return)(?=(\s)?([^\s()]+(\s)?((\*)*(\s))?)?[^\s()]+(\s?=(\s)?(malloc|calloc|realloc|alloc)\(.+\);$))");
+        static Regex FreeMemoryPattern = new Regex(@"(?!.*return)(?=(\s)?)?free\(.+\);$");
         static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^\d][^ ()]*( [^ ()]+)?$");
         //include <NAME>
         static Regex IncludeTrianglesPattern = new Regex(@"^(\s)?#include.{0,2}<.+>$");
@@ -432,11 +434,13 @@ namespace testServer2
         /// <param name="parameters"> parameters type ArrayList conatins the function parameters.</param>
         /// <param name="functionLength"> scopeLength type int default is 0 if the code line is outside any scopes.</param>
         /// <param name="typeEnding"> the file type (for an example h or c).</param>
-        static void ChecksInSyntaxCheck(string path, MyStream sr, string codeLine, bool IsScope, Hashtable keywords, int threadNumber,string typeEnding, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames, ArrayList parameters = null, int functionLength = 0)
+        static void ChecksInSyntaxCheck(string path, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames, ArrayList parameters = null, int functionLength = 0,string functionName="")
         {
             //adds the parameters of the function to the current ArrayList of variables.
             int i;
             bool keywordCheck = true;
+            bool memoryAllocation = false;
+            bool memoryRelease = false;
             if (parameters != null)
             {
                 //if its type ending c.
@@ -486,6 +490,37 @@ namespace testServer2
                 if (StructPattern.IsMatch(codeLine) || TypedefOneLine.IsMatch(codeLine))
                 {
                     keywordResults = AddStructNames(sr, codeLine, keywords);
+                }
+                if(!memoryAllocation&&MemoryPattern.IsMatch(codeLine))
+                {
+                    if(!memoryHandleFunc.ContainsKey(CreateMD5(functionName)))
+                    {
+                        memoryHandleFunc.Add(CreateMD5(functionName), GeneralConsts.MEMORY_ALLOCATION);
+                        memoryAllocation = true;
+                    }
+                    else
+                    {
+                        if (memoryRelease)
+                        {
+                            
+                            memoryHandleFunc[CreateMD5(functionName)]=GeneralConsts.MEMORY_MANAGEMENT;
+                        }
+                    }
+                }
+                if(!memoryRelease&&FreeMemoryPattern.IsMatch(codeLine))
+                {
+                    if (!memoryHandleFunc.ContainsKey(CreateMD5(functionName)))
+                    {
+                        memoryHandleFunc.Add(CreateMD5(functionName), GeneralConsts.MEMORY_FREE);
+                        memoryRelease = true;
+                    }
+                    else
+                    {
+                        if (memoryAllocation)
+                        {
+                            memoryHandleFunc[CreateMD5(functionName)] = GeneralConsts.MEMORY_MANAGEMENT;
+                        }
+                    }
                 }
                 if (VariableDecleration.IsMatch(codeLine) && !(codeLine.IndexOf("typedef") != GeneralConsts.NOT_FOUND_STRING))
                 {
@@ -569,7 +604,7 @@ namespace testServer2
         /// </summary>
         /// <param name="path"> The path of the c code type string.</param>
         /// <param name="keywords"> keywords type Hashtable that conatins the code keywords.</param>
-        public static bool SyntaxCheck(string path,ArrayList globalVariable, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,int threadNumber,string typeEnding)
+        public static bool SyntaxCheck(string path,ArrayList globalVariable,Hashtable memoryHandleFunc, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,int threadNumber,string typeEnding)
         {
             MyStream sr=null;
             try
@@ -599,7 +634,7 @@ namespace testServer2
                     if (OpenBlockPattern.IsMatch(codeLine))
                     {
                         NextScopeLength(sr, ref codeLine, ref scopeLength, true);
-                        ChecksInSyntaxCheck(path, sr, codeLine, true, keywords, threadNumber,typeEnding, variables, globalVariable, blocksAndNames, parameters, scopeLength + 1);
+                        ChecksInSyntaxCheck(path, sr, codeLine, true, keywords,memoryHandleFunc, threadNumber,typeEnding, variables, globalVariable, blocksAndNames, parameters, scopeLength + 1,lastFuncLine);
                         parameters.Clear();
                     }
                     // if there is a function it saves its parameters (only if its C)..
@@ -613,18 +648,19 @@ namespace testServer2
                             variables.Clear();
                         }
                         lastFuncLine = codeLine;
+
                     }
                     // if there is a function in h it checks it keywords to see if they are good.
                     else if (functionPatternInH.IsMatch(codeLine))
                     {
                         parameters.AddRange(GeneralRestApiServerMethods.FindParameters(cleanLineFromDoc(codeLine)));
                         lastFuncLine = codeLine;
-                        ChecksInSyntaxCheck(path, sr, codeLine, false, keywords, threadNumber, typeEnding, variables, globalVariable, blocksAndNames,parameters);
+                        ChecksInSyntaxCheck(path, sr, codeLine, false, keywords,memoryHandleFunc, threadNumber, typeEnding, variables, globalVariable, blocksAndNames,parameters);
                     }
                     //handling outside the scopes.
                     else
                     {
-                        ChecksInSyntaxCheck(path, sr, codeLine, false, keywords, threadNumber,typeEnding, variables, globalVariable, blocksAndNames);
+                        ChecksInSyntaxCheck(path, sr, codeLine, false, keywords,memoryHandleFunc, threadNumber,typeEnding, variables, globalVariable, blocksAndNames);
                     }
 
                 }
@@ -663,6 +699,10 @@ namespace testServer2
                 a.Add(CreateMD5(keysArr[i]), keysArr[i]);
             }
             sr.Close();
+        }
+        static void AddMemoryFunction(Hashtable memoryHandlesFunc,MyStream sr,string lastFuncName )
+        {
+
         }
         //path to the code;
         /// Function - PreprocessorActions

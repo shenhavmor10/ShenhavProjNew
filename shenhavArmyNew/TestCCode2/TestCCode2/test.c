@@ -78,7 +78,6 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 	dfsdfsdf
 	*/
 	puts(pointer);
-	free(pointer6);
 	return 0;
 	spoi();
 
