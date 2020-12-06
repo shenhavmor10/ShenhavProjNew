@@ -8,7 +8,7 @@
         Closing="When_Close_Event"
         Title="MainWindow" Height="471.557" Width="821.556">
     <Grid>
-        <Button Click="ConnectionButton_Click" Content="Connect" HorizontalAlignment="Left" Margin="552,352,0,0" VerticalAlignment="Top" Width="108" Height="42" FontSize="24" Name="Connect3"/>
+        <Button Click="ConnectionButton_Click" Content="Connect" HorizontalAlignment="Left" Margin="696,352,0,0" VerticalAlignment="Top" Width="108" Height="42" FontSize="24" Name="Connect3"/>
         <Button Click="BrowseButtonFile_Click" Content="Browse" Name="Browse1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="245,27,0,0" Height="28" FontSize="18"/>
         <TextBox HorizontalAlignment="Left" Height="28" Margin="10,27,0,0" TextWrapping="Wrap" Text="Browse the file you want to check.." VerticalAlignment="Top" Width="201" Name="FileNameTextBox1" />
         <Button Click="BrowseButtonFolder_Click" Content="Browse" Name="Browse2" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="245,71,0,0" Height="28" FontSize="18"/>
@@ -33,6 +33,20 @@
         <TextBox HorizontalAlignment="Left" Height="28" Margin="358,222,0,0" TextWrapping="Wrap" Text="Browse destination Folder for the code." VerticalAlignment="Top" Width="201" Name="FileNameTextBoxDest" />
         <Button Click="BrowseButtonFolder_Click" Content="Browse" Name="BrowseDest2" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="245,222,0,0" Height="28" FontSize="18"/>
         <TextBox HorizontalAlignment="Left" Height="28" Margin="10,222,0,0" TextWrapping="Wrap" Text="Browse destination Folder for the code." VerticalAlignment="Top" Width="201" Name="FileNameTextBoxDest2" />
+
+        <StackPanel HorizontalAlignment="Left" Height="89" Margin="358,340,0,12" VerticalAlignment="Center" Width="100" Name="StackPanelMemory">
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap"  Text="" VerticalAlignment="Stretch" Width="91" Name="CustomMalloc"/>
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Width="91" Name="CustomCalloc" />
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Width="91" Name="CustomAlloc" />
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Width="91" Name="CustomRealloc" />
+        </StackPanel>
+
+        <StackPanel HorizontalAlignment="Left" Height="89" Margin="463,352,0,0" VerticalAlignment="Center" Width="100" Name="StackPanelFree">
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Width="91" Name="CustomFree" />
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Width="91" Name="CustomFree2" />
+        </StackPanel>
+
+
 
 
     </Grid>

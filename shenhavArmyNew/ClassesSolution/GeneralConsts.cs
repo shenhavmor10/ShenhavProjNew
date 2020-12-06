@@ -22,5 +22,11 @@ namespace ClassesSolution
         public const string MEMORY_ALLOCATION = "Memory Allocation";
         public const string MEMORY_FREE = "Memory Release (Free)";
         public const string MEMORY_MANAGEMENT = "Memory Management (Allocates And Frees)";
+        public const string mallocPattern = "malloc";
+        public const string callocPattern = "calloc";
+        public const string allocPattern = "alloc";
+        public const string reallocPattern = "realloc";
+        public const string freePattern = "free";
+        public static string [] arrayMemoryPatterns = { mallocPattern, callocPattern, allocPattern, reallocPattern, freePattern };
     }
 }

@@ -85,12 +85,48 @@ namespace GUI
             {
                 if(tool.IsChecked==true)
                 {
-                    tools += "," + exeNames[i++];
+                    tools += exeNames[i++]+",";
                 }
+            }
+            if(tools.Length>0)
+            {
+                tools = tools.Substring(0, tools.Length - 1);
             }
             if(tools!= GeneralConsts.EMPTY_STRING)
             {
-                path += tools;
+                path += ",tools={"+tools+"}";
+            }
+            string memoryPatterns = GeneralConsts.EMPTY_STRING;
+            foreach(TextBox t in StackPanelMemory.Children)
+            {
+                if(t.Text!=GeneralConsts.EMPTY_STRING)
+                {
+                    memoryPatterns += t.Text + ",";
+                }
+            }
+            if(memoryPatterns.Length>0)
+            {
+                memoryPatterns = memoryPatterns.Substring(0, memoryPatterns.Length - 1);
+            }
+            if(memoryPatterns != GeneralConsts.EMPTY_STRING)
+            {
+                path += ",memory={" + memoryPatterns + "}";
+            }
+            string freePatterns = GeneralConsts.EMPTY_STRING;
+            foreach (TextBox t in StackPanelFree.Children)
+            {
+                if (t.Text != GeneralConsts.EMPTY_STRING)
+                {
+                    freePatterns += t.Text + ",";
+                }
+            }
+            if(freePatterns.Length>0)
+            {
+                freePatterns = freePatterns.Substring(0, freePatterns.Length - 1);
+            }
+            if (memoryPatterns != GeneralConsts.EMPTY_STRING)
+            {
+                path += ",free={" + freePatterns + "}";
             }
             Thread clientThread;
             clientThread = new Thread(() => ClientConnection.ExecuteClient(path,threadNumber));

@@ -22,6 +22,14 @@ namespace testServer2
         const int EXTRA_INCLUDE_FOLDER_INDEX = 3;
         const int PROJECT_FOLDER_INDEX = 1;
         const int START_INDEX_OF_TOOLS = 0;
+        enum MemoryPatternEnum
+        {
+            MALLOC_INDEX_MEMORYARRAY,
+            CALLOC_INDEX_MEMORYARRAY,
+            ALLOC_INDEX_MEMORYARRAY,
+            REALLOC_INDEX_MEMORYARRAY,
+            FREE_INDEX_MEMORYARRAY
+        }
         const string MAIN_DICT_INDEX = "main";
         //paths for all files.
         const string toolExeFolder = @"..\..\..\ToolsExe";
@@ -32,6 +40,9 @@ namespace testServer2
         const string logFile = @"..\..\..\LogFile.txt";
         const string FINISH_SUCCESFULL = "Finished succesfully code is ready at the destination path.";
         const int TIMEOUT_SLEEP = 1000;
+        static Regex ToolsBlock = new Regex("tools={(.*?)}");
+        static Regex MemoryBlock = new Regex("memory={(.*?)}");
+        static Regex FreeBlock = new Regex("free={(.*?)}");
         static Mutex mutexAddLogFiles = new Mutex();
         static bool compileError = false;
         static ArrayList currentDataList = new ArrayList();
@@ -66,15 +77,38 @@ namespace testServer2
             Console.WriteLine(content);
             mutexAddLogFiles.ReleaseMutex();
         }
+        
         /// Function - RunAllChecks
         /// <summary>
         /// Thread starts all checks.
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="pathes"></param>
-        static void RunAllChecks(string filePath,string destPath, string [] pathes,ArrayList tools,string fileType)
+        /// <param name="filePath"> the path of the file that is being checked.</param>
+        /// <param name="pathes"> all pathes that the imports might be in.</param>
+        /// <param name="destPath"> the destination path of the file.</param>
+        /// <param name="fileType"> the type of the file.</param>
+        /// <param name="freePatterns"> all free patterns.</param>
+        /// <param name="memoryPatterns"> all memory handles patterns.</param>
+        /// <param name="tools"> all tools type arrayList.</param>
+        static void RunAllChecks(string filePath,string destPath, string [] pathes,ArrayList tools,string fileType,string [] memoryPatterns,string [] freePatterns)
         {
             //variable declaration.
+            //create regex for all memory handles (malloc alloc etc... and custom memory handles aswell).
+            string memoryPatternTemp = @"(?!.*return)(?= (\s)?([^\s()] + (\s)?((\*)*(\s))?)?[^\s()]+(\s ?= (\s)?(";
+            for(int i=0;i<memoryPatterns.Length;i++)
+            {
+                memoryPatternTemp += memoryPatterns[i]+"|";
+            }
+            memoryPatternTemp=memoryPatternTemp.Substring(0, memoryPatternTemp.Length - 1);
+            memoryPatternTemp += @")\(.+\);$))";
+            Regex MemoryPattern = new Regex(memoryPatternTemp);
+            //create regex for all free handles plus custom frees.
+            string freePatternTemp = @"(?!.*return)(?=(\s)?)?";
+            for(int i=0;i<freePatterns.Length;i++)
+            {
+                freePatternTemp += freePatterns[i] + "|";
+            }
+            freePatternTemp = freePatternTemp.Substring(0, freePatternTemp.Length - 1);
+            Regex FreeMemoryPattern = new Regex(freePatternTemp);
             Hashtable memoryHandleFuncs=new Hashtable();
             Hashtable keywords = new Hashtable();
             Hashtable includes = new Hashtable();
@@ -99,7 +133,7 @@ namespace testServer2
             //Syntax Check.
             try
             {
-                compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable, memoryHandleFuncs, keywords, funcVariables, threadNumber, fileType);
+                compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable, memoryHandleFuncs, keywords, funcVariables, threadNumber, fileType, MemoryPattern, FreeMemoryPattern);
             }
             catch(Exception e)
             {
@@ -140,6 +174,12 @@ namespace testServer2
             }
 
         }
+        /// Function - createLogFile
+        /// <summary>
+        /// creates the log file path and opens it.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns> Returns a path for the file type string.</returns>
         static string createLogFile(string filePath)
         {
             filePath = filePath.Substring(0, filePath.LastIndexOf("\\"));
@@ -194,8 +234,6 @@ namespace testServer2
             };
             process.Start();
             process.WaitForExit(20000);
-            string returnLog=process.StandardOutput.ReadToEnd();
-            AddToLogString(srcPath, returnLog);
             //process.WaitForExit(); might need for synchronize.
             return tcs.Task;
         }
@@ -236,8 +274,14 @@ namespace testServer2
                     ArrayList tools = new ArrayList();
                     currentDataList.Add(list[currentDataList.Count]);
                     AddToLogString(MAIN_DICT_INDEX, currentDataList[currentDataList.Count - 1].ToString());
-                    string[] paths = Regex.Split((string)currentDataList[currentDataList.Count - 1], ",");
+                    string infoServer = currentDataList[currentDataList.Count - 1].ToString();
+                    string[] paths = Regex.Split(infoServer.Substring(0, infoServer.IndexOf("tools")), ",");
+                    Console.WriteLine("resulttttt "+ToolsBlock.Match(infoServer).Groups[1].Value);
+                    string [] toolsArray = Regex.Split(ToolsBlock.Match(infoServer).Groups[1].Value,",");
+                    string [] memoryArray = Regex.Split(MemoryBlock.Match(infoServer).Groups[1].Value, ",");
+                    string[] freeArray = Regex.Split(FreeBlock.Match(infoServer).Groups[1].Value, ",");
                     string filePath = paths[FILE_PATH_INDEX];
+                    
                     if (logFiles.ContainsKey(filePath))
                     {
                         logFiles[filePath] = GeneralConsts.EMPTY_STRING;
@@ -249,13 +293,11 @@ namespace testServer2
                     AddToLogString(filePath, "FilePath - " + filePath);
                     string[] pathes = { paths[PROJECT_FOLDER_INDEX], paths[GCC_INCLUDE_FOLDER_INDEX], paths[EXTRA_INCLUDE_FOLDER_INDEX] };
                     string destPath = paths[DEST_PATH_INDEX];
-                    for (int i = START_TOOLS_INDEX; i < paths.Length; i++)
-                    {
-                        tools.Add(paths[i]);
-                    }
+                    tools.AddRange(toolsArray);
+                   
                     //because i still dont have a prefect checks for headers so im giving the thread a default null so the program can run.
                     Thread runChecksThread=null;
-                    runChecksThread = new Thread(() => RunAllChecks(filePath, destPath, pathes, tools, filePath.Substring(filePath.Length - 1)));
+                    runChecksThread = new Thread(() => RunAllChecks(filePath, destPath, pathes, tools, filePath.Substring(filePath.Length - 1),memoryArray, freeArray));
                     runChecksThread.Start();
 
                 }
