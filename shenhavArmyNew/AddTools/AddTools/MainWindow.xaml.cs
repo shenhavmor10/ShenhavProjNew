@@ -14,9 +14,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Data.SqlClient;
 using System.ComponentModel;
+using System.IO;
 
-
-namespace AddTools
+namespace ViewChanger
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -28,25 +28,14 @@ namespace AddTools
             InitializeComponent();
         }
 
-        private void ApplyBtn_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
-            SqlConnection cnn;
-            string connectionString = "Data Source=E560-02\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
-            cnn = new SqlConnection(connectionString);
-            cnn.Open();
-            SqlCommand command = new SqlCommand(string.Format("INSERT INTO tools_table (tool_name, tool_desc, tool_priority,tool_exe_name) VALUES({0}, {1}, {2},{3});", ToolName,ToolDescription,ToolPriority,ToolFolderPath), cnn);
-            SqlDataReader reader = command.ExecuteReader();
-
-
+            DataContext = new ViewChanger.ViewModels.AddTools();
         }
-        private void BrowseBtn_Click(object sender, RoutedEventArgs e)
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
-            var folderResult = folderDialog.ShowDialog();
-            if (folderResult.HasValue && folderResult.Value)
-            {
-                ToolFolderPath.Text = folderDialog.SelectedPath;
-            }
+            DataContext = new ViewChanger.ViewModels.UpdateTool();
         }
     }
 }
