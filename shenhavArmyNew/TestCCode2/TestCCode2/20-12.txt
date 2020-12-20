@@ -1,0 +1,3 @@
+
+script : ..\..\..\Client2\bin\Debug\Client2.exe
+

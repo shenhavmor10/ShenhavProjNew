@@ -26,6 +26,14 @@ struct example2 {
 * @returns:
 * if the messege  djfdjfddn dfkdf mdfdk dfm
 */
+void spoi(char* a, char b)
+{
+	if (num == null)
+	{
+		printf("ssss");
+	}
+	*num = 0;
+}
 static int* main(int* podd, int** odpdf, char a, char* retval)
 {
 	int num;
@@ -41,6 +49,9 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 	{
 		int max2 = max;
 	}
+	char* yosi = "a";
+	char dosi = "s";
+	spoi(yosi, dosi);
 	//dfgdfgdfgdfg
 	//fgfgfgfgfg
 
@@ -79,15 +90,8 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 	*/
 	puts(pointer);
 	return 0;
-	spoi();
+	
 
 }
-void spoi(char * a,char b)
-{
-	if (num == null)
-	{
-		printf("ssss");
-	}
-	*num = 0;
-}
+
 

@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.IO;
 using ClassesSolution;
 using Server;
+using System.Globalization;
 
 namespace testServer2
 {
-    public class GeneralCompilerFunctions
+    public static class GeneralCompilerFunctions
     {
         const string FILE_NOT_FOUND = "No such file found.";
         //All Patterns That is being searched in the code.
@@ -19,6 +20,7 @@ namespace testServer2
         static Regex functionPatternInH = new Regex(@"^[a-zA-Z]+.*\s[a-zA-Z].*[(].*[)]\;$");
         static Regex staticFunctionPatternInC = new Regex(@"^.*static.*\s.*[a-zA-Z]+.*\s[a-zA-Z].*[(].*[)]$");
         static Regex FunctionPatternInC = new Regex(@"^([^ ]+\s)?[^ ]+\s(.*\s)?[^ ]+\([^()]*\)$");
+        static Regex CallFunction = new Regex(@"[^ ]+\([^()]*\);$");
         static Regex StructPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?struct(([^;]*$)|(\s(.+{$|.*{$|[^\s;]+$)))");
         static Regex EnumPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?(enum\s(.+{$|.*{$;?|[^\s;]+;?$))");
         static Regex TypedefOneLine = new Regex(@"^.*typedef\s(struct|enum)\s[^\s]+\s[^\s]+;$");
@@ -414,6 +416,86 @@ namespace testServer2
             result = result.Trim(trimChar);
             return result;
         }
+        static int IsParameterNameInArrayList(ArrayList a,string parameterName)
+        {
+            bool found = false;
+            int indexFound=-1;
+            for(int i=0;i<a.Count&&!found;i++)
+            {
+                if(((ParametersType)a[i]).parameterName==parameterName)
+                {
+                    found = true;
+                    indexFound = i;
+                }
+            }
+            return indexFound;
+        }
+        static bool IsNumber(this string aNumber)
+        {
+            int temp_big_int;
+            var is_number = int.TryParse(aNumber, out temp_big_int);
+            return is_number;
+        }
+        static ArrayList AmountOfFuncWithThisName(string funcName, Dictionary<string, ArrayList> calledFromFunc)
+        {
+            ArrayList results=new ArrayList();
+            foreach (var item in calledFromFunc.Keys)
+            {
+                if(item.IndexOf(funcName)!=-1)
+                {
+                    results.Add(item.ToString());
+                }
+            }
+            return results;
+        }
+        static string ConverterFromRegularCallToTypeCall(string callFuncLine,ArrayList variables,ArrayList globalVariables, Dictionary<string, ArrayList> calledFromFunc)
+        {
+            callFuncLine = cleanLineFromDoc(callFuncLine);
+            string [] tempSplitForNameAndTypes = callFuncLine.Split('(');
+            string convertedFuncLine = tempSplitForNameAndTypes[0] + "(";
+            string[] allParameters = tempSplitForNameAndTypes[1].Split(',');
+            allParameters[allParameters.Length - 1] = allParameters[allParameters.Length - 1].Trim(')');
+            int temporaryIndex;
+            bool found = false;
+            bool exit = false;
+            for (int i=0;i<allParameters.Length&&!found&&!exit;i++)
+            {
+                if(AmountOfFuncWithThisName(convertedFuncLine,calledFromFunc).Count==1)
+                {
+                    convertedFuncLine = AmountOfFuncWithThisName(convertedFuncLine, calledFromFunc)[0].ToString();
+                    found = true;
+                }
+                if (AmountOfFuncWithThisName(convertedFuncLine, calledFromFunc).Count == 0)
+                {
+                    exit = true;
+                }
+                else if((temporaryIndex=IsParameterNameInArrayList(variables,allParameters[i]))!=-1)
+                {
+                    convertedFuncLine += ((ParametersType)variables[temporaryIndex]).parameterType + ",";
+                }
+                else if((temporaryIndex = IsParameterNameInArrayList(globalVariables, allParameters[i])) != -1)
+                {
+                    convertedFuncLine += ((ParametersType)globalVariables[temporaryIndex]).parameterType + ",";
+                }
+                else if(allParameters[i].IndexOf(@"""")!=-1)
+                {
+                    convertedFuncLine += "string";
+                }
+                else if(IsNumber(allParameters[i]))
+                {
+                    convertedFuncLine += "int";
+                }
+            }
+            if(found==false)
+            {
+                convertedFuncLine += ")";
+            }
+            if(exit)
+            {
+                convertedFuncLine = "error";
+            }
+            return convertedFuncLine;
+        }
         /// Function - ChecksInSyntaxCheck
         /// <summary>
         /// this function take cares of the whole syntax check of the program.
@@ -432,7 +514,7 @@ namespace testServer2
         /// <param name="parameters"> parameters type ArrayList conatins the function parameters.</param>
         /// <param name="functionLength"> scopeLength type int default is 0 if the code line is outside any scopes.</param>
         /// <param name="typeEnding"> the file type (for an example h or c).</param>
-        static void ChecksInSyntaxCheck(string path, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames,Regex MemoryPattern, Regex FreeMemoryPattern, ArrayList parameters = null, int functionLength = 0,string functionName="")
+        static void ChecksInSyntaxCheck(string path, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames,Regex MemoryPattern, Regex FreeMemoryPattern, ArrayList parameters = null, Dictionary<string, ArrayList> calledFromFunc = null, int functionLength = 0,string functionName="")
         {
             //adds the parameters of the function to the current ArrayList of variables.
             int i;
@@ -478,7 +560,7 @@ namespace testServer2
             bool DifferentTypesCheck = true;
             int pos = 0;
             ArrayList keywordResults = new ArrayList();
-            for (i = 0; i < functionLength + 1&&!CompileError; i++)
+            for (i = 0; i < functionLength + 1&&!CompileError&&codeLine!=null; i++)
             {
                 if (codeLine.Trim(GeneralConsts.TAB_SPACE) == GeneralConsts.EMPTY_STRING)
                 {
@@ -488,6 +570,28 @@ namespace testServer2
                 if (StructPattern.IsMatch(codeLine) || TypedefOneLine.IsMatch(codeLine))
                 {
                     keywordResults = AddStructNames(sr, codeLine, keywords);
+                }
+                if(CallFunction.IsMatch(codeLine))
+                {
+                    MatchCollection m = Regex.Matches(codeLine, CallFunction.ToString());
+                    string convertedLine = m[0].ToString();
+                    convertedLine = ConverterFromRegularCallToTypeCall(codeLine,variables,globalVariables,calledFromFunc);
+                    if(convertedLine!="error"&&calledFromFunc.ContainsKey(convertedLine))
+                    {
+                        try
+                        {
+                            calledFromFunc[convertedLine].Add(functionName);
+                        }
+                        catch (Exception e)
+                        {
+                            MainProgram.AddToLogString(path, e.ToString());
+                        }
+                    }
+                    /*else
+                    {
+                        Server.ConnectionServer.CloseConnection(threadNumber, string.Format("function does not exist : "+codeLine), GeneralConsts.ERROR);
+                    }*/
+                    
                 }
                 if(!memoryAllocation&&MemoryPattern.IsMatch(codeLine))
                 {
@@ -602,7 +706,7 @@ namespace testServer2
         /// </summary>
         /// <param name="path"> The path of the c code type string.</param>
         /// <param name="keywords"> keywords type Hashtable that conatins the code keywords.</param>
-        public static bool SyntaxCheck(string path,ArrayList globalVariable,Hashtable memoryHandleFunc, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,int threadNumber,string typeEnding,Regex MemoryPattern,Regex FreeMemoryPattern)
+        public static bool SyntaxCheck(string path,ArrayList globalVariable,Dictionary<string,ArrayList>calledFromFunc,Hashtable memoryHandleFunc, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,int threadNumber,string typeEnding,Regex MemoryPattern,Regex FreeMemoryPattern)
         {
             MyStream sr=null;
             try
@@ -632,7 +736,7 @@ namespace testServer2
                     if (OpenBlockPattern.IsMatch(codeLine))
                     {
                         NextScopeLength(sr, ref codeLine, ref scopeLength, true);
-                        ChecksInSyntaxCheck(path, sr, codeLine, true, keywords,memoryHandleFunc, threadNumber,typeEnding, variables, globalVariable, blocksAndNames, MemoryPattern, FreeMemoryPattern, parameters, scopeLength + 1,lastFuncLine);
+                        ChecksInSyntaxCheck(path, sr, codeLine, true, keywords,memoryHandleFunc, threadNumber,typeEnding, variables, globalVariable, blocksAndNames, MemoryPattern, FreeMemoryPattern, parameters,calledFromFunc, scopeLength + 1,lastFuncLine);
                         parameters.Clear();
                     }
                     // if there is a function it saves its parameters (only if its C)..
@@ -646,6 +750,14 @@ namespace testServer2
                             variables.Clear();
                         }
                         lastFuncLine = codeLine;
+                        string funcKeyInDict = GeneralRestApiServerMethods.FindNameFromCodeLine(codeLine);
+                        funcKeyInDict += "(";
+                        for (int i = 0; i < parameters.Count - 1; i++)
+                        {
+                            funcKeyInDict += ((ParametersType)parameters[i]).parameterType + ",";
+                        }
+                        funcKeyInDict += ((ParametersType)parameters[parameters.Count - 1]).parameterType + ")";
+                        calledFromFunc.Add(funcKeyInDict, new ArrayList());
 
                     }
                     // if there is a function in h it checks it keywords to see if they are good.
@@ -698,10 +810,6 @@ namespace testServer2
             }
             sr.Close();
         }
-        static void AddMemoryFunction(Hashtable memoryHandlesFunc,MyStream sr,string lastFuncName )
-        {
-
-        }
         //path to the code;
         /// Function - PreprocessorActions
         /// <summary>
@@ -715,7 +823,7 @@ namespace testServer2
         /// <param name="includes"> Hashtable to store the includes.</param>
         /// <param name="defines"> Dictionary to store the defines . (key - new keyword, value - old Definition)</param>
         /// <param name="pathes"> Paths for all the places where the imports might be.</param>
-        static void PreprocessorActions(string path, int threadNumber, Hashtable keywords, Hashtable includes,Dictionary<string,string> defines,string [] pathes,int fileThreadNumber)
+        static void PreprocessorActions(string path,string originalFile, int threadNumber, Hashtable keywords, Hashtable includes,Dictionary<string,string> defines,string [] pathes,int fileThreadNumber)
         {
             bool endLoop = false;
             MyStream sr = null;
@@ -726,7 +834,7 @@ namespace testServer2
             }
             catch (Exception e)
             {
-                MainProgram.AddToLogString(path,String.Format("{0} Second exception caught.", e.ToString()));
+                MainProgram.AddToLogString(originalFile, String.Format("{0} Second exception caught.", e.ToString()));
                 Server.ConnectionServer.CloseConnection(fileThreadNumber, FILE_NOT_FOUND, GeneralConsts.ERROR);
                 endLoop = true;
             }
@@ -792,7 +900,7 @@ namespace testServer2
                                 {
                                     keywords.Add(CreateMD5(newKeyword), newKeyword);
                                     defines.Add(newKeyword, defineOriginalWord);
-                                    MainProgram.AddToLogString(path, "new Keywords :" + newkeyWords[0]);
+                                    MainProgram.AddToLogString(originalFile, "new Keywords :" + newkeyWords[0]);
                                 }
                             }
                         }
@@ -809,7 +917,7 @@ namespace testServer2
                             {
                                 keywords.Add(CreateMD5(newKeyword), newKeyword);
                                 defines.Add(newKeyword, defineOriginalWord);
-                                MainProgram.AddToLogString(path, "new : " +newKeyword);
+                                MainProgram.AddToLogString(originalFile, "new : " +newKeyword);
                             }
                         }
                     }
@@ -838,7 +946,7 @@ namespace testServer2
                     {
                         result = CutBetween2Strings(codeLine, "\"", "\"");
                     }
-                    MainProgram.AddToLogString(path, result);
+                    MainProgram.AddToLogString(originalFile, result);
                     //only enters an include if it didnt already included him.
                     if (!includes.Contains(CreateMD5(result)))
                     {
@@ -848,7 +956,7 @@ namespace testServer2
                         if (result.IndexOf("\\") != -1)
                         {
                             //opens the thread (thread number +1).
-                            preprocessorThread = new Thread(() => PreprocessorActions(result, threadNumber + 1, keywords, includes,defines, pathes,fileThreadNumber));
+                            preprocessorThread = new Thread(() => PreprocessorActions(result,originalFile, threadNumber + 1, keywords, includes,defines, pathes,fileThreadNumber));
                         }
                         //if it does not include an exact path.
                         else
@@ -864,11 +972,10 @@ namespace testServer2
                                 }
                             }    
                             //creats a thread.
-                            preprocessorThread = new Thread(() => PreprocessorActions(currentPath+"\\" + result, threadNumber + 1, keywords, includes,defines, pathes,fileThreadNumber));
+                            preprocessorThread = new Thread(() => PreprocessorActions(currentPath+"\\" + result, originalFile, threadNumber + 1, keywords, includes,defines, pathes,fileThreadNumber));
                         }
                         preprocessorThread.Start();
                         preprocessorThread.Join(GeneralConsts.TIMEOUT_JOIN);
-                        MainProgram.AddToLogString(path, "thread " + threadNumber + "stopped");
                     }
                 }
 
@@ -877,7 +984,7 @@ namespace testServer2
             {
                 sr.Close();
             }
-            printArrayList(path, keywords);
+            printArrayList(originalFile, keywords);
         }
         /// Function - CutBetween2Strings
         /// <summary>
@@ -1044,7 +1151,7 @@ namespace testServer2
             AddToArrayListFromFile(ignoreVariablesTypesPath, ignoreVarialbesType, ",");
             //C Syntext File To Syntext ArrayList.
             //AddToListFromFile(CSyntextPath, syntext, " ");
-            PreprocessorActions(cFilePath, 0, keywords, includes,defines,pathes,threadNumber);
+            PreprocessorActions(cFilePath, cFilePath, 0, keywords, includes,defines,pathes,threadNumber);
         }
     }
 }

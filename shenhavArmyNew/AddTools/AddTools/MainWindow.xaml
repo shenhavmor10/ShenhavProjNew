@@ -34,7 +34,6 @@
             <StackPanel>
                 <Button Content="Add Tool" FontSize="20" Click="Button_Click"></Button>
                 <Button Content="Update Tool" FontSize="20" Click="Button_Click_1"></Button>
-                <Button Content="Delete Tool" FontSize="20"></Button>
             </StackPanel>
         </DockPanel>
         <ContentControl Grid.Column="1" Grid.ColumnSpan="4" Grid.RowSpan="5" Content="{Binding}"/>

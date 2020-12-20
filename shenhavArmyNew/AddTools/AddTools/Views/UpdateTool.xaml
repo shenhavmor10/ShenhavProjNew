@@ -4,15 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ViewChanger.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="600">
     <Grid Background="White">
 
-        <Button Content="Browse" HorizontalAlignment="Left" Margin="305,143,0,0" VerticalAlignment="Top" Width="80" Height="41" Name ="BrowseBtn" FontSize="18" Click="BrowseBtn_Click" RenderTransformOrigin="0.468,0.656"/>
+        <Button Content="Browse" HorizontalAlignment="Left" Margin="305,143,0,0" VerticalAlignment="Top" Width="101" Height="41" Name ="BrowseBtn" FontSize="18" Click="BrowseBtn_Click" RenderTransformOrigin="0.468,0.656"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="296" FontSize="24"><Run Text="Update A Tool "/><Run Text=":)"/></TextBlock>
-        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,143,0,0" TextWrapping="Wrap" Text="Browse Tools Folder.." VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolFolderPath"/>
-        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,97,0,0" TextWrapping="Wrap" Text="Tool Name" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolName" TextChanged="ToolName_TextChanged"/>
+        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,143,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolFolderPath" materialDesign:HintAssist.Hint="Browse Tools Folder.."/>
+        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,97,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolName" TextChanged="ToolName_TextChanged" materialDesign:HintAssist.Hint="Tool Name"/>
         <Button Content="Apply" HorizontalAlignment="Left" Margin="424,335,0,0" VerticalAlignment="Top" Width="143" Height="62" FontSize="40" Name ="ApplyBtn" Click="ApplyBtn_Click"/>
         <CheckBox Content="DeleteTool" HorizontalAlignment="Left" Margin="305,97,0,0" VerticalAlignment="Top" Height="41" Width="111" FontSize="16" Checked="CheckBox_Checked" Name="DeleteTool"/>
+        <TextBlock HorizontalAlignment="Left" Margin="206,335,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="62" Width="200" FontSize="24" Name="ResultTextBlock"/>
     </Grid>
 </UserControl>

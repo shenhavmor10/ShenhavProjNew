@@ -73,8 +73,7 @@ namespace testServer2
         public static void AddToLogString(string filePath,string content)
         {
             mutexAddLogFiles.WaitOne();
-            //logFiles[filePath] += content + GeneralConsts.NEW_LINE;
-            Console.WriteLine(content);
+            logFiles[filePath] += content + GeneralConsts.NEW_LINE;
             mutexAddLogFiles.ReleaseMutex();
         }
         
@@ -110,6 +109,7 @@ namespace testServer2
             freePatternTemp = freePatternTemp.Substring(0, freePatternTemp.Length - 1);
             Regex FreeMemoryPattern = new Regex(freePatternTemp);
             Hashtable memoryHandleFuncs=new Hashtable();
+            Dictionary<string, ArrayList> calledFromFunc = new Dictionary<string, ArrayList>();
             Hashtable keywords = new Hashtable();
             Hashtable includes = new Hashtable();
             Dictionary<string, string> defines = new Dictionary<string, string>();
@@ -133,7 +133,7 @@ namespace testServer2
             //Syntax Check.
             try
             {
-                compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable, memoryHandleFuncs, keywords, funcVariables, threadNumber, fileType, MemoryPattern, FreeMemoryPattern);
+                compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable,calledFromFunc, memoryHandleFuncs, keywords, funcVariables, threadNumber, fileType, MemoryPattern, FreeMemoryPattern);
             }
             catch(Exception e)
             {
@@ -149,7 +149,7 @@ namespace testServer2
                 //just tests.
                 try
                 {
-                    GeneralRestApiServerMethods.CreateFinalJson(filePath, includes, globalVariable, funcVariables, defines, final_json,fileType,memoryHandleFuncs);
+                    GeneralRestApiServerMethods.CreateFinalJson(filePath, includes, globalVariable, funcVariables, defines, final_json,fileType,memoryHandleFuncs,calledFromFunc);
                     Console.WriteLine("after final json");
                 }
                 catch (Exception e)
@@ -166,7 +166,7 @@ namespace testServer2
                 ConnectionServer.CloseConnection(threadNumber, FINISH_SUCCESFULL,GeneralConsts.FINISHED_SUCCESFULLY);
                 AddToLogString(filePath, FINISH_SUCCESFULL);
                 Console.WriteLine(logFiles[filePath]);
-                Thread writeToFile = new Thread(() => File.AppendAllText(logFile, logFiles[filePath]));
+                Thread writeToFile = new Thread(() => File.WriteAllText(logFile, logFiles[filePath]));
                 writeToFile.Start();
                 writeToFile.Join(GeneralConsts.TIMEOUT_JOIN);
 
@@ -186,6 +186,7 @@ namespace testServer2
             System.DateTime moment = DateTime.Today;
             string newPath = filePath + @"\" + moment.Day + "-" + moment.Month+".txt";
             StreamWriter outputFile = new StreamWriter(newPath);
+            outputFile.Close();
             return newPath;
         }
         /// Function - RunAllTasks
@@ -198,7 +199,6 @@ namespace testServer2
         static void RunAllTasks(string filePath,string destPath,ArrayList tools)
         {
             string logFilePath=createLogFile(filePath);
-            //runs on all tools recieved and adds to them .exe
             for (int i = START_INDEX_OF_TOOLS; i < tools.Count; i++)
             {
                 tools[i] = File.ReadAllText(toolExeFolder + "\\" + tools[i]);
@@ -206,6 +206,10 @@ namespace testServer2
             //runs the tools one by one.
             for (int i= START_INDEX_OF_TOOLS; i<tools.Count;i++)
             {
+                using (StreamWriter sw = File.AppendText(logFilePath))
+                {
+                    sw.WriteLine(string.Format("\n"+"script : "+tools[i] +"\n"));
+                }
                 RunProcessAsync((string)tools[i],filePath,destPath, logFilePath);
             }
         }

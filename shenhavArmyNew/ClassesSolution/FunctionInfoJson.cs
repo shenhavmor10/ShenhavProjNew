@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace ClassesSolution
 {
@@ -18,6 +19,7 @@ namespace ClassesSolution
         public string pattern;
         public bool memoryAllocation;
         public bool memoryRelease;
+        public string [] calledFromFunc;
         public FunctionInfoJson()
         {
             this.content = null;
@@ -27,6 +29,7 @@ namespace ClassesSolution
             this.exitPointsAmount = 0;
             this.memoryAllocation = false;
             this.memoryAllocation = false;
+            this.calledFromFunc = null;
         }
 
     }
