@@ -415,12 +415,18 @@ namespace testServer2
                         returnType = returnType.Trim();
                         //enter function to where i store it. 
                         Object tempStorage = new FunctionInfoJson();
+                        //if its a c code than it has those extra information that only c has.
                         if(typeEnding=="c")
                         {
+                            //goes to the next scope.
                             GeneralCompilerFunctions.NextScopeLength(sr, ref codeLine, ref ((FunctionInfoJson)tempStorage).codeLength, true);
+                            //gets the function code.
                             ((FunctionInfoJson)tempStorage).content = FunctionCode(sr, ref codeLine);
+                            //gets the variables of the function
                             ((FunctionInfoJson)tempStorage).variables = FindVariables(variables[fName]);
+                            //gets the exit points.
                             ((FunctionInfoJson)tempStorage).allExitPoints = FindPatternInCode(((FunctionInfoJson)tempStorage).content,ReturnPattern);
+                            //gets the amount of the exit points.
                             ((FunctionInfoJson)tempStorage).exitPointsAmount = ((FunctionInfoJson)tempStorage).allExitPoints.Length;
                             if(memoryHandleFuncs.ContainsKey(GeneralCompilerFunctions.CreateMD5(fName)))
                             {
@@ -440,6 +446,7 @@ namespace testServer2
                                 }
                             }
                         }
+                        //this one is for all files.
                         ((FunctionInfoJson)tempStorage).parameters = FindParameters(fName);
                         if (typeEnding == "c")
                         {
@@ -452,6 +459,7 @@ namespace testServer2
                             funcKeyInDict += (((FunctionInfoJson)tempStorage).parameters[((FunctionInfoJson)tempStorage).parameters.Length - 1]).parameterType + ")";
                             ((FunctionInfoJson)tempStorage).calledFromFunc = (string[])calledFromFunc[funcKeyInDict].ToArray(typeof(string));
                         }
+                        //those are for all files.
                         ((FunctionInfoJson)tempStorage).returnType = returnType;
                         curPos = sr.Pos;
                         ((FunctionInfoJson)tempStorage).documentation = FindDocumentation(sr, documentPos, firstLineDocumentation, curPos);

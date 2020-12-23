@@ -416,6 +416,13 @@ namespace testServer2
             result = result.Trim(trimChar);
             return result;
         }
+        /// Function - IsParameterNameInArrayList
+        /// <summary>
+        /// Checks if the parameter name is in the array list.
+        /// </summary>
+        /// <param name="a"> array type ArrayList.</param>
+        /// <param name="parameterName"> parameter name type string.</param>
+        /// <returns></returns>
         static int IsParameterNameInArrayList(ArrayList a,string parameterName)
         {
             bool found = false;
@@ -430,12 +437,26 @@ namespace testServer2
             }
             return indexFound;
         }
+        /// Function - IsNumber
+        /// <summary>
+        /// checks if the string is a number.
+        /// </summary>
+        /// <param name="aNumber"> a string that might be a number.</param>
+        /// <returns> returns a boolean true if its a number and false otherwise</returns>
         static bool IsNumber(this string aNumber)
         {
             int temp_big_int;
             var is_number = int.TryParse(aNumber, out temp_big_int);
             return is_number;
         }
+        /// Function - AmountOfFuncWithThisName
+        /// <summary>
+        /// Checks how much functions with the same name are in the dictionary "calledFromFunc" a dictionary who saves for every function
+        /// the functions they are being called from.
+        /// </summary>
+        /// <param name="funcName"> function name type string.</param>
+        /// <param name="calledFromFunc"> called from function Dictionary.</param>
+        /// <returns> returns an arrayList of the function names.</returns>
         static ArrayList AmountOfFuncWithThisName(string funcName, Dictionary<string, ArrayList> calledFromFunc)
         {
             ArrayList results=new ArrayList();
@@ -448,6 +469,19 @@ namespace testServer2
             }
             return results;
         }
+        /// Function - ConverterFromRegularCallToTypeCall
+        /// <summary>
+        /// The dictionary of the calledFromFunc works like that : 
+        /// Every key is built like - FuncName(ParamType,ParamType).
+        /// this function is converting from a functionCall for an example - Function1(1,"hey",param3)
+        /// to how to key is being built - Function1(int,string,paramType)
+        /// this function is being used in order to take care of functions with 2 names and different params..
+        /// </summary>
+        /// <param name="callFuncLine"> the line of the call of the function type string.</param>
+        /// <param name="variables"> variables arrayList (all variables of the function are in it).</param>
+        /// <param name="globalVariables"> all of the global variables in the code type array list.</param>
+        /// <param name="calledFromFunc"> called from func type dictionary.</param>
+        /// <returns></returns>
         static string ConverterFromRegularCallToTypeCall(string callFuncLine,ArrayList variables,ArrayList globalVariables, Dictionary<string, ArrayList> calledFromFunc)
         {
             callFuncLine = cleanLineFromDoc(callFuncLine);
@@ -460,27 +494,34 @@ namespace testServer2
             bool exit = false;
             for (int i=0;i<allParameters.Length&&!found&&!exit;i++)
             {
+                //if there is only 1 function with the current name in the dict it automatically takes the key from the dictionary.
                 if(AmountOfFuncWithThisName(convertedFuncLine,calledFromFunc).Count==1)
                 {
                     convertedFuncLine = AmountOfFuncWithThisName(convertedFuncLine, calledFromFunc)[0].ToString();
                     found = true;
                 }
-                if (AmountOfFuncWithThisName(convertedFuncLine, calledFromFunc).Count == 0)
+                //if there is none it exits immediately.
+                else if (AmountOfFuncWithThisName(convertedFuncLine, calledFromFunc).Count == 0)
                 {
                     exit = true;
                 }
+                //if there are more than 1 function with the same function name it goes and start checking those if's.
+                //this if is checking in the variables the type of the variable if it exists.
                 else if((temporaryIndex=IsParameterNameInArrayList(variables,allParameters[i]))!=-1)
                 {
                     convertedFuncLine += ((ParametersType)variables[temporaryIndex]).parameterType + ",";
                 }
+                //same on global variables.
                 else if((temporaryIndex = IsParameterNameInArrayList(globalVariables, allParameters[i])) != -1)
                 {
                     convertedFuncLine += ((ParametersType)globalVariables[temporaryIndex]).parameterType + ",";
                 }
+                //string type.
                 else if(allParameters[i].IndexOf(@"""")!=-1)
                 {
                     convertedFuncLine += "string";
                 }
+                //number type.
                 else if(IsNumber(allParameters[i]))
                 {
                     convertedFuncLine += "int";
@@ -513,7 +554,12 @@ namespace testServer2
         /// <param name="blocksAndNames"> blocksAndNames type ArrayList that conatins the code variables in the scope.</param>
         /// <param name="parameters"> parameters type ArrayList conatins the function parameters.</param>
         /// <param name="functionLength"> scopeLength type int default is 0 if the code line is outside any scopes.</param>
-        /// <param name="typeEnding"> the file type (for an example h or c).</param>
+        /// <param name="typeEnding"> the file type (for an example h or c).</param>the called from func dictionary.
+        /// <param name="calledFromFunc"> the called from func dictionary.</param>
+        /// <param name="FreeMemoryPattern"> the pattern of the free memory.</param>
+        /// <param name="functionName"> the name of the function.</param>
+        /// <param name="memoryHandleFunc"> all of the memory handles type arrayList.</param>
+        /// <param name="MemoryPattern"> Regex of the memory pattern.</param>
         static void ChecksInSyntaxCheck(string path, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames,Regex MemoryPattern, Regex FreeMemoryPattern, ArrayList parameters = null, Dictionary<string, ArrayList> calledFromFunc = null, int functionLength = 0,string functionName="")
         {
             //adds the parameters of the function to the current ArrayList of variables.

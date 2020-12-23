@@ -25,6 +25,27 @@ namespace testServer2
         /// <param name="filePath"> Path for the code file.</param>
         /// <param name="includes"> Hashtable for all of the includes in the code.</param>
         /// <param name="defines"> Dictionary that stores all of the defines in the code.</param>
+        static void TakeOnlyNameNeeded(Dictionary<string, Dictionary<string, object>>final_json,string parameterName,string parameterType)
+        {
+            foreach (string functionName in final_json["functions"].Keys)
+            {
+                switch(parameterType)
+                {
+                    case "name":
+                        if (((FunctionInfoJson)final_json["functions"][functionName]).fName != parameterName)
+                        {
+                            final_json["functions"].Remove(functionName);
+                        }
+                        break;
+                    case "returnType":
+                        if (((FunctionInfoJson)final_json["functions"][functionName]).returnType != parameterName)
+                        {
+                            final_json["functions"].Remove(functionName);
+                        }
+                        break;
+                }
+            }
+        }
         public SyncServer()
         {
             var listener = new HttpListener();
@@ -89,6 +110,14 @@ namespace testServer2
                             switch (path)
                             {
                                 case "functions":
+                                    if (context.Request.QueryString["name"] != null)
+                                    {
+                                        TakeOnlyNameNeeded(final_json, context.Request.QueryString["name"],"name");
+                                    }
+                                    if (context.Request.QueryString["returnType"] != null)
+                                    {
+                                        TakeOnlyNameNeeded(final_json, context.Request.QueryString["returnType"], "returnType");
+                                    }
                                     dataJson = JsonConvert.SerializeObject(final_json[filePath]["function"]);
                                     MainProgram.AddToLogString(filePath, dataJson);
                                     break;

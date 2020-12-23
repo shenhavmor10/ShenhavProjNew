@@ -15,6 +15,43 @@ struct example2 {
 	int a;
 };
 
+ifdef A
+ifdef B
+ifdef C
+
+
+
+
+fun1()
+{
+	malloc
+}
+
+ifdef A
+func2()
+{
+	free
+}
+
+ifdef A/* this func return ture */
+ifdef B /* this func reutnr false*/
+ifdef AB /*b warning unused return, reutnrs ture*/
+
+func 3()
+
+{	malloc
+ifdef A
+return true
+ifdef B 
+return false
+
+
+
+}
+
+
+
+
 /*
 * sends a message to a client
 * @params:
