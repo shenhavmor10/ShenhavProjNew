@@ -18,19 +18,19 @@
         <TextBox HorizontalAlignment="Left" Height="28" Margin="10,114,0,0" TextWrapping="Wrap" Text="Browse folder 1 that a file from there might be in the code you want to check.." VerticalAlignment="Top" Width="201" Name="FileNameTextBox3" />
         <TextBox HorizontalAlignment="Left" Height="28" Margin="10,158,0,0" TextWrapping="Wrap" Text="Browse folder 2 that a file from there might be in the code you want to check.." VerticalAlignment="Top" Width="201" Name="FileNameTextBox4" />
         <Button Click="BrowseButtonFile_Click" Content="Browse" Name="Browse5" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="593,27,0,0" Height="28" FontSize="18"/>
-        <TextBox HorizontalAlignment="Left" Height="28" Margin="358,27,0,0" TextWrapping="Wrap" Text="Browse the file you want to check.." VerticalAlignment="Top" Width="201" Name="FileNameTextBox5"/>
-        <Button Click="BrowseButtonFolder_Click" Content="Browse" Name="Browse6" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="593,71,0,0" Height="28" FontSize="18"/>
-        <Button Click="BrowseButtonFolder_Click" Content="Browse" Name="Browse7" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="593,114,0,0" Height="28" FontSize="18"/>
-        <Button Click="BrowseButtonFolder_Click" Content="Browse" Name="Browse8" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="593,158,0,0" Height="28" FontSize="18"/>
-        <TextBox HorizontalAlignment="Left" Height="28" Margin="358,71,0,0" TextWrapping="Wrap" Text="Browse project folder" VerticalAlignment="Top" Width="201" Name="FileNameTextBox6"/>
-        <TextBox HorizontalAlignment="Left" Height="28" Margin="358,114,0,0" TextWrapping="Wrap" Text="Browse folder 1 that a file from there might be in the code you want to check.." VerticalAlignment="Top" Width="201" Name="FileNameTextBox7" />
-        <TextBox HorizontalAlignment="Left" Height="28" Margin="358,158,0,0" TextWrapping="Wrap" Text="Browse folder 2 that a file from there might be in the code you want to check.." VerticalAlignment="Top" Width="201" Name="FileNameTextBox8" />
+        <TextBox HorizontalAlignment="Left" Height="28" Margin="358,27,0,0" TextWrapping="Wrap" Text="Browse the file you want to check.." VerticalAlignment="Top" Width="201" Name="FileNameTextBox5" TextChanged="FileNameTextBox5_TextChanged"/>
+        <Button Click="BrowseButtonFolder_Click" Content="Browse" Name="Browse6" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="593,60,0,0" Height="28" FontSize="18"/>
+        <Button Click="BrowseButtonFolder_Click" Content="Browse" Name="Browse7" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="593,92,0,0" Height="28" FontSize="18"/>
+        <Button Click="BrowseButtonFolder_Click" Content="Browse" Name="Browse8" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="593,125,0,0" Height="28" FontSize="18"/>
+        <TextBox HorizontalAlignment="Left" Height="28" Margin="358,59,0,0" TextWrapping="Wrap" Text="Browse project folder" VerticalAlignment="Top" Width="201" Name="FileNameTextBox6"/>
+        <TextBox HorizontalAlignment="Left" Height="28" Margin="358,92,0,0" TextWrapping="Wrap" Text="Browse folder 1 that a file from there might be in the code you want to check.." VerticalAlignment="Top" Width="201" Name="FileNameTextBox7" />
+        <TextBox HorizontalAlignment="Left" Height="28" Margin="358,125,0,0" TextWrapping="Wrap" Text="Browse folder 2 that a file from there might be in the code you want to check.." VerticalAlignment="Top" Width="201" Name="FileNameTextBox8" />
         <Button Click="ConnectionButton_Click" Content="Connect" HorizontalAlignment="Left" Margin="204,352,0,0" VerticalAlignment="Top" Width="108" Height="42" FontSize="24" Name="Connect"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,255,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="73" Width="302" Name="TextBlock1" x:FieldModifier="public"/>
         <TextBlock HorizontalAlignment="Left" Margin="358,255,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="73" Width="302" Name="TextBlock2" x:FieldModifier="public"/>
         <StackPanel HorizontalAlignment="Left" Height="270" Margin="704,27,0,0" VerticalAlignment="Top" Width="100" Name="StackPanelCheckBox"/>
-        <Button Click="BrowseButtonFolder_Click" Content="Browse" Name="BrowseDest" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="593,222,0,0" Height="28" FontSize="18"/>
-        <TextBox HorizontalAlignment="Left" Height="28" Margin="358,222,0,0" TextWrapping="Wrap" Text="Browse destination Folder for the code." VerticalAlignment="Top" Width="201" Name="FileNameTextBoxDest" />
+        <Button Click="BrowseButtonFolder_Click" Content="Browse" Name="BrowseDest" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="593,158,0,0" Height="28" FontSize="18"/>
+        <TextBox HorizontalAlignment="Left" Height="28" Margin="358,158,0,0" TextWrapping="Wrap" Text="Browse destination Folder for the code." VerticalAlignment="Top" Width="201" Name="FileNameTextBoxDest" />
         <Button Click="BrowseButtonFolder_Click" Content="Browse" Name="BrowseDest2" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="245,222,0,0" Height="28" FontSize="18"/>
         <TextBox HorizontalAlignment="Left" Height="28" Margin="10,222,0,0" TextWrapping="Wrap" Text="Browse destination Folder for the code." VerticalAlignment="Top" Width="201" Name="FileNameTextBoxDest2" />
 
@@ -45,6 +45,8 @@
             <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Width="91" Name="CustomFree" />
             <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Width="91" Name="CustomFree2" />
         </StackPanel>
+        <TextBox HorizontalAlignment="Left" Height="28" Margin="358,191,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="201" Name="Environment_variable_path" TextChanged="Environment_variable_path_TextChanged" />
+        <Button Click="BrowseButtonFile_Click" Content="Browse" Name="environmentVariablePath" HorizontalAlignment="Left" VerticalAlignment="Top" Width="67" Margin="593,191,0,0" Height="28" FontSize="18"/>
 
 
 

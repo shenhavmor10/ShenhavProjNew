@@ -32,22 +32,19 @@ namespace testServer2
         }
         const string MAIN_DICT_INDEX = "main";
         //paths for all files.
-        const string toolExeFolder = @"..\..\..\ToolsExe";
-        const string ignoreVariablesTypesPath = @"..\..\..\ignoreVariablesType.txt";
-        //static string filePath = @"C:\Users\Shenhav\Desktop\Check\checkOne.c";
-        const string ansiCFile = @"..\..\..\Ansikeywords.txt";
-        const string CSyntextFile = @"..\..\..\CSyntext.txt";
-        const string logFile = @"..\..\..\LogFile.txt";
+        const string configFile = @"..\..\..\ConfigurationFIle.txt";
+        static string toolExeFolder, ignoreVariablesTypesPath, ansiCFile, CSyntextFile, logFile;
         const string FINISH_SUCCESFULL = "Finished succesfully code is ready at the destination path.";
         const int TIMEOUT_SLEEP = 1000;
         static Regex ToolsBlock = new Regex("tools={(.*?)}");
         static Regex MemoryBlock = new Regex("memory={(.*?)}");
         static Regex FreeBlock = new Regex("free={(.*?)}");
+        static Regex EnvironmentVariablesPathBlock = new Regex("environmentVariablePath={(.*?)}");
         static Mutex mutexAddLogFiles = new Mutex();
         static bool compileError = false;
         static ArrayList currentDataList = new ArrayList();
         static int threadNumber = 0;
-        static Dictionary<string, Dictionary<string, Object>> final_json = new Dictionary<string, Dictionary<string, Object>>();
+        static Dictionary<string,Dictionary<string, Dictionary<string, Object>>> final_json = new Dictionary<string, Dictionary<string, Dictionary<string, object>>>();
         static Dictionary<string, string> logFiles = new Dictionary<string, string>();
         //static string librariesPath = @"C:\Users\Shenhav\Desktop\Check";
         //global variable declaration.
@@ -61,7 +58,7 @@ namespace testServer2
         /// all information of the code and the rest api is prasing the information to the GET requests.
         /// </summary>
         /// <returns>final json type Dictionary<string,Dictionary<string,Object>> </returns>
-        public static Dictionary<string,Dictionary<string,Object>> GetFinalJson()
+        public static Dictionary<string, Dictionary<string, Dictionary<string, Object>>> GetFinalJson()
         {
             return final_json;
         }
@@ -92,6 +89,7 @@ namespace testServer2
         {
             //variable declaration.
             //create regex for all memory handles (malloc alloc etc... and custom memory handles aswell).
+            int currentThreadNumber = threadNumber;
             string memoryPatternTemp = @"(?!.*return)(?= (\s)?([^\s()] + (\s)?((\*)*(\s))?)?[^\s()]+(\s ?= (\s)?(";
             for(int i=0;i<memoryPatterns.Length;i++)
             {
@@ -119,7 +117,7 @@ namespace testServer2
             //initialize 
             try
             {
-                GeneralCompilerFunctions.initializeKeywordsAndSyntext(ansiCFile, filePath, CSyntextFile, ignoreVariablesTypesPath, keywords, includes, defines, pathes, threadNumber);
+                GeneralCompilerFunctions.initializeKeywordsAndSyntext(ansiCFile, filePath, CSyntextFile, ignoreVariablesTypesPath, keywords, includes, defines, pathes, currentThreadNumber);
                 Console.WriteLine("after initialize");
             }
             catch(Exception e)
@@ -133,12 +131,12 @@ namespace testServer2
             //Syntax Check.
             try
             {
-                compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable,calledFromFunc, memoryHandleFuncs, keywords, funcVariables, threadNumber, fileType, MemoryPattern, FreeMemoryPattern);
+                compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable,calledFromFunc, memoryHandleFuncs, keywords, funcVariables, currentThreadNumber, fileType, MemoryPattern, FreeMemoryPattern);
             }
             catch(Exception e)
             {
                 AddToLogString(filePath, "ERROR IN SyntaxCheck");
-                ConnectionServer.CloseConnection(threadNumber, "ERROR IN SyntaxCheck " + e.ToString(), GeneralConsts.ERROR);
+                ConnectionServer.CloseConnection(currentThreadNumber, "ERROR IN SyntaxCheck " + e.ToString(), GeneralConsts.ERROR);
             }
             Console.WriteLine("finished");
 
@@ -155,7 +153,7 @@ namespace testServer2
                 catch (Exception e)
                 {
                     AddToLogString(filePath, "ERROR Creating final json");
-                    ConnectionServer.CloseConnection(threadNumber, "ERROR Creating final json " + e.ToString(), GeneralConsts.ERROR);
+                    ConnectionServer.CloseConnection(currentThreadNumber, "ERROR Creating final json " + e.ToString(), GeneralConsts.ERROR);
                 }
                
                 string dataJson = JsonConvert.SerializeObject(final_json[filePath]["codeInfo"]);
@@ -163,7 +161,7 @@ namespace testServer2
                 Thread threadOpenTools = new Thread(() => RunAllTasks(filePath, destPath, tools));
                 threadOpenTools.Start();
                 threadOpenTools.Join(GeneralConsts.TIMEOUT_JOIN);
-                ConnectionServer.CloseConnection(threadNumber, FINISH_SUCCESFULL,GeneralConsts.FINISHED_SUCCESFULLY);
+                ConnectionServer.CloseConnection(currentThreadNumber, FINISH_SUCCESFULL,GeneralConsts.FINISHED_SUCCESFULLY);
                 AddToLogString(filePath, FINISH_SUCCESFULL);
                 Console.WriteLine(logFiles[filePath]);
                 Thread writeToFile = new Thread(() => File.WriteAllText(logFile, logFiles[filePath]));
@@ -241,12 +239,44 @@ namespace testServer2
             //process.WaitForExit(); might need for synchronize.
             return tcs.Task;
         }
+        static void initializeConfig()
+        {
+            Dictionary<string, string> configDict = new Dictionary<string, string>();
+            try
+            {
+                using (var sr = new StreamReader("configFile.txt"))
+                {
+                    string line = null;
+
+                    // while it reads a key
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        // add the key and whatever it 
+                        // can read next as the value
+                        configDict.Add(line.Split('=')[0], line.Split('=')[1]);
+                        
+                    }
+                }
+                toolExeFolder = configDict["toolExeFolder"];
+                ignoreVariablesTypesPath = configDict["ignoreVariablesTypesPath"];
+                ansiCFile = configDict["ansiCFile"];
+                CSyntextFile = configDict["CSyntextFile"];
+                logFile = configDict["logFile"];
+            }
+            catch(Exception e)
+            {
+                AddToLogString(MAIN_DICT_INDEX, "error = " + e.ToString());
+                ConnectionServer.CloseConnection(threadNumber, "ERROR IN initialize " + e.ToString(), GeneralConsts.ERROR);
+            }
+            configDict.Clear();
+        }
         /// Function - InitializeMainProgram
         /// <summary>
         /// This function initialize the whole main program. opens all threads needed and more.
         /// </summary>
         static void InitializeMainProgram()
         {
+            initializeConfig();
             File.WriteAllText(logFile, GeneralConsts.EMPTY_STRING);
             Thread restApi = new Thread(() => new SyncServer());
             restApi.Start();
@@ -258,6 +288,56 @@ namespace testServer2
             serverThread = new Thread(() => Server.ConnectionServer.ExecuteServer(11111));
             serverThread.Start();
             AddToLogString(MAIN_DICT_INDEX, "started socket for client listen");
+        }
+        static ArrayList GetAllPossibilitiesWithoutDuplicates(string [] array)
+        {
+            ArrayList result = new ArrayList();
+            int finalSize = (int)Math.Pow(array.Length, 2) - 1;
+            int currentIndex = 0;
+            while (finalSize>result.Count)
+            {
+                result.Add(array[currentIndex]);
+                for(int i=0;i<result.Count-1;i++)
+                {
+                    result.Add(string.Format((string)result[i] +","+array[currentIndex]));
+                }
+            }
+            return result;
+        }
+        static void SetEnvironmentVariables(string filePath,string environmentVariablesPath,int currentThreadNumber)
+        {
+            MyStream sr = null;
+            try
+            {
+                sr = new MyStream(environmentVariablesPath, System.Text.Encoding.UTF8);
+            }
+            catch(Exception e)
+            {
+                AddToLogString(MAIN_DICT_INDEX, "error = " + e.ToString());
+                ConnectionServer.CloseConnection(threadNumber, "ERROR IN initialize " + e.ToString(), GeneralConsts.ERROR);
+            }
+            string line = "";
+            ArrayList tempArrayForEnvironmentVars = new ArrayList();
+            while((line=sr.ReadLine())!=null)
+            {
+                //getting all environmentVariables blackbox
+            }
+            tempArrayForEnvironmentVars = GetAllPossibilitiesWithoutDuplicates((string[])tempArrayForEnvironmentVars.ToArray(typeof(string)));
+            foreach (string eVar in tempArrayForEnvironmentVars)
+            {
+                try
+                {
+                    final_json[filePath].Add(eVar, new Dictionary<string, object>());
+                }
+                catch(Exception e)
+                {
+                    AddToLogString(filePath, "error = there are more than one environment variable with the same name.");
+                    ConnectionServer.CloseConnection(currentThreadNumber, "error = there are more than one environment variable with the same name.", GeneralConsts.ERROR);
+                }
+            }
+
+
+            
         }
         /// Function - MainLoopToGetFiles
         /// <summary>
@@ -284,6 +364,7 @@ namespace testServer2
                     string [] toolsArray = Regex.Split(ToolsBlock.Match(infoServer).Groups[1].Value,",");
                     string [] memoryArray = Regex.Split(MemoryBlock.Match(infoServer).Groups[1].Value, ",");
                     string[] freeArray = Regex.Split(FreeBlock.Match(infoServer).Groups[1].Value, ",");
+                    string environmentVariablePath= EnvironmentVariablesPathBlock.Match(infoServer).Groups[1].Value;
                     string filePath = paths[FILE_PATH_INDEX];
                     
                     if (logFiles.ContainsKey(filePath))

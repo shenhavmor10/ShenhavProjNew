@@ -247,7 +247,7 @@ namespace testServer2
         /// <param name="path"> path of the code.</param>
         /// <param name="pattern"> function pattern type string</param>
         /// <returns> return a json for the functions get in "SyncServer".</returns>
-        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Object>>final_json,string typeEnding,Hashtable memoryHandleFuncs,Dictionary<string,ArrayList>calledFromFunc)
+        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json,string typeEnding,Hashtable memoryHandleFuncs,Dictionary<string,ArrayList>calledFromFunc)
         {
             //if its h type file.
             if(typeEnding=="h")

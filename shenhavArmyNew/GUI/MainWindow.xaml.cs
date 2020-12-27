@@ -26,7 +26,7 @@ namespace GUI
             InitializeComponent();
             main = this;
             SqlConnection cnn;
-            string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
+            string connectionString = "Data Source=E560-02\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
             cnn = new SqlConnection(connectionString);
             cnn.Open();
             SqlCommand command = new SqlCommand("Select tool_name,tool_desc,tool_exe_name from tools_table ORDER BY tool_priority ASC;", cnn);
@@ -128,6 +128,10 @@ namespace GUI
             {
                 path += ",free={" + freePatterns + "}";
             }
+            if(Environment_variable_path.Text!="")
+            {
+                path += ",environmentVariablePath={" + Environment_variable_path.Text + "}";
+            }
             Thread clientThread;
             clientThread = new Thread(() => ClientConnection.ExecuteClient(path,threadNumber));
             clientThread.Start();
@@ -148,6 +152,10 @@ namespace GUI
                 if(content=="Browse1")
                 {
                     FileNameTextBox1.Text = openFileDlg.FileName;
+                }
+                else if(content == "environmentVariablePath")
+                {
+                    Environment_variable_path.Text = openFileDlg.FileName;
                 }
                 else
                 {
@@ -197,6 +205,19 @@ namespace GUI
             }
         }
 
+        private void FileNameTextBoxDest_Copy_TextChanged(object sender, TextChangedEventArgs e)
+        {
 
+        }
+
+        private void FileNameTextBox5_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void Environment_variable_path_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 }
