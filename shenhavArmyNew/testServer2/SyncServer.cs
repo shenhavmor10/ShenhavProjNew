@@ -18,6 +18,7 @@ namespace testServer2
         static Regex staticFunctionPatternInC = new Regex(@"^.*static.*\s.*[a-zA-Z]+.*\s[a-zA-Z].*[(].*[)]$");
         const string NOT_FOUND_500 = "Could not found pattern";
         const string NOT_FOUND_404 = "Not found";
+        static Dictionary<string, Dictionary<string, object>> ToolsData = new Dictionary<string, Dictionary<string, object>>();
         /// Function - SyncServer
         /// <summary>
         /// Creation of the rest api server.
@@ -25,8 +26,61 @@ namespace testServer2
         /// <param name="filePath"> Path for the code file.</param>
         /// <param name="includes"> Hashtable for all of the includes in the code.</param>
         /// <param name="defines"> Dictionary that stores all of the defines in the code.</param>
+        static void TakeOnlyNameNeeded(Dictionary<string, Dictionary<string, object>> final_json, string parameterName,string parameterType,string filePath,string eVar)
+        {
+            foreach (string functionName in ((Dictionary<string,FunctionInfoJson>)final_json[eVar]["functions"]).Keys)
+            {
+                switch(parameterType)
+                {
+                    case "name":
+                        if (((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"])[functionName].fName != parameterName)
+                        {
+                            final_json["functions"].Remove(functionName);
+                        }
+                        break;
+                    case "returnType":
+                        if (((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"])[functionName].returnType != parameterName)
+                        {
+                            final_json["functions"].Remove(functionName);
+                        }
+                        break;
+                }
+            }
+        }
+        static void SendData(string data,bool not_found,HttpListenerContext context)
+        {
+            byte[] bytes;
+            if (not_found)
+            {
+                bytes = Encoding.UTF8.GetBytes(NOT_FOUND_500);
+                context.Response.StatusCode = 500;
+            }
+            else
+            {
+                if (data.Length < 0)
+                {
+                    bytes = Encoding.UTF8.GetBytes(NOT_FOUND_404);
+                    context.Response.StatusCode = 404;
+                }
+                else
+                {
+                    bytes = Encoding.UTF8.GetBytes(data);
+                }
+            }
+            Stream OutputStream = context.Response.OutputStream;
+            //sends the message back.
+            OutputStream.Write(bytes, 0, bytes.Length);
+            //Close connection.
+            OutputStream.Close();
+        }
+        static void Rd_isResetDictionary(object sender, ResetDictEventArgs e)
+        {
+            ToolsData[e.filePath].Clear();
+        }
         public SyncServer()
         {
+            ResetDictionary rd = new ResetDictionary();
+            rd.isResetDictionary += new IsResetDict(Rd_isResetDictionary);
             var listener = new HttpListener();
             //add prefixes.
             listener.Prefixes.Add("http://localhost:8081/");
@@ -44,8 +98,9 @@ namespace testServer2
                     context.Response.SendChunked = true;
                     context.Response.ContentType = "application/json";
                     string dataJson = GeneralConsts.EMPTY_STRING;
-                    Dictionary<string, Dictionary<string, object>> final_json = MainProgram.GetFinalJson();
+                    Dictionary<string,Dictionary<string, Dictionary<string, object>>> final_json = MainProgram.GetFinalJson();
                     string filePath = context.Request.QueryString["filePath"];
+                    string eVar = context.Request.QueryString["eVar"];
                     bool not_found_pattern = false;
                     bool not_found = false;
                     char[] trimChars = { '/', ' '};
@@ -89,11 +144,20 @@ namespace testServer2
                             switch (path)
                             {
                                 case "functions":
-                                    dataJson = JsonConvert.SerializeObject(final_json[filePath]["function"]);
+                                    //this is wrong needs to fix.
+                                    if (context.Request.QueryString["name"] != null)
+                                    {
+                                        TakeOnlyNameNeeded(final_json[path], context.Request.QueryString["name"],"name",filePath,eVar);
+                                    }
+                                    if (context.Request.QueryString["returnType"] != null)
+                                    {
+                                        TakeOnlyNameNeeded(final_json[path], context.Request.QueryString["returnType"], "returnType", filePath, eVar);
+                                    }
+                                    dataJson = JsonConvert.SerializeObject(final_json[filePath][eVar]["function"]);
                                     MainProgram.AddToLogString(filePath, dataJson);
                                     break;
                                 case "codeInfo":
-                                    dataJson = JsonConvert.SerializeObject(final_json[filePath]["codeInfo"]);
+                                    dataJson = JsonConvert.SerializeObject(final_json[filePath][eVar]["codeInfo"]);
                                     MainProgram.AddToLogString(filePath, dataJson);
                                     break;
                                 default:
@@ -101,31 +165,31 @@ namespace testServer2
 
                             }
                         }
-                        byte [] bytes;
-                        if (not_found)
+                        SendData(dataJson, not_found, context);
+
+                    }
+                    if(context.Request.HttpMethod=="POST")
+                    {
+                        path = context.Request.RawUrl;
+                        path = path.Trim(trimChars);
+                        path = path.Split('?')[0];
+                        if (path == "logs")
                         {
-                            bytes= Encoding.UTF8.GetBytes(NOT_FOUND_500);
-                            context.Response.StatusCode = 500;
-                        }
-                        else
-                        {
-                            if (dataJson.Length < 0)
+                            dataJson=GeneralConsts.EMPTY_STRING;
+                            MainProgram.AddToLogString(filePath, context.Request.QueryString["logs"]);
+                            MainProgram.AddToLogString(filePath, context.Request.QueryString["returnSize"]);
+                            using (var reader = new StreamReader(context.Request.InputStream))
+                                dataJson = reader.ReadToEnd();
+                            if(dataJson != "")
                             {
-                                bytes = Encoding.UTF8.GetBytes(NOT_FOUND_404);
-                                context.Response.StatusCode = 404;
+                                MainProgram.AddToLogString(filePath, dataJson);
                             }
                             else
                             {
-                                bytes = Encoding.UTF8.GetBytes(dataJson);
+                                not_found = true;
                             }
                         }
-                        
-                        Stream OutputStream = context.Response.OutputStream;
-                        //sends the message back.
-                        OutputStream.Write(bytes, 0, bytes.Length);
-                        //Close connection.
-                        OutputStream.Close();
-
+                        SendData(dataJson, not_found, context);
                     }
                 }
 
@@ -136,6 +200,9 @@ namespace testServer2
                 }
             }
         }
-        
+        private void Rd_isResetDictionary1(object sender, ResetDictEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -28,8 +28,35 @@ namespace ViewChanger.ViewModels
         public AddTools()
         {
             InitializeComponent();
+            initializeConfig();
         }
-        const string DestProjectPath = @"..\..\..\..\ToolsExe";
+        static string DestProjectPath;
+        static void initializeConfig()
+        {
+            Dictionary<string, string> configDict = new Dictionary<string, string>();
+            try
+            {
+                using (var sr = new StreamReader("AddToolConfigFile.txt"))
+                {
+                    string line = null;
+
+                    // while it reads a key
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        // add the key and whatever it 
+                        // can read next as the value
+                        configDict.Add(line.Split('=')[0], line.Split('=')[1]);
+
+                    }
+                }
+                DestProjectPath = configDict["DestProjectPath"];
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("needs to add error log..");
+            }
+            configDict.Clear();
+        }
         private void ApplyBtn_Click(object sender, RoutedEventArgs e)
         {
             SqlConnection cnn;

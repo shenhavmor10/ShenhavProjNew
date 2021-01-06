@@ -15,6 +15,7 @@ struct example2 {
 	int a;
 };
 
+
 /*
 * sends a message to a client
 * @params:
@@ -51,18 +52,26 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 	}
 	char* yosi = "a";
 	char dosi = "s";
+	#ifdef evar1
+	struct example4 {
+		int a;
+		int b;
+	};
+	int resultttt;
+	#endif
 	spoi(yosi, dosi);
 	//dfgdfgdfgdfg
 	//fgfgfgfgfg
-
 	char* pointer = malloc(sizeof(char) * 10);
 	//dfgdfgdfgdfg
 	//fgfgfgfgfg
 	/*
 	*ok
 	*/
+	#ifdef Eight
+	int EightIsGood;
+	#endif
 	char* runner = pointer;
-
 	*retval = pointer;
 
 	/*                  sdfsdfsdfsd*/

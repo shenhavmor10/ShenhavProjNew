@@ -1,9 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace ClassesSolution
 {
     //Both classes are being used to store a json file that the program sends to the Tools !
+
     public class FunctionInfoJson
     {
 
@@ -51,6 +53,23 @@ namespace ClassesSolution
             this.parameterName = parameterName;
         }
     }
+    public delegate void IsResetDict(object sender, ResetDictEventArgs e);
+    public class ResetDictEventArgs : EventArgs
+    {
+        public string filePath;
+    }
+    public class ResetDictionary
+    {
+        public event IsResetDict isResetDictionary;
+        public void Reset_Dictionary(string filePath)
+        {
+            ResetDictEventArgs e = new ResetDictEventArgs();
+            e.filePath = filePath;
+            isResetDictionary(this, e);
+        }
+
+    }
+
     class Program
     {
         static void Main(string[] args)

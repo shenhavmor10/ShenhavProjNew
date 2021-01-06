@@ -247,20 +247,20 @@ namespace testServer2
         /// <param name="path"> path of the code.</param>
         /// <param name="pattern"> function pattern type string</param>
         /// <returns> return a json for the functions get in "SyncServer".</returns>
-        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Object>>final_json,string typeEnding,Hashtable memoryHandleFuncs,Dictionary<string,ArrayList>calledFromFunc)
+        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json,string eVars,string typeEnding,Hashtable memoryHandleFuncs,Dictionary<string,ArrayList>calledFromFunc)
         {
             //if its h type file.
             if(typeEnding=="h")
             {
-                CreateFunctionsJsonFile(filePath, functionPatternInH, typeEnding, final_json);
+                CreateFunctionsJsonFile(filePath, functionPatternInH, typeEnding, final_json,eVars);
             }
             //if its a c type file for now.
             else 
             {
-                CreateFunctionsJsonFile(filePath, FunctionPatternInC, typeEnding, final_json,variables,memoryHandleFuncs,calledFromFunc);
+                CreateFunctionsJsonFile(filePath, FunctionPatternInC, typeEnding, final_json,eVars,variables,memoryHandleFuncs,calledFromFunc);
             }
             //for both files
-            CreateCodeJsonFile(filePath,includes,globalVariables,defines,final_json);
+            CreateCodeJsonFile(filePath,includes,globalVariables,defines,final_json,eVars);
         }
         /// Function - FindVariables
         /// <summary>
@@ -337,7 +337,7 @@ namespace testServer2
         /// type "ParameterType" of all of his variables.
         /// </param>
         /// <param name="final_json"> the final big json.</param>
-        static void CreateFunctionsJsonFile(string path, Regex pattern, string typeEnding, Dictionary<string, Dictionary<string, Object>> final_json, Dictionary<string,ArrayList> variables=null,Hashtable memoryHandleFuncs=null,Dictionary<string,ArrayList>calledFromFunc=null)
+        static void CreateFunctionsJsonFile(string path, Regex pattern, string typeEnding, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json, string eVars, Dictionary<string,ArrayList> variables=null,Hashtable memoryHandleFuncs=null,Dictionary<string,ArrayList>calledFromFunc=null)
         {
             string codeLine = GeneralConsts.EMPTY_STRING;
             string fName;
@@ -415,12 +415,18 @@ namespace testServer2
                         returnType = returnType.Trim();
                         //enter function to where i store it. 
                         Object tempStorage = new FunctionInfoJson();
+                        //if its a c code than it has those extra information that only c has.
                         if(typeEnding=="c")
                         {
+                            //goes to the next scope.
                             GeneralCompilerFunctions.NextScopeLength(sr, ref codeLine, ref ((FunctionInfoJson)tempStorage).codeLength, true);
+                            //gets the function code.
                             ((FunctionInfoJson)tempStorage).content = FunctionCode(sr, ref codeLine);
+                            //gets the variables of the function
                             ((FunctionInfoJson)tempStorage).variables = FindVariables(variables[fName]);
+                            //gets the exit points.
                             ((FunctionInfoJson)tempStorage).allExitPoints = FindPatternInCode(((FunctionInfoJson)tempStorage).content,ReturnPattern);
+                            //gets the amount of the exit points.
                             ((FunctionInfoJson)tempStorage).exitPointsAmount = ((FunctionInfoJson)tempStorage).allExitPoints.Length;
                             if(memoryHandleFuncs.ContainsKey(GeneralCompilerFunctions.CreateMD5(fName)))
                             {
@@ -440,6 +446,7 @@ namespace testServer2
                                 }
                             }
                         }
+                        //this one is for all files.
                         ((FunctionInfoJson)tempStorage).parameters = FindParameters(fName);
                         if (typeEnding == "c")
                         {
@@ -452,6 +459,7 @@ namespace testServer2
                             funcKeyInDict += (((FunctionInfoJson)tempStorage).parameters[((FunctionInfoJson)tempStorage).parameters.Length - 1]).parameterType + ")";
                             ((FunctionInfoJson)tempStorage).calledFromFunc = (string[])calledFromFunc[funcKeyInDict].ToArray(typeof(string));
                         }
+                        //those are for all files.
                         ((FunctionInfoJson)tempStorage).returnType = returnType;
                         curPos = sr.Pos;
                         ((FunctionInfoJson)tempStorage).documentation = FindDocumentation(sr, documentPos, firstLineDocumentation, curPos);
@@ -472,9 +480,7 @@ namespace testServer2
                 //add it to where i store the function code.
             }
             //Serialize.
-            Dictionary<string, Object> tempOuterDict=new Dictionary<string, Object>();
-            tempOuterDict.Add("function", tempDict);
-            final_json.Add(path, tempOuterDict);
+            final_json[path][eVars].Add("function", tempDict);
             sr.Close();
         }
         /// Function - CreateCodeJsonFile
@@ -485,7 +491,7 @@ namespace testServer2
         /// <param name="defines"> Dictionary of defines that has all defines in the code. 
         ///                        (Including all imports defines.)</param>
         /// <returns> returns a json file type string.</returns>
-        static void CreateCodeJsonFile(string path,Hashtable includes,ArrayList globalVariables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Object>> final_json)
+        static void CreateCodeJsonFile(string path,Hashtable includes,ArrayList globalVariables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json, string eVars)
         {
             CodeInfoJson code=new CodeInfoJson();
             code.includes = new string[includes.Values.Count];
@@ -495,7 +501,7 @@ namespace testServer2
             code.definesAmount = defines.Count;
             code.Globalvariables = FindVariables(globalVariables);
             //Serialize.
-            final_json[path].Add("codeInfo",code);
+            final_json[path][eVars].Add("codeInfo",code);
         }
         /// Function - ReadAllScope
         /// <summary>
