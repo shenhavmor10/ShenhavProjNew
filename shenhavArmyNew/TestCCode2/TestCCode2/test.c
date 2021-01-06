@@ -15,42 +15,6 @@ struct example2 {
 	int a;
 };
 
-ifdef A
-ifdef B
-ifdef C
-
-
-
-
-fun1()
-{
-	malloc
-}
-
-ifdef A
-func2()
-{
-	free
-}
-
-ifdef A/* this func return ture */
-ifdef B /* this func reutnr false*/
-ifdef AB /*b warning unused return, reutnrs ture*/
-
-func 3()
-
-{	malloc
-ifdef A
-return true
-ifdef B 
-return false
-
-
-
-}
-
-
-
 
 /*
 * sends a message to a client
@@ -88,18 +52,26 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 	}
 	char* yosi = "a";
 	char dosi = "s";
+	#ifdef evar1
+	struct example4 {
+		int a;
+		int b;
+	};
+	int resultttt;
+	#endif
 	spoi(yosi, dosi);
 	//dfgdfgdfgdfg
 	//fgfgfgfgfg
-
 	char* pointer = malloc(sizeof(char) * 10);
 	//dfgdfgdfgdfg
 	//fgfgfgfgfg
 	/*
 	*ok
 	*/
+	#ifdef Eight
+	int EightIsGood;
+	#endif
 	char* runner = pointer;
-
 	*retval = pointer;
 
 	/*                  sdfsdfsdfsd*/

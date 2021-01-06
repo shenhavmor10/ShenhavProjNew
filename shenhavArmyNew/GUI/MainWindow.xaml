@@ -42,7 +42,7 @@
         </StackPanel>
 
         <StackPanel HorizontalAlignment="Left" Height="89" Margin="463,352,0,0" VerticalAlignment="Center" Width="100" Name="StackPanelFree">
-            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Width="91" Name="CustomFree" />
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Width="91" Name="CustomFree" TextChanged="CustomFree_TextChanged" />
             <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Width="91" Name="CustomFree2" />
         </StackPanel>
         <TextBox HorizontalAlignment="Left" Height="28" Margin="358,191,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="201" Name="Environment_variable_path" TextChanged="Environment_variable_path_TextChanged" />

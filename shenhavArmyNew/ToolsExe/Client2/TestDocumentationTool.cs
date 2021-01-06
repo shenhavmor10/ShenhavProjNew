@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Net;
 
 namespace Client
 {
@@ -36,7 +37,7 @@ namespace Client
             return documentation;
         }
         
-        static async Task GetFromRestApi(string sourcePath,string destPath,string documentationPath)
+        static async Task GetFromRestApi(string sourcePath,string destPath,string eVar)
         {
             //Communicating with rest api server
             Console.WriteLine("entered ");
@@ -45,17 +46,24 @@ namespace Client
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             //Functions GET.
             Console.WriteLine("before async");
-            
-            HttpResponseMessage response = await client.GetAsync(string.Format("http://127.0.0.1:8081?filePath={0}&readyPattern={1}&returnSize={2}", sourcePath, "StructPattern", "scope"));
+            Console.WriteLine("Evar = " + eVar);
+            Console.WriteLine("destPath = " + destPath);
+            HttpResponseMessage response = await client.GetAsync(string.Format("http://127.0.0.1:8081/functions?filePath={0}&eVar={1}", sourcePath,eVar));
             //HttpResponseMessage response = await client.GetAsync(string.Format("http://127.0.0.1:8081/functions?filePath={0}",sourcePath);
             Console.WriteLine("after async");
+            
+            
             response.EnsureSuccessStatusCode();
             string responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseBody);
+            string logs = "logs logs logs logs \n logs logs logs \n another logs and another logs \n yay !";
+            var json = JsonConvert.SerializeObject(logs);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+            var responseForPost = await client.PostAsync(string.Format("http://127.0.0.1:8081/logs?filePath={0}&eVar={1}",sourcePath,eVar), data);
+            string result = responseForPost.Content.ReadAsStringAsync().Result;
+            Console.WriteLine(result);
             //Deserialize.
             //Dictionary<string, FunctionInfoJson> dict = JsonConvert.DeserializeObject<Dictionary<string, FunctionInfoJson>>(responseBody);
-            string[] arr = JsonConvert.DeserializeObject<string[]>(responseBody);
-            Console.WriteLine(arr[0]);
-            Console.Read();
             //Checking if it works (it does).
             /*Console.WriteLine(dict["static int* main(int* podd, int** odpdf, char a, char* retval)"].documentation);
             string documentationTemplate = new MyStream(documentationPath, System.Text.Encoding.UTF8).ReadToEnd();
@@ -120,12 +128,9 @@ namespace Client
         {
             Console.WriteLine(args[0]+"\n"+args[1]);
             string destPath = args[1];
-            string sourcePath = args[0];//.Split(' ')[0];
-            //string destPath = args[1].Split(' ')[1];
-            //Console.WriteLine(destPath);
-            string documentationPath = Path.GetFullPath(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"..\..\"));
-            documentationPath += "Documentation.txt";
-            await GetFromRestApi(sourcePath, destPath, documentationPath);
+            string sourcePath = args[0];
+            string eVar = args[2];//.Split(' ')[0];
+            await GetFromRestApi(sourcePath, destPath, eVar);
         }
     }
 }

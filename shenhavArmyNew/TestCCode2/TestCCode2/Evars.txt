@@ -1,0 +1,2 @@
+#define evar1
+#define evar2

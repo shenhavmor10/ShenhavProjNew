@@ -1,0 +1,13 @@
+﻿  Using triplet "x86-windows" from "C:\DEV\vcpkg\installed\x86-windows\"
+  test.c
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\TestCCode2\TestCCode2\test.c(32,17): error C2065: 'null': undeclared identifier
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\TestCCode2\TestCCode2\test.c(36,2): error C2100: illegal indirection
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\TestCCode2\TestCCode2\test.c(66,24): warning C4013: 'malloc' undefined; assuming extern returning int
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\TestCCode2\TestCCode2\test.c(73,19): warning C4047: '=': 'char' differs in levels of indirection from 'char *'
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\TestCCode2\TestCCode2\test.c(76,26): warning C4013: 'calloc' undefined; assuming extern returning int
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\TestCCode2\TestCCode2\test.c(81,8): warning C4013: 'prinf' undefined; assuming extern returning int
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\TestCCode2\TestCCode2\test.c(89,24): warning C4013: 'alloc' undefined; assuming extern returning int
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\TestCCode2\TestCCode2\test.c(54,1): warning C4047: 'initializing': 'char' differs in levels of indirection from 'char [2]'
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\TestCCode2\TestCCode2\test.c(66,1): warning C4047: 'initializing': 'char *' differs in levels of indirection from 'int'
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\TestCCode2\TestCCode2\test.c(76,1): warning C4047: 'initializing': 'char **' differs in levels of indirection from 'int'
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\TestCCode2\TestCCode2\test.c(89,1): warning C4047: 'initializing': 'char *' differs in levels of indirection from 'int'
