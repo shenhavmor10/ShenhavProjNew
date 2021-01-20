@@ -6,6 +6,7 @@ using System.Threading;
 using System.Data.SqlClient;
 using ClassesSolution;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace GUI
 {
@@ -19,7 +20,8 @@ namespace GUI
         const int FirstThread = 0;
         const int SecondThread = 1;
         static int threadNumber = 0;
-        static ArrayList exeNames = new ArrayList();
+        static Dictionary<string,string> exeNames = new Dictionary<string, string>();
+        static Dictionary<string, string[]> NameAndResultNeeded = new Dictionary<string, string[]>();
         internal static MainWindow main;
         public MainWindow()
         {
@@ -31,14 +33,15 @@ namespace GUI
             string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
             cnn = new SqlConnection(connectionString);
             cnn.Open();
-            SqlCommand command = new SqlCommand("Select tool_name,tool_desc,tool_exe_name from tools_table ORDER BY tool_priority ASC;", cnn);
+            SqlCommand command = new SqlCommand("Select tool_name,tool_desc,tool_exe_name,tool_result_needed from tools_table;", cnn);
             using (SqlDataReader reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
                     CheckBox temp = new CheckBox();
                     temp.Content= reader["tool_name"].ToString();
-                    exeNames.Add(reader["tool_exe_name"].ToString());
+                    NameAndResultNeeded.Add(reader["tool_name"].ToString(), reader["tool_result_needed"].ToString().Split(','));
+                    exeNames.Add(reader["tool_name"].ToString(), reader["tool_exe_name"].ToString());
                     StackPanelCheckBox.Children.Add(temp);
                 }
             }
@@ -64,6 +67,7 @@ namespace GUI
                     break;
             }
         }
+        
         private void ConnectionButton_Click(object sender, RoutedEventArgs e)
         {
             string content = (sender as Button).Name.ToString();
@@ -83,14 +87,81 @@ namespace GUI
             }
             string tools = GeneralConsts.EMPTY_STRING;
             int i = 0;
-            foreach(CheckBox tool in StackPanelCheckBox.Children)
+            /*foreach(CheckBox tool in StackPanelCheckBox.Children)
             {
                 if(tool.IsChecked==true)
                 {
-                    tools += exeNames[i++]+",";
+                    tools += exeNames[i]+",";
+                }
+                i++;
+            }*/
+            //test
+            bool atLeastOneTool = false;
+            foreach (CheckBox tool in StackPanelCheckBox.Children)
+            {
+                if (!tool.IsChecked == true)
+                {
+                    NameAndResultNeeded.Remove(tool.Content.ToString());
+                }
+                else
+                {
+                    atLeastOneTool = true;
                 }
             }
-            if(tools.Length>0)
+            if(atLeastOneTool)
+            {
+                TextBlock1.Text = "Pick at least one Tool";
+            }
+            //now everyone in NameAndResultNeeded is only the only who the client checked.
+            ArrayList tempArray = new ArrayList();
+            foreach(string key in NameAndResultNeeded.Keys)
+            {
+                if(NameAndResultNeeded[key].Length==1&& NameAndResultNeeded[key][0]=="")
+                {
+                    tempArray.Add(key);
+                }
+            }
+            foreach(string alreadyAdded in tempArray)
+            {
+                if (NameAndResultNeeded.ContainsKey(alreadyAdded))
+                {
+                    NameAndResultNeeded.Remove(alreadyAdded);
+                }
+            }
+            bool contains = true;
+            while(NameAndResultNeeded.Count>0)
+            {
+                foreach(string key in NameAndResultNeeded.Keys)
+                {
+                    contains = true;
+                    for(i=0;i<NameAndResultNeeded[key].Length;i++)
+                    {
+                        if(!tempArray.Contains(NameAndResultNeeded[key][i]))
+                        {
+                            contains = false;
+                        }
+                    }
+                    if(contains)
+                    {
+                        tempArray.Add(key);
+                    }
+                }
+                foreach(string alreadyAdded in tempArray)
+                {
+                    if(NameAndResultNeeded.ContainsKey(alreadyAdded))
+                    {
+                        NameAndResultNeeded.Remove(alreadyAdded);
+                    }
+                    
+                }
+            }
+            for(i=0;i<tempArray.Count;i++)
+            {
+                tools += exeNames[(string)tempArray[i]] + ",";
+            }
+
+            //test
+            if (tools.Length>0)
             {
                 tools = tools.Substring(0, tools.Length - 1);
             }

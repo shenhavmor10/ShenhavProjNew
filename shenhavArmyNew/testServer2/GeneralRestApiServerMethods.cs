@@ -533,6 +533,8 @@ namespace testServer2
         /// <param name="returnSize"> size of the return code.</param>
         /// <param name="filePath"> the path of the file type string.</param>
         /// <returns> An array of strings that contains all of the code that matches the patterns.</returns>
+        
+        // needs to make it with eVars aswell...
         public static string [] SearchPattern(Regex Pattern,string returnSize,string filePath)
         {
 

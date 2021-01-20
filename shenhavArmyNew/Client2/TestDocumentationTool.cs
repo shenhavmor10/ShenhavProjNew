@@ -56,6 +56,10 @@ namespace Client
             response.EnsureSuccessStatusCode();
             string responseBody = await response.Content.ReadAsStringAsync();
             Console.WriteLine(responseBody);
+            var response2 = await client.GetAsync(string.Format("http://127.0.0.1:8081/result?filePath={0}&eVar={1}&toolName={2}", sourcePath, eVar, "toolTest"));
+            response2.EnsureSuccessStatusCode();
+            string responseBody2 = await response2.Content.ReadAsStringAsync();
+            Console.WriteLine(responseBody2);
             string logs = "logs logs logs logs \n logs logs logs \n another logs and another logs \n yay !";
             var json = JsonConvert.SerializeObject(logs);
             var data = new StringContent(json, Encoding.UTF8, "application/json");

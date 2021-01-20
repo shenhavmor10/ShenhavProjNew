@@ -550,6 +550,14 @@ namespace testServer2
             }
             return convertedFuncLine;
         }
+        /// Function - checkIfEvarIsTurned
+        /// <summary>
+        /// returns if one of the environment variables that are open is being checked 
+        /// in the ifdef.
+        /// </summary>
+        /// <param name="codeLine"> the line of the code.</param>
+        /// <param name="eVars"> evars Array (all evars that are being turned).</param>
+        /// <returns></returns>
         static bool checkIfEvarIsTurned(string codeLine,string [] eVars)
         {
             //suppose to give me the environment variable it means in the ifdef.
@@ -1265,6 +1273,13 @@ namespace testServer2
             result = result.Trim();
             return result;
         }
+        /// Function - AddKeywordsFromArray
+        /// <summary>
+        /// add keyword to array.
+        /// </summary>
+        /// <param name="arrayString"></param>
+        /// <param name="keywords"></param>
+        /// <param name="keywords2"></param>
         public static void AddKeywordsFromArray(string[] arrayString, Hashtable keywords, ArrayList keywords2 = null)
         {
             for (int i = 0; i < arrayString.Length; i++)

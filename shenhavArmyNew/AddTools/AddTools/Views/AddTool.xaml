@@ -5,19 +5,22 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ViewChanger.ViewModels"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="600">
-    <Grid Background="White">
-        
 
-        <Button Content="Browse" HorizontalAlignment="Left" Margin="305,235,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn" FontSize="18" Click="BrowseBtn_Click"/>
+
+    
+    <Grid Background="White">
+
+
+        <Button Content="Browse" HorizontalAlignment="Left" Margin="304,189,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn" FontSize="18" Command="{Binding Path=BrowseBtn_Click}"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="296" FontSize="24"><Run Text="Add A New Tool ! "/><Run Text=":)"/></TextBlock>
-        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,235,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolFolderPath" materialDesign:HintAssist.Hint="Browse Tools Folder.."/>
-        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,97,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolName" TextChanged="ToolName_TextChanged" materialDesign:HintAssist.Hint="ToolName"/>
+        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,189,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolFolderPath" materialDesign:HintAssist.Hint="Browse Tools Folder.."/>
+        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,97,0,0" TextWrapping="Wrap" Text="{Binding AddToolModel.ToolName}" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolName" TextChanged="ToolName_TextChanged" materialDesign:HintAssist.Hint="ToolName"/>
         <TextBox HorizontalAlignment="Left" Height="41" Margin="10,143,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolDescription" materialDesign:HintAssist.Hint="Tool Description"/>
         <Button Content="Apply" HorizontalAlignment="Left" Margin="432,335,0,0" VerticalAlignment="Top" Width="143" Height="62" FontSize="40" Name ="ApplyBtn" Click="ApplyBtn_Click"/>
-        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,189,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolPriority" materialDesign:HintAssist.Hint="Tool Priority Number"/>
+        <StackPanel HorizontalAlignment="Left" Height="270" Margin="432,60,0,0" VerticalAlignment="Top" Width="100" Name="StackPanelCheckBox"/>
+        <TextBlock HorizontalAlignment="Left" Margin="432,10,0,0" TextWrapping="Wrap" Text="Tool result needed" VerticalAlignment="Top" Height="45" Width="100" FontSize="18" Name ="Tool_result_needed_block"/>
         <TextBlock HorizontalAlignment="Left" Margin="257,335,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="62" Width="153" FontSize="24" Name ="ResultTextBlock"/>
     </Grid>
 </UserControl>
