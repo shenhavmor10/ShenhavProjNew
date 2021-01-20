@@ -98,7 +98,7 @@ namespace testServer2
         /// <param name="freePatterns"> all free patterns.</param>
         /// <param name="memoryPatterns"> all memory handles patterns.</param>
         /// <param name="tools"> all tools type arrayList.</param>
-        static void RunAllChecks(string filePath,string destPath, string [] pathes,ArrayList tools,string fileType,string [] memoryPatterns,string [] freePatterns)
+        static void RunAllChecks(string filePath,string destPath, string [] pathes,ArrayList tools,ResetDictionary rd,string fileType,string [] memoryPatterns,string [] freePatterns)
         {
             //variable declaration.
             //create regex for all memory handles (malloc alloc etc... and custom memory handles aswell).
@@ -181,6 +181,7 @@ namespace testServer2
                     Console.WriteLine("enter thread with evar = " + eVars);
                     threadOpenTools.Join();
                     Console.WriteLine("join "+eVars);
+                    rd.Reset_Dictionary(filePath);
                     
 
                     /*AddToLogString(filePath, FINISH_SUCCESFULL);
@@ -197,10 +198,6 @@ namespace testServer2
         {
             AddToLogString(filePath, eVar);
             AddToLogString(filePath, toolName);
-        }
-        private static void Rd_isResetDictionary(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         /// Function - createLogFile
@@ -234,11 +231,9 @@ namespace testServer2
         /// <param name="tools"> The array of the tools sorted from low to high priority.</param>
         static void RunAllTasks(string filePath,string destPath,ArrayList tools,int currentThreadNumber,string eVar)
         {
-            Console.WriteLine("entered new task");
             ArrayList toolsScripts = new ArrayList();
             for (int i = START_INDEX_OF_TOOLS; i < tools.Count; i++)
             {
-                Console.WriteLine(filePath + " " + destPath + " " + tools[i] + " " + eVar + " "+ currentThreadNumber + " ");
                 toolsScripts.Add(File.ReadAllText(toolExeFolder + "\\" + tools[i]));
             }
             //runs the tools one by one.
@@ -259,7 +254,9 @@ namespace testServer2
         /// <returns></returns>
         static Task<int> RunProcessAsync(string fileName,string srcPath,string destPath,string eVar)
         {
+            Console.WriteLine(Directory.GetCurrentDirectory());
             Console.WriteLine("running async waiting for exit.");
+            Console.WriteLine("FileName ="+fileName);
             var tcs = new TaskCompletionSource<int>();
 
             var process = new Process
@@ -317,11 +314,12 @@ namespace testServer2
         /// <summary>
         /// This function initialize the whole main program. opens all threads needed and more.
         /// </summary>
-        static void InitializeMainProgram()
+        static ResetDictionary InitializeMainProgram()
         {
             initializeConfig();
             File.WriteAllText(logFile, GeneralConsts.EMPTY_STRING);
-            Thread restApi = new Thread(() => new SyncServer());
+            ResetDictionary rd = new ResetDictionary();
+            Thread restApi = new Thread(() => new SyncServer(rd));
             restApi.Start();
             
             AddToLogString(MAIN_DICT_INDEX, "started rest api");
@@ -331,6 +329,7 @@ namespace testServer2
             serverThread = new Thread(() => Server.ConnectionServer.ExecuteServer(11111));
             serverThread.Start();
             AddToLogString(MAIN_DICT_INDEX, "started socket for client listen");
+            return rd;
         }
         /// Function - GetAllPossibilitiesWithoutDuplicates
         /// <summary>
@@ -411,7 +410,7 @@ namespace testServer2
         /// The function that runs the whole loop of the program that gets new files from the server and
         /// take cares of them and runs RunAllChecks Function.
         /// </summary>
-        static void MainLoopToGetFiles()
+        static void MainLoopToGetFiles(ResetDictionary rd)
         {
             while (ConnectionServer.GetCloseAllBool() == false)
             {
@@ -463,7 +462,7 @@ namespace testServer2
                     SetEnvironmentVariables(filePath, environmentVariablePath, threadNumber);
                     //because i still dont have a prefect checks for headers so im giving the thread a default null so the program can run.
                     Thread runChecksThread=null;
-                    runChecksThread = new Thread(() => RunAllChecks(filePath, destPath, pathes, tools, filePath.Substring(filePath.Length - 1),memoryArray, freeArray));
+                    runChecksThread = new Thread(() => RunAllChecks(filePath, destPath, pathes, tools, rd, filePath.Substring(filePath.Length - 1),memoryArray, freeArray));
                     runChecksThread.Start();
 
                 }
@@ -483,8 +482,8 @@ namespace testServer2
         {
             //open Rest API.
             logFiles.Add(MAIN_DICT_INDEX, GeneralConsts.EMPTY_STRING);
-            InitializeMainProgram();
-            MainLoopToGetFiles();
+            ResetDictionary rd= InitializeMainProgram();
+            MainLoopToGetFiles(rd);
         }
     }
 }

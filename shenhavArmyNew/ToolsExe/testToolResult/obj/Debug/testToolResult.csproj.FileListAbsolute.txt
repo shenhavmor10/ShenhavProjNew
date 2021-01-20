@@ -1,0 +1,9 @@
+C:\Users\Shenhav\source\repos\testToolResult\testToolResult\bin\Debug\testToolResult.exe.config
+C:\Users\Shenhav\source\repos\testToolResult\testToolResult\bin\Debug\testToolResult.exe
+C:\Users\Shenhav\source\repos\testToolResult\testToolResult\bin\Debug\testToolResult.pdb
+C:\Users\Shenhav\source\repos\testToolResult\testToolResult\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Shenhav\source\repos\testToolResult\testToolResult\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Shenhav\source\repos\testToolResult\testToolResult\obj\Debug\testToolResult.csproj.CoreCompileInputs.cache
+C:\Users\Shenhav\source\repos\testToolResult\testToolResult\obj\Debug\testToolResult.csproj.CopyComplete
+C:\Users\Shenhav\source\repos\testToolResult\testToolResult\obj\Debug\testToolResult.exe
+C:\Users\Shenhav\source\repos\testToolResult\testToolResult\obj\Debug\testToolResult.pdb

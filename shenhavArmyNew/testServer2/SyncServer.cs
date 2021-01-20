@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using ClassesSolution;
 using Server;
+using System.Linq;
 
 namespace testServer2
 {
@@ -19,34 +20,48 @@ namespace testServer2
         const string NOT_FOUND_500 = "Could not found pattern";
         const string NOT_FOUND_404 = "Not found";
         static Dictionary<string, Dictionary<string, object>> ToolsData = new Dictionary<string, Dictionary<string, object>>();
-        /// Function - SyncServer
+
+        /// Function - TakeOnlyNameNeeded
         /// <summary>
-        /// Creation of the rest api server.
+        /// Take only function by the name given.
         /// </summary>
-        /// <param name="filePath"> Path for the code file.</param>
-        /// <param name="includes"> Hashtable for all of the includes in the code.</param>
-        /// <param name="defines"> Dictionary that stores all of the defines in the code.</param>
-        static void TakeOnlyNameNeeded(Dictionary<string, Dictionary<string, object>> final_json, string parameterName,string parameterType,string filePath,string eVar)
+        /// <param name="final_json"> the final json Dictionary.</param>
+        /// <param name="parameterName"> Name of the function type string.</param>
+        /// <param name="parameterType"></param>
+        /// <param name="filePath"></param>
+        /// <param name="eVar"></param>
+        static string TakeOnlyNameNeeded(Dictionary<string, Dictionary<string, object>> final_json, string parameterName,string parameterType,string filePath,string eVar)
         {
-            foreach (string functionName in ((Dictionary<string,FunctionInfoJson>)final_json[eVar]["functions"]).Keys)
+            string result="";
+            bool found = false;
+            for (int i=0;i< ((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"]).Count&&!found;i++)
             {
-                switch(parameterType)
+                var item = ((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"]).ElementAt(i);
+                switch (parameterType)
                 {
                     case "name":
-                        if (((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"])[functionName].fName != parameterName)
+                        if (((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"])[item.Key].fName == parameterName)
                         {
-                            final_json["functions"].Remove(functionName);
+                            result = item.Key;
                         }
                         break;
                     case "returnType":
-                        if (((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"])[functionName].returnType != parameterName)
+                        if (((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"])[item.Key].returnType == parameterName)
                         {
-                            final_json["functions"].Remove(functionName);
+                            result = item.Key;
                         }
                         break;
                 }
             }
+            return result;
         }
+        /// Function - SendData
+        /// <summary>
+        /// Send data tot the context given. if not found flag is on it returns status code 500.
+        /// </summary>
+        /// <param name="data"> data type string.</param>
+        /// <param name="not_found"> type bool.</param>
+        /// <param name="context"> context type HttpListenerContext.</param>
         static void SendData(string data,bool not_found,HttpListenerContext context)
         {
             byte[] bytes;
@@ -75,11 +90,22 @@ namespace testServer2
         }
         static void Rd_isResetDictionary(object sender, ResetDictEventArgs e)
         {
-            ToolsData[e.filePath].Clear();
+            Console.WriteLine("entered event");
+            if(ToolsData.ContainsKey(e.filePath))
+            {
+                ToolsData[e.filePath].Clear();
+            }
+            
         }
-        public SyncServer()
+        /// Function - SyncServer
+        /// <summary>
+        /// Creation of the rest api server.
+        /// </summary>
+        /// <param name="filePath"> Path for the code file.</param>
+        /// <param name="includes"> Hashtable for all of the includes in the code.</param>
+        /// <param name="defines"> Dictionary that stores all of the defines in the code.</param>
+        public SyncServer(ResetDictionary rd)
         {
-            ResetDictionary rd = new ResetDictionary();
             rd.isResetDictionary += new IsResetDict(Rd_isResetDictionary);
             var listener = new HttpListener();
             //add prefixes.
@@ -100,6 +126,10 @@ namespace testServer2
                     string dataJson = GeneralConsts.EMPTY_STRING;
                     Dictionary<string,Dictionary<string, Dictionary<string, object>>> final_json = MainProgram.GetFinalJson();
                     string filePath = context.Request.QueryString["filePath"];
+                    if(!ToolsData.ContainsKey(filePath))
+                    {
+                        ToolsData.Add(filePath,new Dictionary<string, object>());
+                    }
                     string eVar = context.Request.QueryString["eVar"];
                     bool not_found_pattern = false;
                     bool not_found = false;
@@ -110,6 +140,7 @@ namespace testServer2
                     //All GET commands.
                     if (context.Request.HttpMethod == "GET")
                     {
+                        //make sure eVars get in here aswell.
                         if(context.Request.QueryString["pattern"]!=null)
                         {
                             MainProgram.AddToLogString(filePath,context.Request.QueryString["pattern"]);
@@ -145,20 +176,39 @@ namespace testServer2
                             {
                                 case "functions":
                                     //this is wrong needs to fix.
+                                    string parameterName;
                                     if (context.Request.QueryString["name"] != null)
                                     {
-                                        TakeOnlyNameNeeded(final_json[path], context.Request.QueryString["name"],"name",filePath,eVar);
+                                        parameterName=TakeOnlyNameNeeded(final_json[path], context.Request.QueryString["name"],"name",filePath,eVar);
+                                        dataJson = JsonConvert.SerializeObject(((Dictionary<string,FunctionInfoJson>)final_json[filePath][eVar]["function"])[parameterName]);
+                                        MainProgram.AddToLogString(filePath, dataJson);
                                     }
-                                    if (context.Request.QueryString["returnType"] != null)
+                                    else if (context.Request.QueryString["returnType"] != null)
                                     {
-                                        TakeOnlyNameNeeded(final_json[path], context.Request.QueryString["returnType"], "returnType", filePath, eVar);
+                                        parameterName=TakeOnlyNameNeeded(final_json[path], context.Request.QueryString["returnType"], "returnType", filePath, eVar);
+                                        dataJson = JsonConvert.SerializeObject(((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"])[parameterName]);
+                                        MainProgram.AddToLogString(filePath, dataJson);
                                     }
-                                    dataJson = JsonConvert.SerializeObject(final_json[filePath][eVar]["function"]);
-                                    MainProgram.AddToLogString(filePath, dataJson);
+                                    else
+                                    {
+                                        dataJson = JsonConvert.SerializeObject(final_json[filePath][eVar]["function"]);
+                                        MainProgram.AddToLogString(filePath, dataJson);
+                                    }
                                     break;
                                 case "codeInfo":
                                     dataJson = JsonConvert.SerializeObject(final_json[filePath][eVar]["codeInfo"]);
                                     MainProgram.AddToLogString(filePath, dataJson);
+                                    break;
+                                case "result":
+                                    string toolName=context.Request.QueryString["toolName"];
+                                    if(ToolsData[filePath].ContainsKey(toolName))
+                                    {
+                                        dataJson = JsonConvert.SerializeObject(ToolsData[filePath][toolName]);
+                                    }
+                                    else
+                                    {
+                                        not_found = true;
+                                    }
                                     break;
                                 default:
                                     break;
@@ -173,21 +223,30 @@ namespace testServer2
                         path = context.Request.RawUrl;
                         path = path.Trim(trimChars);
                         path = path.Split('?')[0];
-                        if (path == "logs")
+                        dataJson = GeneralConsts.EMPTY_STRING;
+                        switch (path)
                         {
-                            dataJson=GeneralConsts.EMPTY_STRING;
-                            MainProgram.AddToLogString(filePath, context.Request.QueryString["logs"]);
-                            MainProgram.AddToLogString(filePath, context.Request.QueryString["returnSize"]);
-                            using (var reader = new StreamReader(context.Request.InputStream))
-                                dataJson = reader.ReadToEnd();
-                            if(dataJson != "")
-                            {
-                                MainProgram.AddToLogString(filePath, dataJson);
-                            }
-                            else
-                            {
-                                not_found = true;
-                            }
+                            case "logs":
+                                using (var reader = new StreamReader(context.Request.InputStream))
+                                    dataJson = reader.ReadToEnd();
+                                if(dataJson != "")
+                                {
+                                    MainProgram.AddToLogString(filePath, dataJson);
+                                }
+                                else
+                                {
+                                    not_found = true;
+                                }
+                                break;
+                            case "result":
+                                MainProgram.AddToLogString(filePath, context.Request.QueryString["result"]);
+                                string toolName=context.Request.QueryString["toolName"];
+                                using (var reader = new StreamReader(context.Request.InputStream))
+                                    dataJson = reader.ReadToEnd();
+                                ToolsData[filePath].Add(toolName, dataJson);
+                                break;
+                            default:
+                                break;
                         }
                         SendData(dataJson, not_found, context);
                     }
