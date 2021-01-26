@@ -42,6 +42,8 @@ namespace ClassesSolution
         public int definesAmount;
         public Dictionary<string, string> defines;
         public ParametersType[] Globalvariables;
+        public string codeContent;
+        public string rawCodeContent;
     }
     public class ParametersType
     {

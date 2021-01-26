@@ -10,7 +10,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Net;
-
+using System.Web;
 namespace Client
 {
     
@@ -51,14 +51,23 @@ namespace Client
             HttpResponseMessage response = await client.GetAsync(string.Format("http://127.0.0.1:8081/functions?filePath={0}&eVar={1}", sourcePath,eVar));
             //HttpResponseMessage response = await client.GetAsync(string.Format("http://127.0.0.1:8081/functions?filePath={0}",sourcePath);
             Console.WriteLine("after async");
-            
+
             
             response.EnsureSuccessStatusCode();
             string responseBody = await response.Content.ReadAsStringAsync();
             Console.WriteLine(responseBody);
-            var response2 = await client.GetAsync(string.Format("http://127.0.0.1:8081/result?filePath={0}&eVar={1}&toolName={2}", sourcePath, eVar, "toolTest"));
+            //check
+            string regexAllInts = @"int\*\*\* s";
+            var encodedRegex = System.Net.WebUtility.UrlEncode(regexAllInts);
+            var response2 = await client.GetAsync(string.Format("http://127.0.0.1:8081?filePath={0}&eVar={1}&pattern={2}&returnSize={3}", sourcePath, eVar, encodedRegex,"scope"));
             response2.EnsureSuccessStatusCode();
             string responseBody2 = await response2.Content.ReadAsStringAsync();
+            Console.WriteLine("responseBody - \n"+responseBody2+"\n end of response");
+            Console.Read();
+            //end check
+            var response3 = await client.GetAsync(string.Format("http://127.0.0.1:8081/result?filePath={0}&eVar={1}&toolName={2}", sourcePath, eVar, "toolTest"));
+            response2.EnsureSuccessStatusCode();
+            string responseBody3 = await response2.Content.ReadAsStringAsync();
             Console.WriteLine(responseBody2);
             string logs = "logs logs logs logs \n logs logs logs \n another logs and another logs \n yay !";
             var json = JsonConvert.SerializeObject(logs);

@@ -145,9 +145,8 @@ namespace testServer2
                         {
                             MainProgram.AddToLogString(filePath,context.Request.QueryString["pattern"]);
                             MainProgram.AddToLogString(filePath, context.Request.QueryString["returnSize"]);
-                            r = new Regex(context.Request.QueryString["pattern"]);
                             string returnSize = context.Request.QueryString["returnSize"];
-                            string [] result=GeneralRestApiServerMethods.SearchPattern(r, returnSize, filePath);
+                            string [] result=GeneralRestApiServerMethods.SearchPatternTest(context.Request.QueryString["pattern"], returnSize, ((CodeInfoJson)final_json[filePath][eVar]["codeInfo"]).codeContent);
                             dataJson = JsonConvert.SerializeObject(result);
                             MainProgram.AddToLogString(filePath, dataJson);
                         }
@@ -159,9 +158,9 @@ namespace testServer2
                                 not_found_pattern = true;
                             else
                             {
-                                r = new Regex(GeneralRestApiServerMethods.TakePatternFromFile(context.Request.QueryString["readyPattern"]));
+                                string patternFromFile=(GeneralRestApiServerMethods.TakePatternFromFile(context.Request.QueryString["readyPattern"]));
                                 string returnSize = context.Request.QueryString["returnSize"];
-                                string[] result = GeneralRestApiServerMethods.SearchPattern(r, returnSize, filePath);
+                                string[] result = GeneralRestApiServerMethods.SearchPatternTest(patternFromFile, returnSize, ((CodeInfoJson)final_json[filePath][eVar]["codeInfo"]).codeContent);
                                 dataJson = JsonConvert.SerializeObject(result);
                             }
                         }
