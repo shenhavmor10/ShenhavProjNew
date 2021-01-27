@@ -548,15 +548,62 @@ namespace testServer2
         /// <param name="returnSize"> size of the return code.</param>
         /// <param name="filePath"> the path of the file type string.</param>
         /// <returns> An array of strings that contains all of the code that matches the patterns.</returns>
-        
+
         // needs to make it with eVars aswell...
-        static string FindScopeMatch(string content,string match,int matchIndex)
+        static int findOpenScopeIndex(string content, int matchIndex)
         {
-            int indexOfOpenScope = content.LastIndexOf("{", matchIndex, matchIndex);
-            int indexOfCloseScope = content.IndexOf("}", matchIndex + match.Length);
-            string newMatch = content.Substring(indexOfOpenScope, indexOfCloseScope - indexOfOpenScope);
-            return newMatch;
-            
+            //each open block decrease the counter by one and each close block increase the counter by one.
+            int counter = 1;
+            int tempOpenBlock = 0, tempCloseBlock = 0;
+            int newOpenIndex = matchIndex, newCloseIndex = matchIndex;
+            while (counter != 0)
+            {
+                tempOpenBlock = content.LastIndexOf("{", newOpenIndex);
+                tempCloseBlock = content.LastIndexOf("}", newCloseIndex);
+                if (tempCloseBlock > tempOpenBlock)
+                {
+                    counter++;
+                    newCloseIndex = tempCloseBlock - 1;
+                }
+                else
+                {
+                    counter--;
+                    newOpenIndex = tempOpenBlock - 1;
+                }
+            }
+            return (tempOpenBlock > tempCloseBlock) ? tempOpenBlock : tempCloseBlock;
+
+        }
+        static int findCloseScopeIndex(string content, int matchIndex)
+        {
+            //each open block decrease the counter by one and each close block increase the counter by one.
+            int counter = 1;
+            int tempOpenBlock = 0, tempCloseBlock = 0;
+            int newOpenIndex = matchIndex, newCloseIndex = matchIndex;
+            while (counter != 0)
+            {
+                tempOpenBlock = content.IndexOf("{", newOpenIndex);
+                tempCloseBlock = content.IndexOf("}", newCloseIndex);
+                if (tempCloseBlock < tempOpenBlock || tempOpenBlock == -1)
+                {
+                    counter--;
+                    newCloseIndex = tempCloseBlock + 1;
+                }
+                else
+                {
+                    counter++;
+                    newOpenIndex = tempOpenBlock + 1;
+                }
+            }
+            return (tempOpenBlock < tempCloseBlock) ? tempCloseBlock : tempOpenBlock;
+        }
+        static string makeScopeMatch(string content, string match, int matchIndex)
+        {
+            int openScope = findOpenScopeIndex(content, matchIndex);
+            int closeScope = findCloseScopeIndex(content, matchIndex + match.Length);
+            string resultString = content.Substring(openScope + 1, closeScope -openScope);
+            return resultString;
+
         }
         public static string [] SearchPatternTest(string pattern,string returnSize,string content)
         {
@@ -581,7 +628,7 @@ namespace testServer2
                     foreach (Match match in m1)
                     {
 
-                        tempNewMatch = FindScopeMatch(content, match.Value, match.Index);
+                        tempNewMatch = makeScopeMatch(content, match.Value, match.Index);
                         results.Add(tempNewMatch);
                     }
                 }

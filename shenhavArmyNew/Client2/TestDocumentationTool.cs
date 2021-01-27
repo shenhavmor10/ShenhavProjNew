@@ -59,11 +59,11 @@ namespace Client
             //check
             string regexAllInts = @"int\*\*\* s";
             var encodedRegex = System.Net.WebUtility.UrlEncode(regexAllInts);
-            var response2 = await client.GetAsync(string.Format("http://127.0.0.1:8081?filePath={0}&eVar={1}&pattern={2}&returnSize={3}", sourcePath, eVar, encodedRegex,"scope"));
+            var encodedfName = System.Net.WebUtility.UrlEncode("main");
+            var response2 = await client.GetAsync(string.Format("http://127.0.0.1:8081?filePath={0}&eVar={1}&functionName={2}&pattern={3}&returnSize={4}", sourcePath, eVar, encodedfName, encodedRegex,"scope"));
             response2.EnsureSuccessStatusCode();
             string responseBody2 = await response2.Content.ReadAsStringAsync();
             Console.WriteLine("responseBody - \n"+responseBody2+"\n end of response");
-            Console.Read();
             //end check
             var response3 = await client.GetAsync(string.Format("http://127.0.0.1:8081/result?filePath={0}&eVar={1}&toolName={2}", sourcePath, eVar, "toolTest"));
             response2.EnsureSuccessStatusCode();

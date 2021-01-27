@@ -22,6 +22,7 @@ namespace GUI
         static int threadNumber = 0;
         static Dictionary<string,string> exeNames = new Dictionary<string, string>();
         static Dictionary<string, string[]> NameAndResultNeeded = new Dictionary<string, string[]>();
+        static ArrayList onlyForTest = new ArrayList();
         internal static MainWindow main;
         public MainWindow()
         {
@@ -42,6 +43,7 @@ namespace GUI
                     temp.Content= reader["tool_name"].ToString();
                     NameAndResultNeeded.Add(reader["tool_name"].ToString(), reader["tool_result_needed"].ToString().Split(','));
                     exeNames.Add(reader["tool_name"].ToString(), reader["tool_exe_name"].ToString());
+                    onlyForTest.Add(reader["tool_exe_name"].ToString());
                     StackPanelCheckBox.Children.Add(temp);
                 }
             }
@@ -87,15 +89,16 @@ namespace GUI
             }
             string tools = GeneralConsts.EMPTY_STRING;
             int i = 0;
-            /*foreach(CheckBox tool in StackPanelCheckBox.Children)
+            foreach(CheckBox tool in StackPanelCheckBox.Children)
             {
                 if(tool.IsChecked==true)
                 {
-                    tools += exeNames[i]+",";
+                    tools += onlyForTest[i]+",";
                 }
                 i++;
-            }*/
+            }
             //test
+            /*
             bool atLeastOneTool = false;
             try
             {
@@ -165,8 +168,10 @@ namespace GUI
                 {
                     tools += exeNames[(string)tempArray[i]] + ",";
                 }
-
-                //test
+                */
+            //test
+            try 
+            {
                 if (tools.Length > 0)
                 {
                     tools = tools.Substring(0, tools.Length - 1);
@@ -216,6 +221,8 @@ namespace GUI
                 clientThread.Start();
                 threadNumber++;
             }
+            
+            
             catch(Exception error)
             {
                 TextBlock1.Text = error.ToString();
