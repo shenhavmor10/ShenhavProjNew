@@ -34,19 +34,19 @@ namespace testServer2
         {
             string result="";
             bool found = false;
-            for (int i=0;i< ((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"]).Count&&!found;i++)
+            for (int i=0;i< ((Dictionary<string, FunctionInfoJson>)final_json[eVar]["function"]).Count&&!found;i++)
             {
-                var item = ((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"]).ElementAt(i);
+                var item = ((Dictionary<string, FunctionInfoJson>)final_json[eVar]["function"]).ElementAt(i);
                 switch (parameterType)
                 {
                     case "name":
-                        if (((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"])[item.Key].fName == parameterName)
+                        if (((Dictionary<string, FunctionInfoJson>)final_json[eVar]["function"])[item.Key].fName == parameterName)
                         {
                             result = item.Key;
                         }
                         break;
                     case "returnType":
-                        if (((Dictionary<string, FunctionInfoJson>)final_json[eVar]["functions"])[item.Key].returnType == parameterName)
+                        if (((Dictionary<string, FunctionInfoJson>)final_json[eVar]["function"])[item.Key].returnType == parameterName)
                         {
                             result = item.Key;
                         }
@@ -145,9 +145,17 @@ namespace testServer2
                         {
                             MainProgram.AddToLogString(filePath,context.Request.QueryString["pattern"]);
                             MainProgram.AddToLogString(filePath, context.Request.QueryString["returnSize"]);
-                            r = new Regex(context.Request.QueryString["pattern"]);
                             string returnSize = context.Request.QueryString["returnSize"];
-                            string [] result=GeneralRestApiServerMethods.SearchPattern(r, returnSize, filePath);
+                            string[] result;
+                            if (context.Request.QueryString["functionName"]!=null)
+                            {
+                                string functionKeyName=TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["functionName"], "name", filePath, eVar);
+                                result = GeneralRestApiServerMethods.SearchPatternTest(context.Request.QueryString["pattern"], returnSize, ((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"])[functionKeyName].content);
+                            }
+                            else
+                            {
+                                result = GeneralRestApiServerMethods.SearchPatternTest(context.Request.QueryString["pattern"], returnSize, ((CodeInfoJson)final_json[filePath][eVar]["codeInfo"]).codeContent);
+                            }
                             dataJson = JsonConvert.SerializeObject(result);
                             MainProgram.AddToLogString(filePath, dataJson);
                         }
@@ -159,9 +167,19 @@ namespace testServer2
                                 not_found_pattern = true;
                             else
                             {
-                                r = new Regex(GeneralRestApiServerMethods.TakePatternFromFile(context.Request.QueryString["readyPattern"]));
+                                string patternFromFile=(GeneralRestApiServerMethods.TakePatternFromFile(context.Request.QueryString["readyPattern"]));
                                 string returnSize = context.Request.QueryString["returnSize"];
-                                string[] result = GeneralRestApiServerMethods.SearchPattern(r, returnSize, filePath);
+                                string[] result;
+                                if (context.Request.QueryString["functionName"] != null)
+                                {
+                                    Console.WriteLine(context.Request.QueryString["functionName"]);
+                                    result = GeneralRestApiServerMethods.SearchPatternTest(patternFromFile, returnSize, ((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"])[context.Request.QueryString["functionName"]].content);
+                                }
+                                else
+                                {
+                                    result = GeneralRestApiServerMethods.SearchPatternTest(patternFromFile, returnSize, ((CodeInfoJson)final_json[filePath][eVar]["codeInfo"]).codeContent);
+                                }
+                                
                                 dataJson = JsonConvert.SerializeObject(result);
                             }
                         }
@@ -179,13 +197,13 @@ namespace testServer2
                                     string parameterName;
                                     if (context.Request.QueryString["name"] != null)
                                     {
-                                        parameterName=TakeOnlyNameNeeded(final_json[path], context.Request.QueryString["name"],"name",filePath,eVar);
+                                        parameterName=TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["name"],"name",filePath,eVar);
                                         dataJson = JsonConvert.SerializeObject(((Dictionary<string,FunctionInfoJson>)final_json[filePath][eVar]["function"])[parameterName]);
                                         MainProgram.AddToLogString(filePath, dataJson);
                                     }
                                     else if (context.Request.QueryString["returnType"] != null)
                                     {
-                                        parameterName=TakeOnlyNameNeeded(final_json[path], context.Request.QueryString["returnType"], "returnType", filePath, eVar);
+                                        parameterName=TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["returnType"], "returnType", filePath, eVar);
                                         dataJson = JsonConvert.SerializeObject(((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"])[parameterName]);
                                         MainProgram.AddToLogString(filePath, dataJson);
                                     }
@@ -253,8 +271,9 @@ namespace testServer2
                 }
 
 
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Console.WriteLine(e.Message);
                     // Client disconnected or some other error - ignored for this example
                 }
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.SqlClient;
 using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace AddToolsMVVM.ViewModel
 {
     public class AddToolViewModel : ViewModelBase
     {
-        static string DestProjectPath = @"..\..\..\..\ToolsExe";
+        static string DestProjectPath;
         private ObservableCollection<ToolModel> toolsList;
         private ToolModel newTool;
         private string resultBlock;
@@ -22,6 +23,7 @@ namespace AddToolsMVVM.ViewModel
         public AddToolViewModel()
         {
             GetAllToolsFromDB();
+            initializeConfig();
             Tool = new ToolModel();
             Tools.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Tools_CollectionChanged);
         }
@@ -140,7 +142,33 @@ namespace AddToolsMVVM.ViewModel
                 Tool.ToolFolder = folderDialog.SelectedPath;
             }
         }
-        
+        public void initializeConfig()
+        {
+            Dictionary<string, string> configDict = new Dictionary<string, string>();
+            try
+            {
+                using (var sr = new StreamReader("AddToolConfigFile.txt"))
+                {
+                    string line = null;
+
+                    // while it reads a key
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        // add the key and whatever it 
+                        // can read next as the value
+                        configDict.Add(line.Split('=')[0], line.Split('=')[1]);
+
+                    }
+                }
+                DestProjectPath = configDict["DestProjectPath"];
+            }
+            catch (Exception e)
+            {
+                ResultBlock = "Couldnt find AddToolConfigFile or missed one of the Files";
+            }
+            configDict.Clear();
+        }
+
     }
     
 }

@@ -558,7 +558,7 @@ namespace testServer2
         /// <param name="codeLine"> the line of the code.</param>
         /// <param name="eVars"> evars Array (all evars that are being turned).</param>
         /// <returns></returns>
-        static bool checkIfEvarIsTurned(string codeLine,string [] eVars)
+        public static bool checkIfEvarIsTurned(string codeLine,string [] eVars)
         {
             //suppose to give me the environment variable it means in the ifdef.
             bool found=false;
@@ -582,7 +582,7 @@ namespace testServer2
         /// <param name="blockNumber"> the index to start with the checking (current block).</param>
         /// <param name="codeLine"> codeLine type string.</param>
         /// <returns></returns>
-        static bool CheckInDefines(ArrayList blocksAndDefines,int blockNumber,string codeLine)
+        public static bool CheckInDefines(ArrayList blocksAndDefines,int blockNumber,string codeLine)
         {
             bool found = false;
             string ifdef;
@@ -607,7 +607,7 @@ namespace testServer2
         /// <param name="codeLine"> CodeLine type string.</param>
         /// <param name="threadNumber"> thread number type int.</param>
         /// <returns></returns>
-        static int Skip_Ifdef_Or_Ifndef(MyStream sr,string codeLine,int threadNumber)
+        public static int Skip_Ifdef_Or_Ifndef(MyStream sr,string codeLine,int threadNumber)
         {
             //stack to count the blocks.
             Stack myStack = new Stack();
@@ -662,7 +662,7 @@ namespace testServer2
         /// <param name="functionName"> the name of the function.</param>
         /// <param name="memoryHandleFunc"> all of the memory handles type arrayList.</param>
         /// <param name="MemoryPattern"> Regex of the memory pattern.</param>
-        static void ChecksInSyntaxCheck(string path, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding,string [] eVars, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames,ArrayList blocksAndDefines,Regex MemoryPattern, Regex FreeMemoryPattern, ArrayList parameters = null, Dictionary<string, ArrayList> calledFromFunc = null, int functionLength = 0,string functionName="")
+        static void ChecksInSyntaxCheck(string path, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding,string [] eVars, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames,ArrayList blocksAndDefines,Regex MemoryPattern, Regex FreeMemoryPattern,ref string codeContent, ArrayList parameters = null, Dictionary<string, ArrayList> calledFromFunc = null, int functionLength = 0,string functionName="",Dictionary<string,string>functionsContent=null)
         {
             try
             {
@@ -705,6 +705,11 @@ namespace testServer2
                 if (codeLine.Trim(GeneralConsts.TAB_SPACE).IndexOf("{") != GeneralConsts.NOT_FOUND_STRING)
                 {
                     codeLine = sr.ReadLine();
+                    codeContent += codeLine + GeneralConsts.NEW_LINE;
+                    if (functionName != "")
+                    {
+                        functionsContent[functionName] += codeLine + GeneralConsts.NEW_LINE;
+                    }
                 }
                 //how to convert to array list
 
@@ -716,6 +721,11 @@ namespace testServer2
                     if (codeLine.Trim(GeneralConsts.TAB_SPACE) == GeneralConsts.EMPTY_STRING)
                     {
                         codeLine = sr.ReadLine();
+                        codeContent += codeLine + GeneralConsts.NEW_LINE;
+                        if (functionName != "")
+                        {
+                            functionsContent[functionName] += codeLine + GeneralConsts.NEW_LINE;
+                        }
                     }
                     codeLine = cleanLineFromDoc(codeLine).Trim();
                     //take cares to all of those situations.
@@ -869,6 +879,11 @@ namespace testServer2
                     if (IsScope && i != functionLength)
                     {
                         codeLine = sr.ReadLine();
+                        codeContent += codeLine + GeneralConsts.NEW_LINE;
+                        if (functionName != "")
+                        {
+                            functionsContent[functionName] += codeLine + GeneralConsts.NEW_LINE;
+                        }
                     }
                 }
                 //if that was a scope it removes all the keywords of the scope.
@@ -894,7 +909,7 @@ namespace testServer2
         /// </summary>
         /// <param name="path"> The path of the c code type string.</param>
         /// <param name="keywords"> keywords type Hashtable that conatins the code keywords.</param>
-        public static bool SyntaxCheck(string path,ArrayList globalVariable,Dictionary<string,ArrayList>calledFromFunc,Hashtable memoryHandleFunc, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,string [] eVars,int threadNumber,string typeEnding,Regex MemoryPattern,Regex FreeMemoryPattern)
+        public static bool SyntaxCheck(string path,ArrayList globalVariable,Dictionary<string,ArrayList>calledFromFunc,Hashtable memoryHandleFunc, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,string [] eVars,int threadNumber,string typeEnding,Regex MemoryPattern,Regex FreeMemoryPattern,Dictionary<string,string> functionsContent,ref string codeContent)
         {
             MyStream sr=null;
             try
@@ -917,17 +932,18 @@ namespace testServer2
                 blocksAndNames.Add(new ArrayList());
                 blocksAndDefines.Add(new ArrayList());
                 string codeLine=sr.ReadLine();
+                codeContent += codeLine + GeneralConsts.NEW_LINE;
                 int scopeLength = 0;
                 string lastFuncLine = "";
                 while (((codeLine = sr.ReadLine())!=null) && !CompileError)
                 {
-                        
+                    codeContent += codeLine + GeneralConsts.NEW_LINE;
                     scopeLength = 0;
                     //handling the scopes.
                     if (OpenBlockPattern.IsMatch(codeLine))
                     {
                         NextScopeLength(sr, ref codeLine, ref scopeLength, true);
-                        ChecksInSyntaxCheck(path, sr, codeLine, true, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames,blocksAndDefines, MemoryPattern, FreeMemoryPattern, parameters,calledFromFunc, scopeLength + 1,lastFuncLine);
+                        ChecksInSyntaxCheck(path, sr, codeLine, true, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames,blocksAndDefines, MemoryPattern, FreeMemoryPattern,ref codeContent, parameters,calledFromFunc, scopeLength + 1,lastFuncLine,functionsContent);
                         parameters.Clear();
                     }
                     // if there is a function it saves its parameters (only if its C)..
@@ -941,6 +957,14 @@ namespace testServer2
                             variables.Clear();
                         }
                         lastFuncLine = codeLine;
+                        try
+                        {
+                            functionsContent.Add(lastFuncLine, "{ \n");
+                        }
+                        catch (Exception e)
+                        {
+                            MainProgram.CleanBeforeCloseThread(threadNumber, e.ToString(), GeneralConsts.ERROR, path);
+                        }
                         string funcKeyInDict = GeneralRestApiServerMethods.FindNameFromCodeLine(codeLine);
                         funcKeyInDict += "(";
                         for (int i = 0; i < parameters.Count - 1; i++)
@@ -956,12 +980,12 @@ namespace testServer2
                     {
                         parameters.AddRange(GeneralRestApiServerMethods.FindParameters(cleanLineFromDoc(codeLine)));
                         lastFuncLine = codeLine;
-                        ChecksInSyntaxCheck(path, sr, codeLine, false, keywords,memoryHandleFunc, threadNumber, typeEnding,eVars, variables, globalVariable, blocksAndNames, blocksAndDefines, MemoryPattern, FreeMemoryPattern, parameters);
+                        ChecksInSyntaxCheck(path, sr, codeLine, false, keywords,memoryHandleFunc, threadNumber, typeEnding,eVars, variables, globalVariable, blocksAndNames, blocksAndDefines, MemoryPattern, FreeMemoryPattern, ref codeContent, parameters);
                     }
                     //handling outside the scopes.
                     else
                     {
-                        ChecksInSyntaxCheck(path, sr, codeLine, false, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames, blocksAndDefines, MemoryPattern, FreeMemoryPattern);
+                        ChecksInSyntaxCheck(path, sr, codeLine, false, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames, blocksAndDefines, MemoryPattern, FreeMemoryPattern, ref codeContent);
                     }
 
                 }

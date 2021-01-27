@@ -129,7 +129,9 @@ namespace testServer2
                 Hashtable includes = new Hashtable();
                 Dictionary<string, string> defines = new Dictionary<string, string>();
                 Dictionary<string, ArrayList> funcVariables = new Dictionary<string, ArrayList>();
+                Dictionary<string, string> functionsContent = new Dictionary<string, string>();
                 ArrayList globalVariable = new ArrayList();
+                string codeContent = "";
                 //initialize 
                 try
                 {
@@ -147,7 +149,7 @@ namespace testServer2
                     //Syntax Check.
                     try
                     {
-                        compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable, calledFromFunc, memoryHandleFuncs, keywords, funcVariables, eVars.Split(','), currentThreadNumber, fileType, MemoryPattern, FreeMemoryPattern);
+                        compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable, calledFromFunc, memoryHandleFuncs, keywords, funcVariables, eVars.Split(','), currentThreadNumber, fileType, MemoryPattern, FreeMemoryPattern,functionsContent, ref codeContent);
                     }
                     catch (Exception e)
                     {
@@ -160,7 +162,7 @@ namespace testServer2
                         //just tests.
                         try
                         {
-                            GeneralRestApiServerMethods.CreateFinalJson(filePath, includes, globalVariable, funcVariables, defines, final_json, eVars, fileType, memoryHandleFuncs, calledFromFunc);
+                            GeneralRestApiServerMethods.CreateFinalJson(filePath, includes, globalVariable, funcVariables, defines, final_json, eVars, fileType, memoryHandleFuncs, calledFromFunc,functionsContent,codeContent);
                             Console.WriteLine("after final json");
                         }
                         catch (Exception e)

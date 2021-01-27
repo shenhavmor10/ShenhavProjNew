@@ -44,6 +44,7 @@ namespace testServer2
                 {
                     myStack.Push(codeLine);
                 }
+
                 if (CloseBlockPattern.IsMatch(codeLine))
                 {
                     myStack.Pop();
@@ -247,7 +248,7 @@ namespace testServer2
         /// <param name="path"> path of the code.</param>
         /// <param name="pattern"> function pattern type string</param>
         /// <returns> return a json for the functions get in "SyncServer".</returns>
-        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json,string eVars,string typeEnding,Hashtable memoryHandleFuncs,Dictionary<string,ArrayList>calledFromFunc)
+        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json,string eVars,string typeEnding,Hashtable memoryHandleFuncs,Dictionary<string,ArrayList>calledFromFunc,Dictionary<string,string>functionContent,string codeContent)
         {
             //if its h type file.
             if(typeEnding=="h")
@@ -257,10 +258,10 @@ namespace testServer2
             //if its a c type file for now.
             else 
             {
-                CreateFunctionsJsonFile(filePath, FunctionPatternInC, typeEnding, final_json,eVars,variables,memoryHandleFuncs,calledFromFunc);
+                CreateFunctionsJsonFile(filePath, FunctionPatternInC, typeEnding, final_json,eVars,variables,memoryHandleFuncs,calledFromFunc,functionContent);
             }
             //for both files
-            CreateCodeJsonFile(filePath,includes,globalVariables,defines,final_json,eVars);
+            CreateCodeJsonFile(filePath,includes,globalVariables,defines,final_json,eVars,codeContent);
         }
         /// Function - FindVariables
         /// <summary>
@@ -337,7 +338,7 @@ namespace testServer2
         /// type "ParameterType" of all of his variables.
         /// </param>
         /// <param name="final_json"> the final big json.</param>
-        static void CreateFunctionsJsonFile(string path, Regex pattern, string typeEnding, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json, string eVars, Dictionary<string,ArrayList> variables=null,Hashtable memoryHandleFuncs=null,Dictionary<string,ArrayList>calledFromFunc=null)
+        static void CreateFunctionsJsonFile(string path, Regex pattern, string typeEnding, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json, string eVars, Dictionary<string,ArrayList> variables=null,Hashtable memoryHandleFuncs=null,Dictionary<string,ArrayList>calledFromFunc=null,Dictionary<string,string>functionsContent=null)
         {
             string codeLine = GeneralConsts.EMPTY_STRING;
             string fName;
@@ -421,7 +422,10 @@ namespace testServer2
                             //goes to the next scope.
                             GeneralCompilerFunctions.NextScopeLength(sr, ref codeLine, ref ((FunctionInfoJson)tempStorage).codeLength, true);
                             //gets the function code.
-                            ((FunctionInfoJson)tempStorage).content = FunctionCode(sr, ref codeLine);
+                            if(functionsContent.ContainsKey(fName))
+                            {
+                                ((FunctionInfoJson)tempStorage).content = functionsContent[fName];
+                            }
                             //gets the variables of the function
                             ((FunctionInfoJson)tempStorage).variables = FindVariables(variables[fName]);
                             //gets the exit points.
@@ -491,7 +495,7 @@ namespace testServer2
         /// <param name="defines"> Dictionary of defines that has all defines in the code. 
         ///                        (Including all imports defines.)</param>
         /// <returns> returns a json file type string.</returns>
-        static void CreateCodeJsonFile(string path,Hashtable includes,ArrayList globalVariables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json, string eVars)
+        static void CreateCodeJsonFile(string path,Hashtable includes,ArrayList globalVariables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json, string eVars,string codeContent)
         {
             CodeInfoJson code=new CodeInfoJson();
             code.includes = new string[includes.Values.Count];
@@ -500,6 +504,17 @@ namespace testServer2
             code.defines = defines;
             code.definesAmount = defines.Count;
             code.Globalvariables = FindVariables(globalVariables);
+            code.codeContent = codeContent;
+            MyStream sr = null;
+            try
+            {
+                sr = new MyStream(path, System.Text.Encoding.UTF8);
+            }
+            catch (Exception e)
+            {
+                MainProgram.AddToLogString(path, "Error open file  " + path);
+            }
+            code.rawCodeContent=sr.ReadToEnd();
             //Serialize.
             final_json[path][eVars].Add("codeInfo",code);
         }
@@ -533,8 +548,96 @@ namespace testServer2
         /// <param name="returnSize"> size of the return code.</param>
         /// <param name="filePath"> the path of the file type string.</param>
         /// <returns> An array of strings that contains all of the code that matches the patterns.</returns>
-        
+
         // needs to make it with eVars aswell...
+        static int findOpenScopeIndex(string content, int matchIndex)
+        {
+            //each open block decrease the counter by one and each close block increase the counter by one.
+            int counter = 1;
+            int tempOpenBlock = 0, tempCloseBlock = 0;
+            int newOpenIndex = matchIndex, newCloseIndex = matchIndex;
+            while (counter != 0)
+            {
+                tempOpenBlock = content.LastIndexOf("{", newOpenIndex);
+                tempCloseBlock = content.LastIndexOf("}", newCloseIndex);
+                if (tempCloseBlock > tempOpenBlock)
+                {
+                    counter++;
+                    newCloseIndex = tempCloseBlock - 1;
+                }
+                else
+                {
+                    counter--;
+                    newOpenIndex = tempOpenBlock - 1;
+                }
+            }
+            return (tempOpenBlock > tempCloseBlock) ? tempOpenBlock : tempCloseBlock;
+
+        }
+        static int findCloseScopeIndex(string content, int matchIndex)
+        {
+            //each open block decrease the counter by one and each close block increase the counter by one.
+            int counter = 1;
+            int tempOpenBlock = 0, tempCloseBlock = 0;
+            int newOpenIndex = matchIndex, newCloseIndex = matchIndex;
+            while (counter != 0)
+            {
+                tempOpenBlock = content.IndexOf("{", newOpenIndex);
+                tempCloseBlock = content.IndexOf("}", newCloseIndex);
+                if (tempCloseBlock < tempOpenBlock || tempOpenBlock == -1)
+                {
+                    counter--;
+                    newCloseIndex = tempCloseBlock + 1;
+                }
+                else
+                {
+                    counter++;
+                    newOpenIndex = tempOpenBlock + 1;
+                }
+            }
+            return (tempOpenBlock < tempCloseBlock) ? tempCloseBlock : tempOpenBlock;
+        }
+        static string makeScopeMatch(string content, string match, int matchIndex)
+        {
+            int openScope = findOpenScopeIndex(content, matchIndex);
+            int closeScope = findCloseScopeIndex(content, matchIndex + match.Length);
+            string resultString = content.Substring(openScope + 1, closeScope -openScope);
+            return resultString;
+
+        }
+        public static string [] SearchPatternTest(string pattern,string returnSize,string content)
+        {
+            ArrayList results = new ArrayList();
+            var m1 = Regex.Matches(content, pattern);
+            string tempNewMatch;
+            if(m1.Count>0)
+            {
+                if (returnSize == "model")
+                {
+                    results.Add(content);
+                }
+                else if(returnSize=="line")
+                {
+                    foreach(var match in m1)
+                    {
+                        results.Add(match);
+                    }
+                }
+                else if(returnSize=="scope")
+                {
+                    foreach (Match match in m1)
+                    {
+
+                        tempNewMatch = makeScopeMatch(content, match.Value, match.Index);
+                        results.Add(tempNewMatch);
+                    }
+                }
+
+            }
+            string[] finalResult = (string[])results.ToArray(typeof(string));
+            return finalResult;
+            
+        }
         public static string [] SearchPattern(Regex Pattern,string returnSize,string filePath)
         {
 

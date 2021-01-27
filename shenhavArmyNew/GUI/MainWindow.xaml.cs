@@ -22,6 +22,7 @@ namespace GUI
         static int threadNumber = 0;
         static Dictionary<string,string> exeNames = new Dictionary<string, string>();
         static Dictionary<string, string[]> NameAndResultNeeded = new Dictionary<string, string[]>();
+        static ArrayList onlyForTest = new ArrayList();
         internal static MainWindow main;
         public MainWindow()
         {
@@ -42,6 +43,7 @@ namespace GUI
                     temp.Content= reader["tool_name"].ToString();
                     NameAndResultNeeded.Add(reader["tool_name"].ToString(), reader["tool_result_needed"].ToString().Split(','));
                     exeNames.Add(reader["tool_name"].ToString(), reader["tool_exe_name"].ToString());
+                    onlyForTest.Add(reader["tool_exe_name"].ToString());
                     StackPanelCheckBox.Children.Add(temp);
                 }
             }
@@ -87,128 +89,144 @@ namespace GUI
             }
             string tools = GeneralConsts.EMPTY_STRING;
             int i = 0;
-            /*foreach(CheckBox tool in StackPanelCheckBox.Children)
+            foreach(CheckBox tool in StackPanelCheckBox.Children)
             {
                 if(tool.IsChecked==true)
                 {
-                    tools += exeNames[i]+",";
+                    tools += onlyForTest[i]+",";
                 }
                 i++;
-            }*/
+            }
             //test
+            /*
             bool atLeastOneTool = false;
-            foreach (CheckBox tool in StackPanelCheckBox.Children)
+            try
             {
-                if (!tool.IsChecked == true)
+                foreach (CheckBox tool in StackPanelCheckBox.Children)
                 {
-                    NameAndResultNeeded.Remove(tool.Content.ToString());
-                }
-                else
-                {
-                    atLeastOneTool = true;
-                }
-            }
-            if(atLeastOneTool)
-            {
-                TextBlock1.Text = "Pick at least one Tool";
-            }
-            //now everyone in NameAndResultNeeded is only the only who the client checked.
-            ArrayList tempArray = new ArrayList();
-            foreach(string key in NameAndResultNeeded.Keys)
-            {
-                if(NameAndResultNeeded[key].Length==1&& NameAndResultNeeded[key][0]=="")
-                {
-                    tempArray.Add(key);
-                }
-            }
-            foreach(string alreadyAdded in tempArray)
-            {
-                if (NameAndResultNeeded.ContainsKey(alreadyAdded))
-                {
-                    NameAndResultNeeded.Remove(alreadyAdded);
-                }
-            }
-            bool contains = true;
-            while(NameAndResultNeeded.Count>0)
-            {
-                foreach(string key in NameAndResultNeeded.Keys)
-                {
-                    contains = true;
-                    for(i=0;i<NameAndResultNeeded[key].Length;i++)
+                    if (!tool.IsChecked == true)
                     {
-                        if(!tempArray.Contains(NameAndResultNeeded[key][i]))
-                        {
-                            contains = false;
-                        }
+                        NameAndResultNeeded.Remove(tool.Content.ToString());
                     }
-                    if(contains)
+                    else
+                    {
+                        atLeastOneTool = true;
+                    }
+                }
+                if (!atLeastOneTool)
+                {
+                    throw new Exception();
+                }
+                //now everyone in NameAndResultNeeded is only the only who the client checked.
+                ArrayList tempArray = new ArrayList();
+                foreach (string key in NameAndResultNeeded.Keys)
+                {
+                    if (NameAndResultNeeded[key].Length == 1 && NameAndResultNeeded[key][0] == "")
                     {
                         tempArray.Add(key);
                     }
                 }
-                foreach(string alreadyAdded in tempArray)
+                if (tempArray.Count == 0)
                 {
-                    if(NameAndResultNeeded.ContainsKey(alreadyAdded))
+                    throw new Exception("Picked tools without delivering them the tools they need.");
+                }
+                foreach (string alreadyAdded in tempArray)
+                {
+                    if (NameAndResultNeeded.ContainsKey(alreadyAdded))
                     {
                         NameAndResultNeeded.Remove(alreadyAdded);
                     }
-                    
                 }
-            }
-            for(i=0;i<tempArray.Count;i++)
-            {
-                tools += exeNames[(string)tempArray[i]] + ",";
-            }
+                bool contains = true;
+                while (NameAndResultNeeded.Count > 0)
+                {
+                    foreach (string key in NameAndResultNeeded.Keys)
+                    {
+                        contains = true;
+                        for (i = 0; i < NameAndResultNeeded[key].Length; i++)
+                        {
+                            if (!tempArray.Contains(NameAndResultNeeded[key][i]))
+                            {
+                                contains = false;
+                            }
+                        }
+                        if (contains)
+                        {
+                            tempArray.Add(key);
+                        }
+                    }
+                    foreach (string alreadyAdded in tempArray)
+                    {
+                        if (NameAndResultNeeded.ContainsKey(alreadyAdded))
+                        {
+                            NameAndResultNeeded.Remove(alreadyAdded);
+                        }
 
+                    }
+                }
+                for (i = 0; i < tempArray.Count; i++)
+                {
+                    tools += exeNames[(string)tempArray[i]] + ",";
+                }
+                */
             //test
-            if (tools.Length>0)
+            try 
             {
-                tools = tools.Substring(0, tools.Length - 1);
-            }
-            if(tools!= GeneralConsts.EMPTY_STRING)
-            {
-                path += ",tools={"+tools+"}";
-            }
-            string memoryPatterns = GeneralConsts.EMPTY_STRING;
-            foreach(TextBox t in StackPanelMemory.Children)
-            {
-                if(t.Text!=GeneralConsts.EMPTY_STRING)
+                if (tools.Length > 0)
                 {
-                    memoryPatterns += t.Text + ",";
+                    tools = tools.Substring(0, tools.Length - 1);
                 }
-            }
-            if(memoryPatterns.Length>0)
-            {
-                memoryPatterns = memoryPatterns.Substring(0, memoryPatterns.Length - 1);
-            }
-            if(memoryPatterns != GeneralConsts.EMPTY_STRING)
-            {
-                path += ",memory={" + memoryPatterns + "}";
-            }
-            string freePatterns = GeneralConsts.EMPTY_STRING;
-            foreach (TextBox t in StackPanelFree.Children)
-            {
-                if (t.Text != GeneralConsts.EMPTY_STRING)
+                if (tools != GeneralConsts.EMPTY_STRING)
                 {
-                    freePatterns += t.Text + ",";
+                    path += ",tools={" + tools + "}";
                 }
+                string memoryPatterns = GeneralConsts.EMPTY_STRING;
+                foreach (TextBox t in StackPanelMemory.Children)
+                {
+                    if (t.Text != GeneralConsts.EMPTY_STRING)
+                    {
+                        memoryPatterns += t.Text + ",";
+                    }
+                }
+                if (memoryPatterns.Length > 0)
+                {
+                    memoryPatterns = memoryPatterns.Substring(0, memoryPatterns.Length - 1);
+                }
+                if (memoryPatterns != GeneralConsts.EMPTY_STRING)
+                {
+                    path += ",memory={" + memoryPatterns + "}";
+                }
+                string freePatterns = GeneralConsts.EMPTY_STRING;
+                foreach (TextBox t in StackPanelFree.Children)
+                {
+                    if (t.Text != GeneralConsts.EMPTY_STRING)
+                    {
+                        freePatterns += t.Text + ",";
+                    }
+                }
+                if (freePatterns.Length > 0)
+                {
+                    freePatterns = freePatterns.Substring(0, freePatterns.Length - 1);
+                }
+                if (memoryPatterns != GeneralConsts.EMPTY_STRING)
+                {
+                    path += ",free={" + freePatterns + "}";
+                }
+                if (Environment_variable_path.Text != "")
+                {
+                    path += ",environmentVariablePath={" + Environment_variable_path.Text + "}";
+                }
+                Thread clientThread;
+                clientThread = new Thread(() => ClientConnection.ExecuteClient(path, threadNumber));
+                clientThread.Start();
+                threadNumber++;
             }
-            if(freePatterns.Length>0)
+            
+            
+            catch(Exception error)
             {
-                freePatterns = freePatterns.Substring(0, freePatterns.Length - 1);
+                TextBlock1.Text = error.ToString();
             }
-            if (memoryPatterns != GeneralConsts.EMPTY_STRING)
-            {
-                path += ",free={" + freePatterns + "}";
-            }
-            if(Environment_variable_path.Text!="")
-            {
-                path += ",environmentVariablePath={" + Environment_variable_path.Text + "}";
-            }
-            Thread clientThread;
-            clientThread = new Thread(() => ClientConnection.ExecuteClient(path,threadNumber));
-            clientThread.Start();
-            threadNumber++;
         }
 
         private void BrowseButtonFile_Click(object sender, RoutedEventArgs e)
