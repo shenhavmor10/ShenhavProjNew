@@ -60,3 +60,4 @@ C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\ClassesSolution\bin\Debu
 C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\ClassesSolution\obj\Debug\ClassesSolution.csproj.CoreCompileInputs.cache
 C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\ClassesSolution\obj\Debug\ClassesSolution.exe
 C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\ClassesSolution\obj\Debug\ClassesSolution.pdb
+C:\Users\Shenhav\Desktop\LastUpdatedArmy\shenhavArmyNew\ClassesSolution\obj\Debug\ClassesSolution.csprojAssemblyReference.cache

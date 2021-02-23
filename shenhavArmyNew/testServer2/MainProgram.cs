@@ -38,6 +38,7 @@ namespace testServer2
         static ArrayList currentDataList = new ArrayList();
         static int threadNumber = 0;
         static Dictionary<string,Dictionary<string, Dictionary<string, Object>>> final_json = new Dictionary<string, Dictionary<string, Dictionary<string, object>>>();
+        static Dictionary<string, string> readyPatterns = new Dictionary<string, string>();
         static Dictionary<string, string> logFiles = new Dictionary<string, string>();
         //static string librariesPath = @"C:\Users\Shenhav\Desktop\Check";
         //global variable declaration.
@@ -54,6 +55,10 @@ namespace testServer2
         public static Dictionary<string, Dictionary<string, Dictionary<string, Object>>> GetFinalJson()
         {
             return final_json;
+        }
+        public static Dictionary<string,string> GetReadyPatterns()
+        {
+            return readyPatterns;
         }
         /// Function - CleanBeforeCloseThread
         /// <summary>
@@ -105,26 +110,38 @@ namespace testServer2
             bool compileError = false;
             int currentThreadNumber = threadNumber;
             string memoryPatternTemp = @"(?!.*return)(?= (\s)?([^\s()] + (\s)?((\*)*(\s))?)?[^\s()]+(\s ?= (\s)?(malloc|alloc|realloc|calloc|";
-            for(int i=0;i<memoryPatterns.Length;i++)
+            string customMalloc = @"(?<=\n\r\t)(\s)*?[^\n]+(\s*?)=(\s*?)(malloc|calloc|alloc|realloc";
+            for (int i=0;i<memoryPatterns.Length;i++)
             {
                 memoryPatternTemp += memoryPatterns[i]+"|";
+                customMalloc += memoryPatterns[i] + "|";
             }
             memoryPatternTemp=memoryPatternTemp.Substring(0, memoryPatternTemp.Length - 1);
+            customMalloc = customMalloc.Substring(0, customMalloc.Length - 1);
+            customMalloc += @")\([^\n]+\);(\s)*?(?=\n\r\t)";
             memoryPatternTemp += @")\(.+\);$))";
+            readyPatterns.Add("CustomMalloc", customMalloc);
             Regex MemoryPattern = new Regex(memoryPatternTemp);
             //create regex for all free handles plus custom frees.
+            string customFree = @"(?<=\n\r\t)(\s)*?(free|";
             string freePatternTemp = @"(?!.*return)(?=(\s)?(free|";
             for(int i=0;i<freePatterns.Length;i++)
             {
                 freePatternTemp += freePatterns[i] + "|";
+                customFree += freePatterns[i] + "|";
             }
+            customFree = customFree.Substring(0, customFree.Length - 1);
+            customFree += @")\(.+\);(\s)*?(?=\n\r)";
             freePatternTemp = freePatternTemp.Substring(0, freePatternTemp.Length - 1);
             freePatternTemp += @")\(.+\);$)";
+            Console.WriteLine(customFree);
+            readyPatterns.Add("CustomFree", customFree);
             Regex FreeMemoryPattern = new Regex(freePatternTemp);
             foreach(string eVars in final_json[filePath].Keys)
             {
                 Hashtable memoryHandleFuncs = new Hashtable();
                 Dictionary<string, ArrayList> calledFromFunc = new Dictionary<string, ArrayList>();
+                Dictionary<string, Dictionary<string,string[]>> callsFromThisFunction = new Dictionary<string, Dictionary<string, string[]>>();
                 Hashtable keywords = new Hashtable();
                 Hashtable includes = new Hashtable();
                 Dictionary<string, string> defines = new Dictionary<string, string>();
@@ -149,7 +166,7 @@ namespace testServer2
                     //Syntax Check.
                     try
                     {
-                        compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable, calledFromFunc, memoryHandleFuncs, keywords, funcVariables, eVars.Split(','), currentThreadNumber, fileType, MemoryPattern, FreeMemoryPattern,functionsContent, ref codeContent);
+                        compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable, calledFromFunc,callsFromThisFunction, memoryHandleFuncs, keywords, funcVariables, eVars.Split(','), currentThreadNumber, fileType, MemoryPattern, FreeMemoryPattern,functionsContent, ref codeContent);
                     }
                     catch (Exception e)
                     {
@@ -162,7 +179,7 @@ namespace testServer2
                         //just tests.
                         try
                         {
-                            GeneralRestApiServerMethods.CreateFinalJson(filePath, includes, globalVariable, funcVariables, defines, final_json, eVars, fileType, memoryHandleFuncs, calledFromFunc,functionsContent,codeContent);
+                            GeneralRestApiServerMethods.CreateFinalJson(filePath, includes, globalVariable, funcVariables, defines, final_json, eVars, fileType, memoryHandleFuncs, calledFromFunc,callsFromThisFunction,functionsContent,codeContent);
                             Console.WriteLine("after final json");
                         }
                         catch (Exception e)

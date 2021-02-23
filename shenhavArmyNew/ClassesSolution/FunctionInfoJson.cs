@@ -22,6 +22,7 @@ namespace ClassesSolution
         public bool memoryAllocation;
         public bool memoryRelease;
         public string [] calledFromFunc;
+        public Dictionary<string,string []> callsFromThisFunction;
         public FunctionInfoJson()
         {
             this.content = null;

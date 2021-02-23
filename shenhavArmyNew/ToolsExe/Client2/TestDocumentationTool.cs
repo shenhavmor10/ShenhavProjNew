@@ -69,6 +69,9 @@ namespace Client
             response2.EnsureSuccessStatusCode();
             string responseBody3 = await response2.Content.ReadAsStringAsync();
             Console.WriteLine(responseBody2);
+            var response4 = await client.GetAsync(string.Format("http://127.0.0.1:8081/result?filePath={0}&eVar={1}&functionName={2}&variable={3}", sourcePath, eVar, "main", "pointer5"));
+            response2.EnsureSuccessStatusCode();
+            string responseBody4 = await response2.Content.ReadAsStringAsync();
             string logs = "logs logs logs logs \n logs logs logs \n another logs and another logs \n yay !";
             var json = JsonConvert.SerializeObject(logs);
             var data = new StringContent(json, Encoding.UTF8, "application/json");

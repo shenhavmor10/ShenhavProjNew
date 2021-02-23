@@ -662,7 +662,7 @@ namespace testServer2
         /// <param name="functionName"> the name of the function.</param>
         /// <param name="memoryHandleFunc"> all of the memory handles type arrayList.</param>
         /// <param name="MemoryPattern"> Regex of the memory pattern.</param>
-        static void ChecksInSyntaxCheck(string path, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding,string [] eVars, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames,ArrayList blocksAndDefines,Regex MemoryPattern, Regex FreeMemoryPattern,ref string codeContent, ArrayList parameters = null, Dictionary<string, ArrayList> calledFromFunc = null, int functionLength = 0,string functionName="",Dictionary<string,string>functionsContent=null)
+        static void ChecksInSyntaxCheck(string path, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding,string [] eVars, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames,ArrayList blocksAndDefines,Regex MemoryPattern, Regex FreeMemoryPattern,ref string codeContent, ArrayList parameters = null, Dictionary<string, ArrayList> calledFromFunc = null, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction = null, int functionLength = 0,string functionName="",Dictionary<string,string>functionsContent=null)
         {
             try
             {
@@ -756,6 +756,7 @@ namespace testServer2
                             try
                             {
                                 calledFromFunc[convertedLine].Add(functionName);
+                                callsFromThisFunction[functionName].Add(SetCallsFromThisFunctionValue(convertedLine, callsFromThisFunction),FindCallingFunctionParameters(codeLine));
                             }
                             catch (Exception e)
                             {
@@ -902,6 +903,36 @@ namespace testServer2
             }
             
         }
+        public static string FindNameFromCodeLine(string codeLine)
+        {
+            codeLine = codeLine.Split('(')[0];
+            codeLine = codeLine.Substring(codeLine.LastIndexOf(" "));
+            codeLine = codeLine.Trim();
+            return codeLine;
+        }
+        public static string SetCallsFromThisFunctionValue(string name, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction)
+        {
+            string result="";
+            foreach(string key in callsFromThisFunction.Keys)
+            {
+                ArrayList parameters = new ArrayList();
+                parameters.AddRange(GeneralRestApiServerMethods.FindParameters(key));
+                string funcKeyInDict = FindNameFromCodeLine(key);
+                funcKeyInDict += "(";
+                for (int i = 0; i < parameters.Count - 1; i++)
+                {
+                    funcKeyInDict += ((ParametersType)parameters[i]).parameterType + ",";
+                }
+                funcKeyInDict += ((ParametersType)parameters[parameters.Count - 1]).parameterType + ")";
+                if(funcKeyInDict==name)
+                {
+                    result = key;
+                }
+
+            }
+            return result;
+
+        }
         /// Function - SyntaxCheck
         /// <summary>
         /// that function uses the Function "ChecksInSyntaxCheck" if that is in a scope
@@ -909,7 +940,7 @@ namespace testServer2
         /// </summary>
         /// <param name="path"> The path of the c code type string.</param>
         /// <param name="keywords"> keywords type Hashtable that conatins the code keywords.</param>
-        public static bool SyntaxCheck(string path,ArrayList globalVariable,Dictionary<string,ArrayList>calledFromFunc,Hashtable memoryHandleFunc, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,string [] eVars,int threadNumber,string typeEnding,Regex MemoryPattern,Regex FreeMemoryPattern,Dictionary<string,string> functionsContent,ref string codeContent)
+        public static bool SyntaxCheck(string path,ArrayList globalVariable,Dictionary<string,ArrayList>calledFromFunc, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction, Hashtable memoryHandleFunc, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,string [] eVars,int threadNumber,string typeEnding,Regex MemoryPattern,Regex FreeMemoryPattern,Dictionary<string,string> functionsContent,ref string codeContent)
         {
             MyStream sr=null;
             try
@@ -943,7 +974,7 @@ namespace testServer2
                     if (OpenBlockPattern.IsMatch(codeLine))
                     {
                         NextScopeLength(sr, ref codeLine, ref scopeLength, true);
-                        ChecksInSyntaxCheck(path, sr, codeLine, true, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames,blocksAndDefines, MemoryPattern, FreeMemoryPattern,ref codeContent, parameters,calledFromFunc, scopeLength + 1,lastFuncLine,functionsContent);
+                        ChecksInSyntaxCheck(path, sr, codeLine, true, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames,blocksAndDefines, MemoryPattern, FreeMemoryPattern,ref codeContent, parameters,calledFromFunc,callsFromThisFunction, scopeLength + 1,lastFuncLine,functionsContent);
                         parameters.Clear();
                     }
                     // if there is a function it saves its parameters (only if its C)..
@@ -973,6 +1004,7 @@ namespace testServer2
                         }
                         funcKeyInDict += ((ParametersType)parameters[parameters.Count - 1]).parameterType + ")";
                         calledFromFunc.Add(funcKeyInDict, new ArrayList());
+                        callsFromThisFunction.Add(lastFuncLine, new Dictionary<string, string[]>());
 
                     }
                     // if there is a function in h it checks it keywords to see if they are good.
@@ -996,6 +1028,18 @@ namespace testServer2
                 }
             }
             return CompileError;
+        }
+        static string [] FindCallingFunctionParameters(string codeLine)
+        {
+            ArrayList result = new ArrayList();
+            var pattern = @"\((.*?)\)";
+            var matches = Regex.Matches(codeLine, pattern);
+            string [] parameters = matches[0].Groups[1].Value.Split(',');
+            for(int i=0;i<parameters.Length;i++)
+            {
+                parameters[i] = parameters[i].Trim();
+            }
+            return parameters;
         }
         /// Function - AddToHashFromFile
         /// <summary>
