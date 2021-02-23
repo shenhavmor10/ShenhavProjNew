@@ -27,13 +27,14 @@ struct example2 {
 * @returns:
 * if the messege  djfdjfddn dfkdf mdfdk dfm
 */
-void spoi(char* a, char b)
+void spoi(char* a, char ** b)
 {
 	if (num == null)
 	{
 		printf("ssss");
 	}
 	*num = 0;
+	free(b);
 }
 static int* main(int* podd, int** odpdf, char a, char* retval)
 {
@@ -58,8 +59,8 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 		int b;
 	};
 	int resultttt;
+	int* shlomi = malloc(sizeof(int) * 10);
 	#endif
-	spoi(yosi, dosi);
 	//dfgdfgdfgdfg
 	//fgfgfgfgfg
 	char* pointer = malloc(sizeof(char) * 10);
@@ -76,6 +77,7 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 
 	/*                  sdfsdfsdfsd*/
 	char** pointer2 = calloc(10, sizeof(char));
+	spoi(yosi, pointer2);
 	/*
 	sdfsdfsdfsd*/
 	if (!pointer2)
@@ -98,6 +100,7 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 	dfsdfsdf
 	*/
 	puts(pointer);
+	free(runner);
 	return 0;
 	
 

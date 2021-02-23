@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using ClassesSolution;
 using System;
 using System.Data;
+using System.Linq;
 
 namespace testServer2
 {
@@ -248,7 +249,7 @@ namespace testServer2
         /// <param name="path"> path of the code.</param>
         /// <param name="pattern"> function pattern type string</param>
         /// <returns> return a json for the functions get in "SyncServer".</returns>
-        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json,string eVars,string typeEnding,Hashtable memoryHandleFuncs,Dictionary<string,ArrayList>calledFromFunc,Dictionary<string,string>functionContent,string codeContent)
+        public static void CreateFinalJson(string filePath,Hashtable includes,ArrayList globalVariables,Dictionary<string,ArrayList>variables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json,string eVars,string typeEnding,Hashtable memoryHandleFuncs,Dictionary<string,ArrayList>calledFromFunc, Dictionary<string, Dictionary<string,string []>> callsFromThisFunction, Dictionary<string,string>functionContent,string codeContent)
         {
             //if its h type file.
             if(typeEnding=="h")
@@ -258,7 +259,7 @@ namespace testServer2
             //if its a c type file for now.
             else 
             {
-                CreateFunctionsJsonFile(filePath, FunctionPatternInC, typeEnding, final_json,eVars,variables,memoryHandleFuncs,calledFromFunc,functionContent);
+                CreateFunctionsJsonFile(filePath, FunctionPatternInC, typeEnding, final_json,eVars,variables,memoryHandleFuncs,calledFromFunc,callsFromThisFunction,functionContent);
             }
             //for both files
             CreateCodeJsonFile(filePath,includes,globalVariables,defines,final_json,eVars,codeContent);
@@ -338,7 +339,7 @@ namespace testServer2
         /// type "ParameterType" of all of his variables.
         /// </param>
         /// <param name="final_json"> the final big json.</param>
-        static void CreateFunctionsJsonFile(string path, Regex pattern, string typeEnding, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json, string eVars, Dictionary<string,ArrayList> variables=null,Hashtable memoryHandleFuncs=null,Dictionary<string,ArrayList>calledFromFunc=null,Dictionary<string,string>functionsContent=null)
+        static void CreateFunctionsJsonFile(string path, Regex pattern, string typeEnding, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json, string eVars, Dictionary<string,ArrayList> variables=null,Hashtable memoryHandleFuncs=null,Dictionary<string,ArrayList>calledFromFunc=null, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction = null, Dictionary<string,string>functionsContent=null)
         {
             string codeLine = GeneralConsts.EMPTY_STRING;
             string fName;
@@ -462,6 +463,7 @@ namespace testServer2
                             }
                             funcKeyInDict += (((FunctionInfoJson)tempStorage).parameters[((FunctionInfoJson)tempStorage).parameters.Length - 1]).parameterType + ")";
                             ((FunctionInfoJson)tempStorage).calledFromFunc = (string[])calledFromFunc[funcKeyInDict].ToArray(typeof(string));
+                            ((FunctionInfoJson)tempStorage).callsFromThisFunction=callsFromThisFunction[fName];
                         }
                         //those are for all files.
                         ((FunctionInfoJson)tempStorage).returnType = returnType;
@@ -540,16 +542,13 @@ namespace testServer2
             }
             return result;
         }
-        /// Function - SearchPattern
+        /// Function - findOpenScopeIndex
         /// <summary>
-        /// 
+        /// finding the open scope of the index given.
         /// </summary>
-        /// <param name="Pattern"> The pattern that it search type Regex.</param>
-        /// <param name="returnSize"> size of the return code.</param>
-        /// <param name="filePath"> the path of the file type string.</param>
-        /// <returns> An array of strings that contains all of the code that matches the patterns.</returns>
-
-        // needs to make it with eVars aswell...
+        /// <param name="content"> the content that it is searching on.</param>
+        /// <param name="matchIndex"> the index of the code you want to check what is it scope</param>
+        /// <returns> returns the index of the open block of the scope.</returns>
         static int findOpenScopeIndex(string content, int matchIndex)
         {
             //each open block decrease the counter by one and each close block increase the counter by one.
@@ -574,6 +573,13 @@ namespace testServer2
             return (tempOpenBlock > tempCloseBlock) ? tempOpenBlock : tempCloseBlock;
 
         }
+        /// Function - findCloseScopeIndex
+        /// <summary>
+        /// finding the close scope of the index given.
+        /// </summary>
+        /// <param name="content"> the content that it is searching on.</param>
+        /// <param name="matchIndex"> the index of the code you want to check what is it scope</param>
+        /// <returns> returns the index of the close block of the scope.</returns>
         static int findCloseScopeIndex(string content, int matchIndex)
         {
             //each open block decrease the counter by one and each close block increase the counter by one.
@@ -597,15 +603,34 @@ namespace testServer2
             }
             return (tempOpenBlock < tempCloseBlock) ? tempCloseBlock : tempOpenBlock;
         }
+        /// Function - makeScopeMatch
+        /// <summary>
+        /// making the actuall scope (string) and returning it.
+        /// </summary>
+        /// <param name="content"> the code where you search the code on.</param>
+        /// <param name="match"> the actually match it found when searching for a pattern.</param>
+        /// <param name="matchIndex"> the index of the match.</param>
+        /// <returns></returns>
         static string makeScopeMatch(string content, string match, int matchIndex)
         {
+            //finding open scope.
             int openScope = findOpenScopeIndex(content, matchIndex);
+            //finding close scope.
             int closeScope = findCloseScopeIndex(content, matchIndex + match.Length);
+            //make the scope (string).
             string resultString = content.Substring(openScope + 1, closeScope -openScope);
             return resultString;
 
         }
-        public static string [] SearchPatternTest(string pattern,string returnSize,string content)
+        /// Function - SearchPattern
+        /// <summary>
+        /// this function gets a pattern and a content and returns in the wanted return size - (scope,line,model).
+        /// </summary>
+        /// <param name="pattern"> the pattern that is being checked.</param>
+        /// <param name="returnSize"> the return size wanted as explained before.</param>
+        /// <param name="content"> the content you are checking on.</param>
+        /// <returns></returns>
+        public static string [] SearchPattern(string pattern,string returnSize,string content)
         {
             ArrayList results = new ArrayList();
             var m1 = Regex.Matches(content, pattern);
@@ -618,9 +643,9 @@ namespace testServer2
                 }
                 else if(returnSize=="line")
                 {
-                    foreach(var match in m1)
+                    foreach(Match match in m1)
                     {
-                        results.Add(match);
+                        results.Add(match.Value);
                     }
                 }
                 else if(returnSize=="scope")
@@ -637,57 +662,6 @@ namespace testServer2
             string[] finalResult = (string[])results.ToArray(typeof(string));
             return finalResult;
             
-        }
-        public static string [] SearchPattern(Regex Pattern,string returnSize,string filePath)
-        {
-
-            ArrayList results = new ArrayList();
-            MyStream sr = new MyStream(filePath, System.Text.Encoding.UTF8);
-            uint pos=sr.Pos;
-            Stack s = new Stack();
-            string blockLine="";
-            bool modelStopWhile = false;
-            string codeLine;
-            while((codeLine = sr.ReadLine())!=null && !modelStopWhile)
-            {
-                if (codeLine.IndexOf("{") != GeneralConsts.NOT_FOUND_STRING)
-                {
-                    pos = sr.Pos;
-                    blockLine = codeLine;
-                    s.Push(codeLine);
-                }
-                if (codeLine.IndexOf("}") != GeneralConsts.NOT_FOUND_STRING)
-                {
-                    s.Pop();
-                }
-                if (Pattern.IsMatch(codeLine))
-                {
-                    if(returnSize=="model")
-                    {
-                        modelStopWhile = true;
-                        sr.Seek(0);
-                        results.Add(sr.ReadToEnd());
-                    }
-                    else if(returnSize=="scope")
-                    {
-                        if(s.Count==0)
-                        {
-                            pos = 0;
-                        }
-                        if(!results.Contains(ReadAllScope(sr,pos, blockLine)))
-                        {
-                            results.Add(ReadAllScope(sr, pos, blockLine));
-                        }
-                    }
-                    else if(returnSize=="line")
-                    {
-                        results.Add(codeLine);
-                    }
-                }
-                
-            }
-            string[] finalResult = (string[])results.ToArray(typeof(string));
-            return finalResult;
         }
         /// Function - TakePatternFromFile
         /// <summary>
@@ -712,6 +686,64 @@ namespace testServer2
 
             }
             return final_pattern;
+        }
+        /// Function - CutOnlyFirstFromLine
+        /// <summary>
+        /// cut the first line from an equal section. the section before the '='.
+        /// </summary>
+        /// <param name="codeLine"> the code line.</param>
+        /// <returns> returns the first section.</returns>
+        public static string CutOnlyFirstFromLine(string codeLine)
+        {
+            string result = codeLine.Split('=')[0];
+            result = result.Trim();
+            try
+            {
+                result = result.Substring(result.LastIndexOf(' '));
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            char[] trimChars = { ' ', '(', ')', ';', '\t', '*' };
+            result = result.Trim(trimChars);
+            return result;
+        }
+        /// Function - CutOnlyLastFromLine
+        /// <summary>
+        /// cut the last line from an equal section. the section after the '='
+        /// </summary>
+        /// <param name="codeLine"></param>
+        /// <returns> returns the last part of the section.</returns>
+        public static string CutOnlyLastFromLine(string codeLine)
+        {
+            string result = codeLine.Split('=')[1];
+            char[] trimChars = { ' ', '(', ')',';','\t','*' };
+            result = result.Trim(trimChars);
+            return result;
+        }
+        /// Function - GetEqualVariables
+        /// <summary>
+        /// gets a json and the name of the parameter and returns the whole variables who are equal to the
+        /// paramater given. (memory equal).
+        /// </summary>
+        /// <param name="json"> the json of the function.</param>
+        /// <param name="parameterName">the name of the parameter.</param>
+        /// <returns></returns>
+        public static string [] GetEqualVariables(FunctionInfoJson json,string parameterName)
+        {
+            ArrayList result = new ArrayList();
+            result.Add(parameterName);
+            string pattern = @"([^\s()]+\s)?((\*)*(\s))?[^\s()]+(\s)?=(\s)?[A-Za-z][^\s()]*;";
+            string [] resultsEqualParams=SearchPattern(pattern, "line", json.content);
+            for(int i=0;i<resultsEqualParams.Length;i++)
+            {
+                if(result.Contains(CutOnlyLastFromLine(resultsEqualParams[i])))
+                {
+                    result.Add(CutOnlyFirstFromLine(resultsEqualParams[i].Trim()));
+                }
+            }
+            return (string[])result.ToArray(typeof(string));
         }
 
     }

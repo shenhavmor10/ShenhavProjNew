@@ -30,7 +30,7 @@ namespace testServer2
         /// <param name="parameterType"></param>
         /// <param name="filePath"></param>
         /// <param name="eVar"></param>
-        static string TakeOnlyNameNeeded(Dictionary<string, Dictionary<string, object>> final_json, string parameterName,string parameterType,string filePath,string eVar)
+        static string TakeOnlyNameNeeded(Dictionary<string, Dictionary<string, object>> final_json, string parameterName,string parameterType,string eVar)
         {
             string result="";
             bool found = false;
@@ -90,7 +90,6 @@ namespace testServer2
         }
         static void Rd_isResetDictionary(object sender, ResetDictEventArgs e)
         {
-            Console.WriteLine("entered event");
             if(ToolsData.ContainsKey(e.filePath))
             {
                 ToolsData[e.filePath].Clear();
@@ -125,6 +124,7 @@ namespace testServer2
                     context.Response.ContentType = "application/json";
                     string dataJson = GeneralConsts.EMPTY_STRING;
                     Dictionary<string,Dictionary<string, Dictionary<string, object>>> final_json = MainProgram.GetFinalJson();
+                    Dictionary<string, string> customReadyPatterns = MainProgram.GetReadyPatterns();
                     string filePath = context.Request.QueryString["filePath"];
                     if(!ToolsData.ContainsKey(filePath))
                     {
@@ -141,6 +141,19 @@ namespace testServer2
                     if (context.Request.HttpMethod == "GET")
                     {
                         //make sure eVars get in here aswell.
+                        //taking care of the option of EqualVariables which means that you give a variable from a function and a function name
+                        //and get all of the variables that are equal to him (memory equal).
+                        if(context.Request.QueryString["functionName"]!=null&&context.Request.QueryString["variable"]!=null)
+                        {
+                            string keyName = TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["functionName"], "name", eVar);
+                            if(!((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"]).ContainsKey(keyName))
+                            {
+                                not_found = true;
+                            }
+                            string [] result=GeneralRestApiServerMethods.GetEqualVariables(((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"])[keyName],context.Request.QueryString["variable"]);
+                            dataJson = JsonConvert.SerializeObject(result);
+                        }
+                        //taking care of a pattern that the user wants to search.
                         if(context.Request.QueryString["pattern"]!=null)
                         {
                             MainProgram.AddToLogString(filePath,context.Request.QueryString["pattern"]);
@@ -149,35 +162,42 @@ namespace testServer2
                             string[] result;
                             if (context.Request.QueryString["functionName"]!=null)
                             {
-                                string functionKeyName=TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["functionName"], "name", filePath, eVar);
-                                result = GeneralRestApiServerMethods.SearchPatternTest(context.Request.QueryString["pattern"], returnSize, ((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"])[functionKeyName].content);
+                                string functionKeyName=TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["functionName"], "name", eVar);
+                                result = GeneralRestApiServerMethods.SearchPattern(context.Request.QueryString["pattern"], returnSize, ((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"])[functionKeyName].content);
                             }
                             else
                             {
-                                result = GeneralRestApiServerMethods.SearchPatternTest(context.Request.QueryString["pattern"], returnSize, ((CodeInfoJson)final_json[filePath][eVar]["codeInfo"]).codeContent);
+                                result = GeneralRestApiServerMethods.SearchPattern(context.Request.QueryString["pattern"], returnSize, ((CodeInfoJson)final_json[filePath][eVar]["codeInfo"]).codeContent);
                             }
                             dataJson = JsonConvert.SerializeObject(result);
-                            MainProgram.AddToLogString(filePath, dataJson);
                         }
+                        //taking care of a ready pattern that is being taked or from the patterns file or from the customReadyPatterns Dictionary.
                         else if(context.Request.QueryString["readyPattern"] != null)
                         {
-                            MainProgram.AddToLogString(filePath, context.Request.QueryString["readyPattern"]);
-                            MainProgram.AddToLogString(filePath, context.Request.QueryString["returnSize"]);
-                            if (GeneralRestApiServerMethods.TakePatternFromFile(context.Request.QueryString["readyPattern"]) == GeneralConsts.EMPTY_STRING)
+                            if (GeneralRestApiServerMethods.TakePatternFromFile(context.Request.QueryString["readyPattern"]) == GeneralConsts.EMPTY_STRING&&!customReadyPatterns.ContainsKey(context.Request.QueryString["readyPattern"]))
                                 not_found_pattern = true;
                             else
                             {
-                                string patternFromFile=(GeneralRestApiServerMethods.TakePatternFromFile(context.Request.QueryString["readyPattern"]));
+                                string patternFromFile;
+                                if (customReadyPatterns.ContainsKey(context.Request.QueryString["readyPattern"]))
+                                {
+                                    patternFromFile = customReadyPatterns[context.Request.QueryString["readyPattern"]];
+                                }
+                                else
+                                {
+                                    patternFromFile = (GeneralRestApiServerMethods.TakePatternFromFile(context.Request.QueryString["readyPattern"]));
+                                }
                                 string returnSize = context.Request.QueryString["returnSize"];
                                 string[] result;
                                 if (context.Request.QueryString["functionName"] != null)
                                 {
                                     Console.WriteLine(context.Request.QueryString["functionName"]);
-                                    result = GeneralRestApiServerMethods.SearchPatternTest(patternFromFile, returnSize, ((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"])[context.Request.QueryString["functionName"]].content);
+                                    string funcKey=TakeOnlyNameNeeded(final_json[filePath],context.Request.QueryString["functionName"],"name",eVar);
+                                    result = GeneralRestApiServerMethods.SearchPattern(patternFromFile, returnSize, ((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"])[funcKey].content);
                                 }
                                 else
                                 {
-                                    result = GeneralRestApiServerMethods.SearchPatternTest(patternFromFile, returnSize, ((CodeInfoJson)final_json[filePath][eVar]["codeInfo"]).codeContent);
+                                    result = GeneralRestApiServerMethods.SearchPattern(patternFromFile, returnSize, ((CodeInfoJson)final_json[filePath][eVar]["codeInfo"]).codeContent);
                                 }
                                 
                                 dataJson = JsonConvert.SerializeObject(result);
@@ -197,13 +217,14 @@ namespace testServer2
                                     string parameterName;
                                     if (context.Request.QueryString["name"] != null)
                                     {
-                                        parameterName=TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["name"],"name",filePath,eVar);
+                                        parameterName=TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["name"],"name",eVar);
                                         dataJson = JsonConvert.SerializeObject(((Dictionary<string,FunctionInfoJson>)final_json[filePath][eVar]["function"])[parameterName]);
                                         MainProgram.AddToLogString(filePath, dataJson);
                                     }
+                                    //return type means all the functions which return that type.
                                     else if (context.Request.QueryString["returnType"] != null)
                                     {
-                                        parameterName=TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["returnType"], "returnType", filePath, eVar);
+                                        parameterName=TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["returnType"], "returnType", eVar);
                                         dataJson = JsonConvert.SerializeObject(((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"])[parameterName]);
                                         MainProgram.AddToLogString(filePath, dataJson);
                                     }
@@ -213,11 +234,13 @@ namespace testServer2
                                         MainProgram.AddToLogString(filePath, dataJson);
                                     }
                                     break;
+                                    //code info situation option.
                                 case "codeInfo":
                                     dataJson = JsonConvert.SerializeObject(final_json[filePath][eVar]["codeInfo"]);
                                     MainProgram.AddToLogString(filePath, dataJson);
                                     break;
                                 case "result":
+                                    //in order to get result of another tool.
                                     string toolName=context.Request.QueryString["toolName"];
                                     if(ToolsData[filePath].ContainsKey(toolName))
                                     {
