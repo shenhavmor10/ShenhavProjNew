@@ -20,6 +20,7 @@ namespace AddToolsMVVM.ViewModel
         private string resultBlock;
         private ICommand _ApplyCommand;
         private ICommand _BrowseCommand;
+        // constructor for the viewmodel.
         public AddToolViewModel()
         {
             GetAllToolsFromDB();
@@ -27,10 +28,15 @@ namespace AddToolsMVVM.ViewModel
             Tool = new ToolModel();
             Tools.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Tools_CollectionChanged);
         }
+        //collefctionChangedType
         void Tools_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             NotifyPropertyChanged("Tools");
         }
+        /// Function - GetAllToolsFromDB
+        /// <summary>
+        /// Get all tools from the database and add them to the toolsList parameter.
+        /// </summary>
         public void GetAllToolsFromDB()
         {
             string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
@@ -46,6 +52,7 @@ namespace AddToolsMVVM.ViewModel
                 }
             }
         }
+        //ResultBlock get set
         public string ResultBlock
         {
             get
@@ -58,6 +65,7 @@ namespace AddToolsMVVM.ViewModel
                 NotifyPropertyChanged("ResultBlock");
             }
         }
+        //Tool get set
         public ToolModel Tool
         {
             get
@@ -70,7 +78,7 @@ namespace AddToolsMVVM.ViewModel
                 NotifyPropertyChanged("Tool");
             }
         }
-
+        //Tools get set
         public ObservableCollection<ToolModel> Tools
         {
             get
@@ -105,15 +113,22 @@ namespace AddToolsMVVM.ViewModel
                 return _BrowseCommand;
             }
         }
+        /// Function - Apply
+        /// <summary>
+        /// happens when you press on the button Apply - 
+        /// this function adds to the database a new tool. after the client filled all information.
+        /// </summary>
         public void Apply()
         {
             SqlConnection cnn;
+            //connection string
             string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
             cnn = new SqlConnection(connectionString);
             cnn.Open();
             SqlCommand command;
             try
             {
+                //commands
                 if (Tool.ToolResultNeeded == null)
                 {
                     command = new SqlCommand(string.Format(@"INSERT INTO tools_table (tool_name, tool_desc,tool_exe_name, tool_is_working) VALUES('{0}','{1}','{2}',1);", Tool.ToolName, Tool.ToolDescription, string.Format(Tool.ToolFolder.Substring(Tool.ToolFolder.LastIndexOf("\\") + 1)) + "\\fileScript.txt"), cnn);
@@ -133,6 +148,10 @@ namespace AddToolsMVVM.ViewModel
             }
             
         }
+        /// Function - Browse
+        /// <summary>
+        /// using Ookii Dialogs Wpf and when someone presses browse it pops a browse window for folders.
+        /// </summary>
         public void Browse()
         {
             var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
@@ -142,6 +161,10 @@ namespace AddToolsMVVM.ViewModel
                 Tool.ToolFolder = folderDialog.SelectedPath;
             }
         }
+        /// Function - initializeConfig
+        /// <summary>
+        /// Gets all config for the project (like getting the DestProjectPath).
+        /// </summary>
         public void initializeConfig()
         {
             Dictionary<string, string> configDict = new Dictionary<string, string>();

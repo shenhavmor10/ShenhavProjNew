@@ -11,6 +11,8 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Linq;
+using System.Data.SqlClient;
+using System.Data;
 
 namespace testServer2
 {
@@ -37,6 +39,7 @@ namespace testServer2
         static Mutex mutexAddLogFiles = new Mutex();
         static ArrayList currentDataList = new ArrayList();
         static int threadNumber = 0;
+        static bool test = false;
         static Dictionary<string,Dictionary<string, Dictionary<string, Object>>> final_json = new Dictionary<string, Dictionary<string, Dictionary<string, object>>>();
         static Dictionary<string, string> readyPatterns = new Dictionary<string, string>();
         static Dictionary<string, string> logFiles = new Dictionary<string, string>();
@@ -78,7 +81,11 @@ namespace testServer2
             {
                 final_json.Remove(filePath);
             }
-            File.WriteAllText(logFilePath, logFiles[filePath]);
+            if(!test)
+            {
+                File.WriteAllText(logFilePath, logFiles[filePath]);
+            }
+            
         }
         /// Function - AddToLogString
         /// <summary>
@@ -103,7 +110,7 @@ namespace testServer2
         /// <param name="freePatterns"> all free patterns.</param>
         /// <param name="memoryPatterns"> all memory handles patterns.</param>
         /// <param name="tools"> all tools type arrayList.</param>
-        static void RunAllChecks(string filePath,string destPath, string [] pathes,ArrayList tools,ResetDictionary rd,string fileType,string [] memoryPatterns,string [] freePatterns)
+        static void RunAllChecks(string filePath,string destPath, string [] pathes,ArrayList tools,ArrayList toolAvgSecLine,ResetDictionary rd,string fileType,string [] memoryPatterns,string [] freePatterns)
         {
             //variable declaration.
             //create regex for all memory handles (malloc alloc etc... and custom memory handles aswell).
@@ -162,7 +169,6 @@ namespace testServer2
                 }
                 if(!compileError)
                 {
-                    AddToLogString(filePath, keywords.Count.ToString());
                     //Syntax Check.
                     try
                     {
@@ -174,8 +180,6 @@ namespace testServer2
                     }
                     if (!compileError)
                     {
-                        GeneralCompilerFunctions.printArrayList(filePath, keywords);
-                        AddToLogString(filePath, keywords.Count.ToString());
                         //just tests.
                         try
                         {
@@ -195,14 +199,13 @@ namespace testServer2
                 foreach (string eVars in final_json[filePath].Keys)
                 {
                     
-                    Thread threadOpenTools = new Thread(() => RunAllTasks(filePath, destPath, tools, currentThreadNumber,eVars));
+                    Thread threadOpenTools = new Thread(() => RunAllTasks(filePath, destPath, tools,toolAvgSecLine, currentThreadNumber,eVars));
                     threadOpenTools.Start();
+                    
                     Console.WriteLine("enter thread with evar = " + eVars);
                     threadOpenTools.Join();
                     Console.WriteLine("join "+eVars);
                     rd.Reset_Dictionary(filePath);
-                    
-
                     /*AddToLogString(filePath, FINISH_SUCCESFULL);
                     Console.WriteLine(logFiles[filePath]);
                     Thread writeToFile = new Thread(() => File.WriteAllText(logFile, logFiles[filePath]));
@@ -212,11 +215,17 @@ namespace testServer2
                 CleanBeforeCloseThread(currentThreadNumber, FINISH_SUCCESFULL, GeneralConsts.FINISHED_SUCCESFULLY, filePath);
             }
         }
-
+        /// Function - AddToolToLogFile
+        /// <summary>
+        /// add text to log file.
+        /// </summary>
+        /// <param name="filePath"> path of the file.</param>
+        /// <param name="eVar"> evironment variables that are turned on.</param>
+        /// <param name="toolName"> the name of the tool.</param>
         static void AddToolToLogFile(string filePath,string eVar,string toolName)
         {
-            AddToLogString(filePath, eVar);
-            AddToLogString(filePath, toolName);
+            AddToLogString(filePath, "\n\nEnvironment Variable = "+eVar);
+            AddToLogString(filePath, "Tool = "+toolName);
         }
 
         /// Function - createLogFile
@@ -248,7 +257,7 @@ namespace testServer2
         /// <param name="filePath"> the path of the file.</param>
         /// <param name="destPath"> the path of the destionation.</param>
         /// <param name="tools"> The array of the tools sorted from low to high priority.</param>
-        static void RunAllTasks(string filePath,string destPath,ArrayList tools,int currentThreadNumber,string eVar)
+        static void RunAllTasks(string filePath,string destPath,ArrayList tools,ArrayList toolsAvgSecLine,int currentThreadNumber,string eVar)
         {
             ArrayList toolsScripts = new ArrayList();
             for (int i = START_INDEX_OF_TOOLS; i < tools.Count; i++)
@@ -259,7 +268,16 @@ namespace testServer2
             for (int i= START_INDEX_OF_TOOLS; i< toolsScripts.Count;i++)
             {
                 AddToolToLogFile(filePath, eVar, (string)toolsScripts[i]);
-                RunProcessAsync((string)toolsScripts[i],filePath,destPath,eVar);
+                if(test)
+                {
+                    RunProcessAsync((string)toolsScripts[i], 0.0, (string)tools[i], filePath, destPath, eVar);
+
+                }
+                else
+                {
+                    RunProcessAsync((string)toolsScripts[i], (double)toolsAvgSecLine[i], (string)tools[i], filePath, destPath, eVar);
+                }
+                
             }
             toolsScripts.Clear();
         }
@@ -271,29 +289,61 @@ namespace testServer2
         /// <param name="srcPath"> the source path of the file</param>
         /// <param name="destPath"> the destination of the new file.</param>
         /// <returns></returns>
-        static Task<int> RunProcessAsync(string fileName,string srcPath,string destPath,string eVar)
+        static Task<int> RunProcessAsync(string fileName,double avgLine,string tool_exe_name,string srcPath,string destPath,string eVar)
         {
+            int maxTimeNeeded;
+            maxTimeNeeded = ((CodeInfoJson)final_json[srcPath][eVar]["codeInfo"]).rowNumber * (int)avgLine * 3;
             Console.WriteLine(Directory.GetCurrentDirectory());
             Console.WriteLine("running async waiting for exit.");
-            Console.WriteLine("FileName ="+fileName);
+            Console.WriteLine("FileName =" + fileName);
             var tcs = new TaskCompletionSource<int>();
-
-            var process = new Process
+            try
             {
-                StartInfo = { FileName = fileName, Arguments = String.Format("{0} {1} {2}",srcPath,destPath,eVar) },
-                EnableRaisingEvents = true
-            };
-
-            /*process.Exited += (sender, args) =>
+                var process = new Process
+                {
+                    StartInfo = { FileName = fileName, Arguments = String.Format("{0} {1} {2}", srcPath, destPath, eVar) },
+                    EnableRaisingEvents = true
+                };
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+                process.Start();
+                if (!process.WaitForExit(maxTimeNeeded))
+                {
+                    throw new Exception("The maximum time for the tool to run has been finished. please call an admin or dont use this tool.");
+                }
+                //process.WaitForExit(); might need for synchronize.
+                stopWatch.Stop();
+                if (test)
+                {
+                    InsertNewAvgToDB(stopWatch.ElapsedMilliseconds / ((CodeInfoJson)final_json[srcPath][eVar]["codeInfo"]).rowNumber, tool_exe_name);
+                }
+                Console.WriteLine("exited..");
+            }
+            catch(Exception e)
             {
-                tcs.SetResult(process.ExitCode);
-                process.Dispose();
-            };*/
-            process.Start();
-            process.WaitForExit();
-            //process.WaitForExit(); might need for synchronize.
-            Console.WriteLine("exited..");
+                CleanBeforeCloseThread(threadNumber, e.Message, GeneralConsts.ERROR, srcPath);
+            }
             return tcs.Task;
+
+
+        }
+        static void InsertNewAvgToDB(double avgTimePerSec,string tool_exe_name)
+        {
+            try
+            {
+                string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
+                SqlConnection cnn = new SqlConnection(connectionString);
+                cnn.Open();
+                SqlCommand command = new SqlCommand("UPDATE tools_table SET tool_avg_line=@tool_avg_line WHERE tool_exe_name=@tool_exe_name", cnn);
+                command.Parameters.Add("@tool_avg_line", SqlDbType.Float).Value = avgTimePerSec;
+                command.Parameters.Add("@tool_exe_name", SqlDbType.NVarChar).Value = tool_exe_name;
+                command.ExecuteNonQuery();
+            }
+            catch(Exception e)
+            {
+                Server.ConnectionServer.CloseConnection(threadNumber, "Failed Inserting to DB" + e.ToString(), GeneralConsts.ERROR);
+            }
+            
         }
         /// Function - initializeConfig
         /// <summary>
@@ -440,10 +490,16 @@ namespace testServer2
                 if (list.Count > currentDataList.Count)
                 {
                     //adds to the current data list the original server data list last node.
+                    ArrayList toolavgLineSeconds = new ArrayList();
+                    test = false;
                     ArrayList tools = new ArrayList();
                     currentDataList.Add(list[currentDataList.Count]);
                     AddToLogString(MAIN_DICT_INDEX, currentDataList[currentDataList.Count - 1].ToString());
                     string infoServer = currentDataList[currentDataList.Count - 1].ToString();
+                    if(infoServer.IndexOf(",test!!") !=-1)
+                    {
+                        test = true;
+                    }
                     string[] paths = Regex.Split(infoServer.Substring(0, infoServer.IndexOf("tools")), ",");
                     Console.WriteLine("resulttttt "+ToolsBlock.Match(infoServer).Groups[1].Value);
                     string [] toolsArray = Regex.Split(ToolsBlock.Match(infoServer).Groups[1].Value,",");
@@ -477,11 +533,15 @@ namespace testServer2
                     string[] pathes = { paths[PROJECT_FOLDER_INDEX], paths[GCC_INCLUDE_FOLDER_INDEX], paths[EXTRA_INCLUDE_FOLDER_INDEX] };
                     string destPath = paths[DEST_PATH_INDEX];
                     tools.AddRange(toolsArray);
+                    if(!test)
+                    {
+                        toolavgLineSeconds = getAllToolAvgLineSecondsArray(tools);
+                    }
                     final_json.Add(filePath, new Dictionary<string, Dictionary<string, object>>());
                     SetEnvironmentVariables(filePath, environmentVariablePath, threadNumber);
                     //because i still dont have a prefect checks for headers so im giving the thread a default null so the program can run.
                     Thread runChecksThread=null;
-                    runChecksThread = new Thread(() => RunAllChecks(filePath, destPath, pathes, tools, rd, filePath.Substring(filePath.Length - 1),memoryArray, freeArray));
+                    runChecksThread = new Thread(() => RunAllChecks(filePath, destPath, pathes, tools, toolavgLineSeconds, rd, filePath.Substring(filePath.Length - 1),memoryArray, freeArray));
                     runChecksThread.Start();
 
                 }
@@ -491,6 +551,33 @@ namespace testServer2
                 }
 
             }
+        }
+        /// Function - getAllToolAvgLineSecondsArray
+        /// <summary>
+        /// get all average time per code line for each tool. and return an array with all included.
+        /// </summary>
+        /// <param name="tools"> arrayList filled of tool_exe_name for all tools.</param>
+        /// <returns></returns>
+        static ArrayList getAllToolAvgLineSecondsArray(ArrayList tools)
+        {
+            ArrayList toolsAvgSec = new ArrayList();
+            string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
+            SqlConnection cnn = new SqlConnection(connectionString);
+            cnn.Open();
+            foreach (string tool in tools)
+            {
+                SqlCommand command = new SqlCommand("Select tool_avg_line from tools_table where tool_exe_name=@tool_exe_name;", cnn);
+                command.Parameters.Add("@tool_exe_name", SqlDbType.NVarChar).Value = tool;
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        toolsAvgSec.Add(reader["tool_avg_line"]);
+                    }
+                }
+            }
+            return toolsAvgSec;
+            
         }
         /// Function - Main
         /// <summary>

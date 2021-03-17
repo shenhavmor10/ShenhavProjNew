@@ -156,8 +156,6 @@ namespace testServer2
                         //taking care of a pattern that the user wants to search.
                         if(context.Request.QueryString["pattern"]!=null)
                         {
-                            MainProgram.AddToLogString(filePath,context.Request.QueryString["pattern"]);
-                            MainProgram.AddToLogString(filePath, context.Request.QueryString["returnSize"]);
                             string returnSize = context.Request.QueryString["returnSize"];
                             string[] result;
                             if (context.Request.QueryString["functionName"]!=null)
@@ -208,7 +206,6 @@ namespace testServer2
                             path = context.Request.RawUrl;
                             path = path.Trim(trimChars);
                             path = path.Split('?')[0];
-                            MainProgram.AddToLogString(filePath, path);
                             //switch case for get commands.
                             switch (path)
                             {
@@ -219,25 +216,21 @@ namespace testServer2
                                     {
                                         parameterName=TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["name"],"name",eVar);
                                         dataJson = JsonConvert.SerializeObject(((Dictionary<string,FunctionInfoJson>)final_json[filePath][eVar]["function"])[parameterName]);
-                                        MainProgram.AddToLogString(filePath, dataJson);
                                     }
                                     //return type means all the functions which return that type.
                                     else if (context.Request.QueryString["returnType"] != null)
                                     {
                                         parameterName=TakeOnlyNameNeeded(final_json[filePath], context.Request.QueryString["returnType"], "returnType", eVar);
                                         dataJson = JsonConvert.SerializeObject(((Dictionary<string, FunctionInfoJson>)final_json[filePath][eVar]["function"])[parameterName]);
-                                        MainProgram.AddToLogString(filePath, dataJson);
                                     }
                                     else
                                     {
                                         dataJson = JsonConvert.SerializeObject(final_json[filePath][eVar]["function"]);
-                                        MainProgram.AddToLogString(filePath, dataJson);
                                     }
                                     break;
                                     //code info situation option.
                                 case "codeInfo":
                                     dataJson = JsonConvert.SerializeObject(final_json[filePath][eVar]["codeInfo"]);
-                                    MainProgram.AddToLogString(filePath, dataJson);
                                     break;
                                 case "result":
                                     //in order to get result of another tool.
