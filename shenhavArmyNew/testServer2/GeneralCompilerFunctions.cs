@@ -43,6 +43,7 @@ namespace testServer2
         const string Documentation = @"(\/\*.*\*\/)|((?!.*\/\*).*\*\/)|(\/\/.*)";
         //chars to trim.
         static char[] CharsToTrim = { '&', '*', '\t', ' ', ';', '{', '}' };
+        static string[] ignoreWhenCheckingEndRow = { @"if(\s)*?\(", @"while(\s)*?\(", @"for(\s)*?\(" };
         [ThreadStatic] static bool CompileError = false;
         static ArrayList ignoreVarialbesType = new ArrayList();
         /// Function - CreateMd5
@@ -728,6 +729,7 @@ namespace testServer2
                         }
                     }
                     codeLine = cleanLineFromDoc(codeLine).Trim();
+                    codeLine = ConcatenateIfNeeded(codeLine, sr, functionsContent,functionName);
                     //take cares to all of those situations.
                     if (StructPattern.IsMatch(codeLine) || TypedefOneLine.IsMatch(codeLine))
                     {
@@ -903,6 +905,12 @@ namespace testServer2
             }
             
         }
+        /// Function - FindNameFromCodeLine
+        /// <summary>
+        /// Get function name from function call code line.
+        /// </summary>
+        /// <param name="codeLine"> code line that has inside the function call.</param>
+        /// <returns></returns>
         public static string FindNameFromCodeLine(string codeLine)
         {
             codeLine = codeLine.Split('(')[0];
@@ -910,6 +918,13 @@ namespace testServer2
             codeLine = codeLine.Trim();
             return codeLine;
         }
+        /// Function - SetCallsFromThisFunctionValue
+        /// <summary>
+        /// creates the key that needs to be for this function on the dictionary of functionInfoJson. if they match return the key
+        /// </summary>
+        /// <param name="name"> function name</param>
+        /// <param name="callsFromThisFunction"> type dictionary that have this function and what functions are being called from this.</param>
+        /// <returns></returns>
         public static string SetCallsFromThisFunctionValue(string name, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction)
         {
             string result="";
@@ -1285,7 +1300,6 @@ namespace testServer2
                     {
                         result = CutBetween2Strings(codeLine, "\"", "\"");
                     }
-                    MainProgram.AddToLogString(originalFile, result);
                     //only enters an include if it didnt already included him.
                     if (!includes.Contains(CreateMD5(result)))
                     {
@@ -1323,7 +1337,43 @@ namespace testServer2
             {
                 sr.Close();
             }
-            printArrayList(originalFile, keywords);
+        }
+        /// Function - ConcatenateIfNeeded
+        /// <summary>
+        /// if someone wrote a line that continues in the next line it concatenates it. and creates a new line.
+        /// </summary>
+        /// <param name="codeLine"> codeLine type string</param>
+        /// <param name="buffer"> buffer type MyStream</param>
+        /// <param name="functionContent"> the content of the function</param>
+        /// <param name="functionName">function Name</param>
+        /// <returns></returns>
+        static string ConcatenateIfNeeded(string codeLine,MyStream buffer,Dictionary<string,string>functionContent,string functionName)
+        {
+            bool stop = false;
+            string newCodeLine = codeLine;
+            if(codeLine.IndexOf("#")!=-1)
+            {
+                stop = true;
+            }
+            for(int i=0;i<ignoreWhenCheckingEndRow.Length&&!stop;i++)
+            {
+                if (Regex.IsMatch(codeLine, ignoreWhenCheckingEndRow[i]))
+                    stop = true;
+            }
+            if(codeLine.IndexOf("/*")!=-1|| codeLine.IndexOf("//") != -1|| codeLine.IndexOf("*/") != -1||codeLine.IndexOf("{")!=-1|| codeLine.IndexOf("}") != -1|| codeLine=="")
+            {
+                stop = true;
+            }
+            while(!stop&&codeLine!=null&&newCodeLine.IndexOf(";")==-1)
+            {
+                newCodeLine += buffer.ReadLine();
+            }
+            if(codeLine!=newCodeLine)
+            {
+                newCodeLine = newCodeLine.Replace("\t", "");
+                functionContent[functionName]=functionContent[functionName].Replace(codeLine, newCodeLine);
+            }
+            return newCodeLine;
         }
         /// Function - CutBetween2Strings
         /// <summary>
@@ -1446,19 +1496,6 @@ namespace testServer2
             return results;
 
 
-        }
-        /// Function - printArrayList
-        /// <summary>
-        /// prints an arrayList.
-        /// </summary>
-        /// <param name="a"> Hashtable A to print</param>
-        public static void printArrayList(string path,Hashtable a)
-        {
-            ICollection keys = a.Keys;
-            foreach (string key in keys)
-            {
-                MainProgram.AddToLogString(path,a[key].ToString());
-            }
         }
         /// Function - AddToArrayListFromFile
         /// <summary>

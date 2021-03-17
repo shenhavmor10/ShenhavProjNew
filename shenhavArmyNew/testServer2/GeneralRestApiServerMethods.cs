@@ -293,6 +293,14 @@ namespace testServer2
             codeLine = codeLine.Trim();
             return codeLine;
         }
+        /// Function - CreatePatternForFunction
+        /// <summary>
+        /// creates a pattern for the function in order to find it in code.
+        /// </summary>
+        /// <param name="parameters"> parameters type ParametersType.</param>
+        /// <param name="functionName"> name of the function.</param>
+        /// <param name="returnType"> the return Of the function.</param>
+        /// <returns></returns>
         static string CreatePatternForFunction(ParametersType [] parameters,string functionName,string returnType)
         {
             string pattern = @"([^\s]+)?" +returnType+@"[\s*]+"+functionName + @"[\s(]+";
@@ -500,6 +508,7 @@ namespace testServer2
         static void CreateCodeJsonFile(string path,Hashtable includes,ArrayList globalVariables,Dictionary<string,string>defines, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json, string eVars,string codeContent)
         {
             CodeInfoJson code=new CodeInfoJson();
+            int rowAmount = 0;
             code.includes = new string[includes.Values.Count];
             includes.Values.CopyTo(code.includes, 0);
             code.includesAmount = includes.Values.Count;
@@ -517,6 +526,19 @@ namespace testServer2
                 MainProgram.AddToLogString(path, "Error open file  " + path);
             }
             code.rawCodeContent=sr.ReadToEnd();
+            try
+            {
+                sr = new MyStream(path, System.Text.Encoding.UTF8);
+            }
+            catch (Exception e)
+            {
+                MainProgram.AddToLogString(path, "Error open file  " + path);
+            }
+            while(sr.ReadLine()!=null)
+            {
+                rowAmount++;
+            }
+            code.rowNumber = rowAmount;
             //Serialize.
             final_json[path][eVars].Add("codeInfo",code);
         }

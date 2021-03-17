@@ -15,10 +15,12 @@ namespace AddToolsMVVM.ViewModel
         private string resultBlockRemove;
         private ToolModel newTool;
         private ICommand _RemoveCommand;
+        //constructor for the viewmodel
         public RemoveViewModel()
         {
             Tool = new ToolModel();
         }
+        //Tool Get Set
         public ToolModel Tool
         {
             get
@@ -31,6 +33,7 @@ namespace AddToolsMVVM.ViewModel
                 NotifyPropertyChanged("Tool");
             }
         }
+        //ResultBlockRemove Get Set
         public string ResultBlockRemove
         {
             get
@@ -54,6 +57,11 @@ namespace AddToolsMVVM.ViewModel
                 return _RemoveCommand;
             }
         }
+        /// Function - Remove
+        /// <summary>
+        /// When pressing the button Remove - 
+        /// it changes in the database the tool section is_working to false. 
+        /// </summary>
         public void Remove()
         {
             SqlConnection cnn;

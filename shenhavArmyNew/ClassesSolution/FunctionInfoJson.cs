@@ -45,6 +45,7 @@ namespace ClassesSolution
         public ParametersType[] Globalvariables;
         public string codeContent;
         public string rawCodeContent;
+        public int rowNumber;
     }
     public class ParametersType
     {

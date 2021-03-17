@@ -1,0 +1,49 @@
+﻿<UserControl x:Class="GUI.Views.AddFile"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:GUI.Views"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="550" d:DesignWidth="600">
+    <Grid Background="White">
+        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="296" FontSize="24"><Run Text="Add A New File ! "/><Run Text=":)"/></TextBlock>
+        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,69,0,0" TextWrapping="Wrap" Text="{Binding File.FilePath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="FilePath" materialDesign:HintAssist.Hint="File Path"/>
+        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,115,0,0" TextWrapping="Wrap" Text="{Binding File.ProjectPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="ProjectPath" materialDesign:HintAssist.Hint="Project Path"/>
+        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,162,0,0" TextWrapping="Wrap" Text="{Binding File.GccPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="GCCPath" materialDesign:HintAssist.Hint="GCC Path"/>
+        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,208,0,0" TextWrapping="Wrap" Text="{Binding File.OtherInclude,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="OtherInclude" materialDesign:HintAssist.Hint="Other Include Path"/>
+        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,254,0,0" TextWrapping="Wrap" Text="{Binding File.EVarsPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="EVarsPath" materialDesign:HintAssist.Hint="Environment Variables Path"/>
+        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,300,0,0" TextWrapping="Wrap" Text="{Binding File.DestinationPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="DestPath" materialDesign:HintAssist.Hint="Destination Path"/>
+        <Button Content="Connect" HorizontalAlignment="Left" Margin="447,11,0,0" VerticalAlignment="Top" Width="143" Height="72" FontSize="30" Name ="ConnectBtn" Command="{Binding Path=ConnectCommand}"/>
+        <Button Content="Browse" HorizontalAlignment="Left" Margin="306,115,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn" FontSize="18" Command="{Binding Path=BrowseCommandFolderPath}"/>
+        <Button Content="Browse" HorizontalAlignment="Left" Margin="306,254,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn2" FontSize="18" Command="{Binding Path=BrowseCommandEVarsPath}"/>
+        <Button Content="Browse" HorizontalAlignment="Left" Margin="306,208,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn3" FontSize="18" Command="{Binding Path=BrowseCommandGCCPath2}"/>
+        <Button Content="Browse" HorizontalAlignment="Left" Margin="306,161,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn4" FontSize="18" Command="{Binding Path=BrowseCommandGCCPath}"/>
+        <Button Content="Browse" HorizontalAlignment="Left" Margin="306,69,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn5" FontSize="18" Command="{Binding Path=BrowseCommandFilePath}"/>
+        <Button Content="Browse" HorizontalAlignment="Left" Margin="306,300,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn6" FontSize="18" Command="{Binding Path=BrowseCommandDestPath}"/>
+        <TextBlock HorizontalAlignment="Left" Margin="382,363,0,0" TextWrapping="Wrap" Text="{Binding ResultBlock,Mode=TwoWay}" VerticalAlignment="Top" Height="77" Width="208" FontSize="12"/>
+        <StackPanel HorizontalAlignment="Left" Height="31" Margin="10,397,0,22" VerticalAlignment="Center" Width="401" Name="StackPanelFree" Orientation="Horizontal">
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap"  Text="{Binding Free1,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomFree" materialDesign:HintAssist.Hint="Custom Free"/>
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Free2,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomFree2" materialDesign:HintAssist.Hint="Custom Free"/>
+        </StackPanel>
+
+        <ListView Height="270" Margin="447,88,10,0" VerticalAlignment="Top" ItemsSource="{Binding Tools}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox IsChecked="{Binding ToolIsCheck}" Content="{Binding ToolName}"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+
+
+        <StackPanel HorizontalAlignment="Left" Height="31" Margin="10,361,0,58" VerticalAlignment="Stretch" Width="401" x:Name="StackPanelMallocs" Orientation="Horizontal">
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap"  Text="{Binding Malloc1,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomMalloc" materialDesign:HintAssist.Hint="Custom Malloc"/>
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Malloc2,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomMalloc2" materialDesign:HintAssist.Hint="Custom Malloc"/>
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Malloc3,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomMalloc3" materialDesign:HintAssist.Hint="Custom Malloc"/>
+            <TextBox HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Malloc4,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomMalloc4" materialDesign:HintAssist.Hint="Custom Malloc"/>
+        </StackPanel>
+
+    </Grid>
+</UserControl>

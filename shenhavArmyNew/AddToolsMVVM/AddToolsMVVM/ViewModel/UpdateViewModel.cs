@@ -17,6 +17,7 @@ namespace AddToolsMVVM.ViewModel
         private string resultBlockUpdate;
         private ICommand _BrowseCommandUpdate;
         private ICommand _ApplyCommandUpdate;
+        //constructor for the viewmodel.
         public UpdateViewModel()
         {
             Tool = new ToolModel();
@@ -32,6 +33,7 @@ namespace AddToolsMVVM.ViewModel
                 return _BrowseCommandUpdate;
             }
         }
+        //ResultBlockUpdate Get Set
         public string ResultBlockUpdate
         {
             get
@@ -55,6 +57,10 @@ namespace AddToolsMVVM.ViewModel
                 return _ApplyCommandUpdate;
             }
         }
+        /// Function - Apply
+        /// <summary>
+        /// Updates the tool requested.
+        /// </summary>
         public void Apply()
         {
             SqlConnection cnn;
@@ -88,6 +94,7 @@ namespace AddToolsMVVM.ViewModel
             }
             
         }
+        //Tool Get Set
         public ToolModel Tool
         {
             get
@@ -100,6 +107,10 @@ namespace AddToolsMVVM.ViewModel
                 NotifyPropertyChanged("Tool");
             }
         }
+        /// Function - Browse
+        /// <summary>
+        /// using Ookii Dialogs Wpf and when someone presses browse it pops a browse window for folders.
+        /// </summary>
         public void Browse()
         {
             var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
