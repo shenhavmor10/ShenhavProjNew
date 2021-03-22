@@ -1,5 +1,0 @@
-toolExeFolder=..\..\..\ToolsExe
-ignoreVariablesTypesPath=..\..\..\ignoreVariablesType.txt
-ansiCFile=..\..\..\Ansikeywords.txt
-CSyntextFile=..\..\..\CSyntext.txt
-logFile=..\..\..\LogFile.txt

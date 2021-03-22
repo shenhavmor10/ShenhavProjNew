@@ -18,7 +18,7 @@ namespace testServer2
         static Regex CloseBlockPattern = new Regex(@".*}.*");
         static Regex FunctionPatternInC = new Regex(@"^([^ ]+\s)?[^ ]+\s(.*\s)?[^ ]+\([^()]*\)$");
         const string ReturnPattern = @"(\s)+?return(\s)?[^\s]+;";
-        const string patternFilePath = @"..\..\..\Patterns.txt";
+        const string patternFilePath = @"..\..\..\ConfFiles\Patterns.txt";
 
         /// Function - FunctionCode
         /// <summary>
