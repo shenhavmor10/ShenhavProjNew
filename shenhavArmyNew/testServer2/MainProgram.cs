@@ -27,7 +27,7 @@ namespace testServer2
         const int START_INDEX_OF_TOOLS = 0;
         const string MAIN_DICT_INDEX = "main";
         //paths for all files.
-        const string configFile = @"..\..\..\ConfigurationFIle.txt";
+        const string configFile = @"..\..\..\ConfFiles\ConfigurationFIle.txt";
         static string toolExeFolder, ignoreVariablesTypesPath, ansiCFile, CSyntextFile, logFile;
         const string FINISH_SUCCESFULL = "Finished succesfully code is ready at the destination path.";
         const int TIMEOUT_SLEEP = 1000;

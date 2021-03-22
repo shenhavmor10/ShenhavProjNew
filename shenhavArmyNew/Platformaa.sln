@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassesSolution", "ClassesS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectionServer", "ConnectionServer\ConnectionServer.csproj", "{A68728DC-37FA-4079-97FE-69C6C82B1F32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUI", "GUI\GUI.csproj", "{024A9460-DDD0-411C-8950-BE5DA9F5ACE7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUI-Old", "GUI\GUI.csproj", "{024A9460-DDD0-411C-8950-BE5DA9F5ACE7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
