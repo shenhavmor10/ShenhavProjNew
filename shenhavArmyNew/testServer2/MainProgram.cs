@@ -331,7 +331,7 @@ namespace testServer2
         {
             try
             {
-                string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
+                string connectionString = "Data Source=DESKTOP-L19GB91\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
                 SqlConnection cnn = new SqlConnection(connectionString);
                 cnn.Open();
                 SqlCommand command = new SqlCommand("UPDATE tools_table SET tool_avg_line=@tool_avg_line WHERE tool_exe_name=@tool_exe_name", cnn);
@@ -561,7 +561,7 @@ namespace testServer2
         static ArrayList getAllToolAvgLineSecondsArray(ArrayList tools)
         {
             ArrayList toolsAvgSec = new ArrayList();
-            string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
+            string connectionString = "Data Source=DESKTOP-L19GB91\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
             SqlConnection cnn = new SqlConnection(connectionString);
             cnn.Open();
             foreach (string tool in tools)

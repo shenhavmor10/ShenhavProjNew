@@ -222,7 +222,7 @@ namespace GUI.ViewModel
         /// </summary>
         public void GetAllToolsFromDB()
         {
-            string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
+            string connectionString = "Data Source=DESKTOP-L19GB91\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
             SqlConnection cnn = new SqlConnection(connectionString);
             cnn.Open();
             SqlCommand command = new SqlCommand("Select tool_name,tool_desc,tool_exe_name,tool_result_needed,tool_avg_line,tool_is_working from tools_table;", cnn);
