@@ -20,6 +20,8 @@ namespace GUI.ViewModel
         private FileModel newFile;
         private MemoryModel customMemoryNames;
         private string resultBlock;
+        static string configFile= @"ConfigurationFile.txt";
+        static string connectionString;
         private ICommand _ConnectCommand;
         private ICommand _BrowseCommandFilePath;
         private ICommand _BrowseCommandEVarsPath;
@@ -31,6 +33,7 @@ namespace GUI.ViewModel
         //constructor for the viewmodel
         public AddFileViewModel()
         {
+            initializeConfig();
             GetAllToolsFromDB();
             Memory = new MemoryModel();
             TestAllUntimedTools();
@@ -216,13 +219,48 @@ namespace GUI.ViewModel
             
             
         }
+        /// Function - initializeConfig
+        /// <summary>
+        /// Function opens up config file and set all paths.
+        /// </summary>
+        static void initializeConfig()
+        {
+            Dictionary<string, string> configDict = new Dictionary<string, string>();
+            try
+            {
+                using (var sr = new StreamReader(configFile))
+                {
+                    string line = null;
+
+                    // while it reads a key
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        // add the key and whatever it 
+                        // can read next as the value
+                        configDict.Add(line.Split('=')[0], line.Split('=')[1]);
+
+                    }
+                }
+                string connectionStringFile = configDict["SqlConnectionString"];
+                Console.WriteLine(connectionStringFile);
+                /*if (!System.IO.File.Exists(connectionStringFile))
+                {
+                    connectionString = System.IO.File.ReadAllText(connectionStringFile);
+                }*/
+                connectionString = System.IO.File.ReadAllText(connectionStringFile);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("error = " + e.ToString());
+            }
+            configDict.Clear();
+        }
         /// Function - GetAllToolsFromDB
         /// <summary>
         /// Get all tools from the database and adds them to the toolsList parameter.
         /// </summary>
         public void GetAllToolsFromDB()
         {
-            string connectionString = "Data Source=DESKTOP-L19GB91\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
             SqlConnection cnn = new SqlConnection(connectionString);
             cnn.Open();
             SqlCommand command = new SqlCommand("Select tool_name,tool_desc,tool_exe_name,tool_result_needed,tool_avg_line,tool_is_working from tools_table;", cnn);

@@ -39,6 +39,7 @@ namespace testServer2
         static Mutex mutexAddLogFiles = new Mutex();
         static ArrayList currentDataList = new ArrayList();
         static int threadNumber = 0;
+        static string connectionString;
         static bool test = false;
         static Dictionary<string,Dictionary<string, Dictionary<string, Object>>> final_json = new Dictionary<string, Dictionary<string, Dictionary<string, object>>>();
         static Dictionary<string, string> readyPatterns = new Dictionary<string, string>();
@@ -331,7 +332,6 @@ namespace testServer2
         {
             try
             {
-                string connectionString = "Data Source=DESKTOP-L19GB91\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
                 SqlConnection cnn = new SqlConnection(connectionString);
                 cnn.Open();
                 SqlCommand command = new SqlCommand("UPDATE tools_table SET tool_avg_line=@tool_avg_line WHERE tool_exe_name=@tool_exe_name", cnn);
@@ -372,6 +372,13 @@ namespace testServer2
                 ansiCFile = configDict["ansiCFile"];
                 CSyntextFile = configDict["CSyntextFile"];
                 logFile = configDict["logFile"];
+                string connectionStringFile = configDict["SqlConnectionString"];
+                Console.WriteLine(connectionStringFile);
+                /*if (!System.IO.File.Exists(connectionStringFile))
+                {
+                    connectionString = System.IO.File.ReadAllText(connectionStringFile);
+                }*/
+                connectionString = System.IO.File.ReadAllText(connectionStringFile);
             }
             catch(Exception e)
             {
@@ -561,7 +568,6 @@ namespace testServer2
         static ArrayList getAllToolAvgLineSecondsArray(ArrayList tools)
         {
             ArrayList toolsAvgSec = new ArrayList();
-            string connectionString = "Data Source=DESKTOP-L19GB91\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
             SqlConnection cnn = new SqlConnection(connectionString);
             cnn.Open();
             foreach (string tool in tools)

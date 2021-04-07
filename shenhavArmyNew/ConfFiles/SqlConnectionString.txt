@@ -1,0 +1,1 @@
+Data Source=E560-02\SQLEXPRESS01;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234

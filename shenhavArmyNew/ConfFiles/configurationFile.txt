@@ -3,3 +3,4 @@ ignoreVariablesTypesPath=..\..\..\ConfFiles\ignoreVariablesType.txt
 ansiCFile=..\..\..\ConfFiles\Ansikeywords.txt
 CSyntextFile=..\..\..\ConfFiles\CSyntext.txt
 logFile=..\..\..\ConfFiles\LogFile.txt
+SqlConnectionString=..\..\..\ConfFiles\SqlConnectionString.txt

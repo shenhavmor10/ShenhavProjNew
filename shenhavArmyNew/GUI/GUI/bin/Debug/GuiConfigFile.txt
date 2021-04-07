@@ -1,6 +1,6 @@
-FilePath=..\..\..\TestItems\TestCCode2\test.c
-ProjectPath=..\..\..\TestItems\TestCCode2
-Evars=..\..\..\TestItems\TestCCode2\Evars.txt
-GCCFirst=..\..\..\TestItems\crt
-GCCSecond=..\..\..\TestItems\crt\sdks
-DestPath=..\..\..\TestItems\Dest
+FilePath=......TestItemsTestCCode2test.c
+ProjectPath=......TestItemsTestCCode2
+Evars=......TestItemsTestCCode2Evars.txt
+GCCFirst=......TestItemscrt
+GCCSecond=......TestItemscrtsdks
+DestPath=......TestItemsDest
