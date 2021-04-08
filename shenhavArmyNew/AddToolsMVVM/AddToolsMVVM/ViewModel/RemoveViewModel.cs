@@ -43,7 +43,7 @@ namespace AddToolsMVVM.ViewModel
             set
             {
                 resultBlockRemove = value;
-                NotifyPropertyChanged("ResultBlock");
+                NotifyPropertyChanged("ResultBlockRemove");
             }
         }
         public ICommand RemoveCommand
@@ -65,10 +65,9 @@ namespace AddToolsMVVM.ViewModel
         public void Remove()
         {
             SqlConnection cnn;
-            string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
             try
             {
-                cnn = new SqlConnection(connectionString);
+                cnn = new SqlConnection(NavigationViewModel.connectionString);
                 cnn.Open();
 
                 //tool_is_working
@@ -78,7 +77,7 @@ namespace AddToolsMVVM.ViewModel
             }
             catch(Exception e)
             {
-                ResultBlockRemove = "ERROR";
+                ResultBlockRemove = "Error in updating database, error = "+e.Message;
             }
         }
     }

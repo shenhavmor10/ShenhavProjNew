@@ -46,3 +46,15 @@ C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\Client2\o
 C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\Client2\obj\Debug\DocumentationTool.csproj.CopyComplete
 C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\Client2\obj\Debug\Client2.exe
 C:\Users\student\Desktop\LastUpdatedArmy\ShenhavProjNew\shenhavArmyNew\Client2\obj\Debug\Client2.pdb
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\bin\Debug\Client2.exe.config
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\bin\Debug\Client2.exe
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\bin\Debug\Client2.pdb
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\bin\Debug\ClassesSolution.exe
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\bin\Debug\Newtonsoft.Json.dll
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\bin\Debug\ClassesSolution.pdb
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\bin\Debug\ClassesSolution.exe.config
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\obj\Debug\DocumentationTool.csprojAssemblyReference.cache
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\obj\Debug\DocumentationTool.csproj.CoreCompileInputs.cache
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\obj\Debug\DocumentationTool.csproj.CopyComplete
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\obj\Debug\Client2.exe
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\Client2\obj\Debug\Client2.pdb

@@ -1,1 +1,2 @@
 DestProjectPath=..\..\..\..\ToolsExe
+SqlConnectionString=..\..\..\..\ConfFiles\SqlConnectionString.txt

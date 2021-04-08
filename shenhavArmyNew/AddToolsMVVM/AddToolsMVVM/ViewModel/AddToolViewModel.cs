@@ -23,8 +23,8 @@ namespace AddToolsMVVM.ViewModel
         // constructor for the viewmodel.
         public AddToolViewModel()
         {
-            GetAllToolsFromDB();
             initializeConfig();
+            GetAllToolsFromDB();
             Tool = new ToolModel();
             Tools.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Tools_CollectionChanged);
         }
@@ -39,8 +39,7 @@ namespace AddToolsMVVM.ViewModel
         /// </summary>
         public void GetAllToolsFromDB()
         {
-            string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
-            SqlConnection cnn = new SqlConnection(connectionString);
+            SqlConnection cnn = new SqlConnection(NavigationViewModel.connectionString);
             cnn.Open();
             SqlCommand command = new SqlCommand("Select tool_name,tool_desc,tool_result_needed from tools_table;", cnn);
             using (SqlDataReader reader = command.ExecuteReader())
@@ -53,7 +52,7 @@ namespace AddToolsMVVM.ViewModel
             }
         }
         //ResultBlock get set
-        public string ResultBlock
+        public string ResultBlockAdd
         {
             get
             {
@@ -62,7 +61,7 @@ namespace AddToolsMVVM.ViewModel
             set
             {
                 resultBlock = value;
-                NotifyPropertyChanged("ResultBlock");
+                NotifyPropertyChanged("ResultBlockAdd");
             }
         }
         //Tool get set
@@ -122,8 +121,7 @@ namespace AddToolsMVVM.ViewModel
         {
             SqlConnection cnn;
             //connection string
-            string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
-            cnn = new SqlConnection(connectionString);
+            cnn = new SqlConnection(NavigationViewModel.connectionString);
             cnn.Open();
             SqlCommand command;
             try
@@ -140,11 +138,11 @@ namespace AddToolsMVVM.ViewModel
                 GeneralFunctions.DirectoryCopy(Tool.ToolFolder, string.Format(DestProjectPath + "\\" + Tool.ToolFolder.Substring(Tool.ToolFolder.LastIndexOf("\\") + 1)), true);
                 command.ExecuteNonQuery();
                 Tools.Add(Tool);
-                ResultBlock = "Success";
+                ResultBlockAdd = "Success";
             }
             catch(Exception e)
             {
-                ResultBlock = "ERROR";
+                ResultBlockAdd = "Error in database insertion , error = "+e.Message;
             }
             
         }
@@ -184,10 +182,17 @@ namespace AddToolsMVVM.ViewModel
                     }
                 }
                 DestProjectPath = configDict["DestProjectPath"];
+                string connectionStringFile = configDict["SqlConnectionString"];
+                Console.WriteLine(connectionStringFile);
+                /*if (!System.IO.File.Exists(connectionStringFile))
+                {
+                    connectionString = System.IO.File.ReadAllText(connectionStringFile);
+                }*/
+                NavigationViewModel.connectionString = System.IO.File.ReadAllText(connectionStringFile);
             }
             catch (Exception e)
             {
-                ResultBlock = "Couldnt find AddToolConfigFile or missed one of the Files";
+                ResultBlockAdd = "Couldnt find AddToolConfigFile or missed one of the Files";
             }
             configDict.Clear();
         }

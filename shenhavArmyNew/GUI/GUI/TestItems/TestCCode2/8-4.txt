@@ -1,0 +1,8 @@
+FilePath - C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\GUI\GUI\TestItems\TestCCode2\test.c
+
+
+Environment Variable = NoEvarTurnedOn
+Tool = ..\..\..\ToolsExe\MemoryHandleTool\bin\Debug\MemoryHandleTool.exe
+"Variable pointer5 that was created in function main was not being free'd."
+Finished succesfully code is ready at the destination path.
+

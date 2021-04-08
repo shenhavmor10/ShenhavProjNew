@@ -43,7 +43,7 @@ namespace AddToolsMVVM.ViewModel
             set
             {
                 resultBlockUpdate = value;
-                NotifyPropertyChanged("ResultBlock");
+                NotifyPropertyChanged("ResultBlockUpdate");
             }
         }
         public ICommand ApplyCommandUpdate
@@ -64,10 +64,9 @@ namespace AddToolsMVVM.ViewModel
         public void Apply()
         {
             SqlConnection cnn;
-            string connectionString = "Data Source=DESKTOP-L628613\\SQLEXPRESS;Initial Catalog=ToolsDB;User ID=shenhav;Password=1234";
             try
             {
-                cnn = new SqlConnection(connectionString);
+                cnn = new SqlConnection(NavigationViewModel.connectionString);
 
                 cnn.Open();
                 SqlCommand command;
@@ -90,7 +89,7 @@ namespace AddToolsMVVM.ViewModel
             }
             catch(Exception e)
             {
-                ResultBlockUpdate = "ERROR";
+                ResultBlockUpdate = "Error in updating database, error = " + e.Message;
             }
             
         }

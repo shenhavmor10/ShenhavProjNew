@@ -10,7 +10,7 @@
     <Grid Background="White">
         <TextBox HorizontalAlignment="Left" Height="41" Margin="10,79,0,0" TextWrapping="Wrap" Text="{Binding Tool.ToolName,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolName" materialDesign:HintAssist.Hint="Tool Name"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="296" FontSize="24"><Run Text="Remove A Tool "/><Run Text=":)"/></TextBlock>
-        <Button Content="Remove" HorizontalAlignment="Left" Margin="411,364,0,0" VerticalAlignment="Top" Width="179" Height="76"  Name ="BrowseBtn" FontSize="40" Command="{Binding Path=RemoveCommand}" RenderTransformOrigin="0.468,0.656"/>
-        <TextBlock HorizontalAlignment="Left" Margin="447,92,0,0" TextWrapping="Wrap" Text="{Binding ResultBlockRemove,Mode=TwoWay}" VerticalAlignment="Top" Height="59" Width="143" FontSize="25"/>
+        <Button Content="Remove" HorizontalAlignment="Left" Margin="447,11,0,0" VerticalAlignment="Top" Width="143" Height="72" FontSize="30"  Name ="BrowseBtn" Command="{Binding Path=RemoveCommand}" RenderTransformOrigin="0.468,0.656"/>
+        <TextBlock HorizontalAlignment="Left" Margin="447,92,0,0" TextWrapping="Wrap" Text="{Binding ResultBlockRemove,Mode=TwoWay}" VerticalAlignment="Top" Height="133" Width="143" FontSize="12"/>
     </Grid>
 </UserControl>

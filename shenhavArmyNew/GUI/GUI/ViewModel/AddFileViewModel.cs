@@ -546,7 +546,7 @@ namespace GUI.ViewModel
             }
             catch (Exception e)
             {
-                ResultBlock = "Couldnt find AddToolConfigFile or missed one of the Files";
+                ResultBlock = "Couldnt find ConfigFile or missed one of the Files";
             }
             configDict.Clear();
             return f;

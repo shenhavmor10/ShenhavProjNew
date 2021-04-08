@@ -24,6 +24,6 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <TextBlock HorizontalAlignment="Left" Margin="447,92,0,0" TextWrapping="Wrap" Text="{Binding ResultBlock,Mode=TwoWay}" VerticalAlignment="Top" Height="59" Width="143" FontSize="12"/>
+        <TextBlock HorizontalAlignment="Left" Margin="447,92,0,0" TextWrapping="Wrap" Text="{Binding ResultBlockAdd,Mode=TwoWay}" VerticalAlignment="Top" Height="133" Width="143" FontSize="12"/>
     </Grid>
 </UserControl>
