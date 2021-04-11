@@ -20,6 +20,7 @@ namespace GUI.ViewModel
     class AddFileViewModel : ViewModelBase
     {
         private ObservableCollection<ToolModel> toolsList;
+        private ObservableCollection<bool> visibilityArray=new ObservableCollection<bool>();
         private FileModel newFile;
         private MemoryModel customMemoryNames;
         private string resultBlock;
@@ -38,7 +39,9 @@ namespace GUI.ViewModel
         private ICommand _GoToFile3Command;
         private ICommand _GoToFile4Command;
         private ICommand _GoToFile5Command;
-        static int fileNumber = 1;
+        static int fileNumber = 0;
+        private bool button2visibility = false, button3visibility = false, button4visibility = false, button5visibility = false;
+
         //constructor for the viewmodel
         public AddFileViewModel()
         {
@@ -47,17 +50,24 @@ namespace GUI.ViewModel
             Memory = new MemoryModel();
             TestAllUntimedTools();
             initializeFiles();
+            initializeVisibility();
+        }
+        public void initializeVisibility()
+        {
+            VisibilityArray.Add(button2visibility);
+            VisibilityArray.Add(button3visibility);
+            VisibilityArray.Add(button4visibility);
+            VisibilityArray.Add(button5visibility);
         }
         public void initializeFiles()
         {
+
             for(int i=0;i<5;i++)
             {
                 File = new FileModel();
-                File.IsVisible = false;
                 NavigationViewModel.fileList.Add(File);
             }
             File = NavigationViewModel.fileList[0];
-            File.IsVisible = true;
         }
         //ResultBlock Get Set
         
@@ -87,7 +97,55 @@ namespace GUI.ViewModel
                 NotifyPropertyChanged("File");
             }
         }
-        
+        public bool Button2Visibility
+        {
+            get
+            {
+                return button2visibility;
+            }
+            set
+            {
+                button2visibility = value;
+                NotifyPropertyChanged("Button2Visibility");
+            }
+        }
+        public bool Button3Visibility
+        {
+            get
+            {
+                return button3visibility;
+            }
+            set
+            {
+                button3visibility = value;
+                NotifyPropertyChanged("Button3Visibility");
+            }
+        }
+        public bool Button4Visibility
+        {
+            get
+            {
+                return button4visibility;
+            }
+            set
+            {
+                button4visibility = value;
+                NotifyPropertyChanged("Button4Visibility");
+            }
+        }
+        public bool Button5Visibility
+        {
+            get
+            {
+                return button5visibility;
+            }
+            set
+            {
+                button5visibility = value;
+                NotifyPropertyChanged("Button5Visibility");
+            }
+        }
+
         //Tools Get Set
         public ObservableCollection<ToolModel> Tools
         {
@@ -99,6 +157,18 @@ namespace GUI.ViewModel
             {
                 toolsList = value;
                 NotifyPropertyChanged("Tools");
+            }
+        }
+        public ObservableCollection<bool> VisibilityArray
+        {
+            get
+            {
+                return visibilityArray;
+            }
+            set
+            {
+                visibilityArray = value;
+                NotifyPropertyChanged("VisibilityArray");
             }
         }
         public ICommand ConnectCommand
@@ -126,6 +196,26 @@ namespace GUI.ViewModel
         public void addFile()
         {
             //NavigationViewModel.fileList[fileNumber++].IsVisible = true;
+            switch (fileNumber)
+            {
+                case 0:
+                    Button2Visibility = true;
+                    break;
+                case 1:
+                    Button3Visibility = true;
+                    break;
+                case 2:
+                    Button4Visibility = true;
+                    break;
+                case 3:
+                    Button5Visibility = true;
+                    break;
+                default:
+                    break;
+
+
+            }
+            fileNumber++;
             //make an array for each one.
         }
         /// Function - createProtocol
@@ -574,10 +664,7 @@ namespace GUI.ViewModel
         {
             File = NavigationViewModel.fileList[4];
         }
-        public void UnvisibleNextButton()
-        {
-            
-        }
+
         /// Function - FindAllUntimedTools
         /// <summary>
         /// find all untimed tool (tools that werent being checked for average time per code line).
