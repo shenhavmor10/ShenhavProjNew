@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GUI.ViewModel;
 
@@ -11,6 +12,7 @@ namespace GUI
 {
     class ClientConnection
     {
+        static Regex CurrentThreadRegex = new Regex("currentThread={(.*?)}");
         public static int sendMessage(string data, Socket sender)
         {
             byte[] messageSent;
@@ -65,7 +67,9 @@ namespace GUI
                     if (data != "exit")
                     {
                         string newData = recieveMessage(sender);
-                        addFileViewModel.ResultBlock = newData;
+                        int clientNumber= int.Parse(CurrentThreadRegex.Match(newData).Groups[1].Value);
+                        newData = Regex.Replace(newData, @"currentThread={(.*?)}", "");
+                        NavigationViewModel.fileList[clientNumber].ResultBlock = newData;
                         //Change the textBlock to the error or final path depends if the code is good or bad.
                     }
                     else

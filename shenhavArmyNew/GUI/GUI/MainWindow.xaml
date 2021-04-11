@@ -34,23 +34,27 @@
 
 
 
-        <DockPanel Background="Gray" Grid.Column="0" Grid.Row="0" Grid.RowSpan="1">
-            <StackPanel Width="157" Height="32" VerticalAlignment="Top">
-                <Button Content="Add File" FontSize="20" Command="{Binding _AddFileCommand}"/>
+        <DockPanel Background="Gray" Grid.RowSpan="5">
+            <StackPanel Width="158" Height="519" VerticalAlignment="Top" >
+                <Button Content="Press Here" FontSize="20" Command="{Binding _AddFileCommand}" />
             </StackPanel>
         </DockPanel>
-        <DockPanel Background="Gray" Grid.Column="0" Grid.Row="1" Grid.RowSpan="5">
-            <ListView VerticalAlignment="Top" ItemsSource="{Binding Files}">
+        <!--<DockPanel Background="Gray" Grid.Column="0" Grid.Row="1" Grid.RowSpan="5">
+            -->
+        <!--<ListView VerticalAlignment="Top" ItemsSource="{Binding Files}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Button Content="{Binding ButtonName}" Command="{Binding Path= NavigationViewModel.GoToFileCommand}" Width="155" Height="32" FontSize="20"/>
+                        <Button Content="{Binding ButtonName}" Command="{Binding GoToFileCommand}" Width="155" Height="32" FontSize="20"/>
                     </DataTemplate>
                 </ListView.ItemTemplate>
-            </ListView>
-        </DockPanel>
+            </ListView>-->
+        <!--
+            
+            
+        </DockPanel>-->
 
 
-        <ContentControl x:Name="Pages" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="0" Grid.RowSpan="5" Content="{Binding SelectedViewModel}"/>
+        <ContentControl x:Name="Pages" Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="0" Grid.RowSpan="5" Content="{Binding SelectedViewModel}"/>
 
 
 

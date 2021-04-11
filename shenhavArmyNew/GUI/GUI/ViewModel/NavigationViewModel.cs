@@ -18,7 +18,7 @@ namespace GUI.ViewModel
         private ObservableCollection<AddFileViewModel> addFileViewModels = new ObservableCollection<AddFileViewModel>();
         public ICommand _AddFileCommand { get; set; }
         public ICommand _DynamicButtonsCommand { get; set; }
-        private ICommand _GoToFileCommand;
+        
 
 
         private ViewModelBase selectedViewModel;
@@ -60,28 +60,7 @@ namespace GUI.ViewModel
             SelectedViewModel = newFileViewModel;
             addFileViewModels.Add(newFileViewModel);
         }
-        public ICommand GoToFileCommand
-        {
-            get
-            {
-                if (_GoToFileCommand == null)
-                {
-                    _GoToFileCommand = new RelayCommand(param => this.GoToFile(fileList[0].ButtonName), null);
-                }
-                return _GoToFileCommand;
-            }
-        }
-        public void GoToFile(string buttonName)
-        {
-
-            for(int i =0;i<fileList.Count;i++)
-            {
-                if(fileList[i].ButtonName==buttonName)
-                {
-                    selectedViewModel = addFileViewModels[i];
-                }
-            }
-        }
+        
         
         public event PropertyChangedEventHandler PropertyChanged;
 

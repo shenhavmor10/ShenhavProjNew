@@ -10,7 +10,10 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
+using GUI.Views;
+using System.Windows;
 
 namespace GUI.ViewModel
 {
@@ -29,7 +32,13 @@ namespace GUI.ViewModel
         private ICommand _BrowseCommandProjectPath;
         private ICommand _BrowseCommandGccPath;
         private ICommand _BrowseCommandOtherIncludes;
-        private ICommand _GoToFileCommand;
+        private ICommand _ButtonAddFile;
+        private ICommand _GoToFile1Command;
+        private ICommand _GoToFile2Command;
+        private ICommand _GoToFile3Command;
+        private ICommand _GoToFile4Command;
+        private ICommand _GoToFile5Command;
+        static int fileNumber = 1;
         //constructor for the viewmodel
         public AddFileViewModel()
         {
@@ -37,24 +46,21 @@ namespace GUI.ViewModel
             GetAllToolsFromDB();
             Memory = new MemoryModel();
             TestAllUntimedTools();
-            File = new FileModel();
-            File.ButtonName = "File"+ (NavigationViewModel.fileList.Count+1);
-            NavigationViewModel.fileList.Add(File);
-
+            initializeFiles();
+        }
+        public void initializeFiles()
+        {
+            for(int i=0;i<5;i++)
+            {
+                File = new FileModel();
+                File.IsVisible = false;
+                NavigationViewModel.fileList.Add(File);
+            }
+            File = NavigationViewModel.fileList[0];
+            File.IsVisible = true;
         }
         //ResultBlock Get Set
-        public string ResultBlock
-        {
-            get
-            {
-                return resultBlock;
-            }
-            set
-            {
-                resultBlock = value;
-                NotifyPropertyChanged("ResultBlock");
-            }
-        }
+        
         //Memory Get Set
         public MemoryModel Memory
         {
@@ -81,6 +87,7 @@ namespace GUI.ViewModel
                 NotifyPropertyChanged("File");
             }
         }
+        
         //Tools Get Set
         public ObservableCollection<ToolModel> Tools
         {
@@ -98,12 +105,28 @@ namespace GUI.ViewModel
         {
             get
             {
-                if(_ConnectCommand == null)
+                if (_ConnectCommand == null)
                 {
                     _ConnectCommand = new RelayCommand(param => this.Connect(), null);
                 }
                 return _ConnectCommand;
             }
+        }
+        public ICommand ButtonAddFile
+        {
+            get
+            {
+                if(_ButtonAddFile == null)
+                {
+                    _ButtonAddFile = new RelayCommand(param => this.addFile(), null);
+                }
+                return _ButtonAddFile;
+            }
+        }
+        public void addFile()
+        {
+            //NavigationViewModel.fileList[fileNumber++].IsVisible = true;
+            //make an array for each one.
         }
         /// Function - createProtocol
         /// <summary>
@@ -190,12 +213,12 @@ namespace GUI.ViewModel
         {
             try
             {
-                ResultBlock = "";
+                File.ResultBlock = "";
                 ArrayList toolsArray = new ArrayList();
                 ObservableCollection<ToolModel> newResultOrder = FixResultOrder(toolsList);
                 if(newResultOrder==null)
                 {
-                    ResultBlock = "Picked tools without delivering them the tools they need. please pick again. or picked 0 tools";
+                    File.ResultBlock = "Picked tools without delivering them the tools they need. please pick again. or picked 0 tools";
                     throw new Exception("Picked tools without delivering them the tools they need.");
                 }
                 foreach (ToolModel tool in newResultOrder)
@@ -204,7 +227,7 @@ namespace GUI.ViewModel
                 }
                 if (toolsArray.Count == 0)
                 {
-                    ResultBlock = "Please Enter at least one tool.";
+                    File.ResultBlock = "Please Enter at least one tool.";
                     throw new Exception("no tools were being added to the check. add atleast one.");
                 }
                 string path = createProtocol(File, toolsArray);
@@ -308,7 +331,7 @@ namespace GUI.ViewModel
                 }
                 if(newToolOrder.Count==0)
                 {
-                    ResultBlock = "Picked tools without delivering them the tools they need. please pick again.";
+                    File.ResultBlock = "Picked tools without delivering them the tools they need. please pick again.";
                     throw new Exception("Picked tools without delivering them the tools they need.");
                 }
                 foreach(ToolModel alreadyAdded in newToolOrder)
@@ -476,6 +499,85 @@ namespace GUI.ViewModel
                 File.OtherInclude = folderDialog.SelectedPath;
             }
         }
+        public ICommand GoToFile2Command
+        {
+            get
+            {
+                if (_GoToFile2Command == null)
+                {
+                    _GoToFile2Command = new RelayCommand(param => this.GoToFile2(), null);
+                }
+                return _GoToFile2Command;
+            }
+        }
+        public void GoToFile2()
+        {
+            File = NavigationViewModel.fileList[1];
+        }
+        public ICommand GoToFile1Command
+        {
+            get
+            {
+                if (_GoToFile1Command == null)
+                {
+                    _GoToFile1Command = new RelayCommand(param => this.GoToFile1(), null);
+                }
+                return _GoToFile1Command;
+            }
+        }
+        public void GoToFile1()
+        {
+            File = NavigationViewModel.fileList[0];
+        }
+        public ICommand GoToFile3Command
+        {
+            get
+            {
+                if (_GoToFile3Command == null)
+                {
+                    _GoToFile3Command = new RelayCommand(param => this.GoToFile3(), null);
+                }
+                return _GoToFile3Command;
+            }
+        }
+        public void GoToFile3()
+        {
+            File = NavigationViewModel.fileList[2];
+        }
+        public ICommand GoToFile4Command
+        {
+            get
+            {
+                if (_GoToFile4Command == null)
+                {
+                    _GoToFile4Command = new RelayCommand(param => this.GoToFile4(), null);
+                }
+                return _GoToFile4Command;
+            }
+        }
+        public void GoToFile4()
+        {
+            File = NavigationViewModel.fileList[3];
+        }
+        public ICommand GoToFile5Command
+        {
+            get
+            {
+                if (_GoToFile5Command == null)
+                {
+                    _GoToFile5Command = new RelayCommand(param => this.GoToFile5(), null);
+                }
+                return _GoToFile5Command;
+            }
+        }
+        public void GoToFile5()
+        {
+            File = NavigationViewModel.fileList[4];
+        }
+        public void UnvisibleNextButton()
+        {
+            
+        }
         /// Function - FindAllUntimedTools
         /// <summary>
         /// find all untimed tool (tools that werent being checked for average time per code line).
@@ -546,7 +648,7 @@ namespace GUI.ViewModel
             }
             catch (Exception e)
             {
-                ResultBlock = "Couldnt find ConfigFile or missed one of the Files";
+                File.ResultBlock = "Couldnt find ConfigFile or missed one of the Files";
             }
             configDict.Clear();
             return f;

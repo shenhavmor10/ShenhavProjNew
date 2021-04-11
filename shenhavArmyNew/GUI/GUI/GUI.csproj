@@ -70,6 +70,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BaseCommand.cs" />
+    <Compile Include="BoolToVisibilityConv.cs" />
     <Compile Include="ClientConnection.cs" />
     <Compile Include="Model\MemoryModel.cs" />
     <Compile Include="Model\FileModel.cs" />

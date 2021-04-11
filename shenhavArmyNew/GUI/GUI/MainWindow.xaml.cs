@@ -26,5 +26,7 @@ namespace GUI
             InitializeComponent();
             this.DataContext = new NavigationViewModel();
         }
+
+
     }
 }

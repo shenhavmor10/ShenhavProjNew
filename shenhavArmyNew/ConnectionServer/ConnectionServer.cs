@@ -98,11 +98,11 @@ namespace Server
                     byte[] message;
                     if ((int)closeConnections[currentThread]==GeneralConsts.ERROR)
                     {
-                        message = Encoding.ASCII.GetBytes("Error - " + (string)responseList[currentThread]);
+                        message = Encoding.ASCII.GetBytes("Error - " + (string)responseList[currentThread] + "currentThread={" + currentThread + "}");
                     }
                     else
                     {
-                        message = Encoding.ASCII.GetBytes((string)responseList[currentThread]);
+                        message = Encoding.ASCII.GetBytes((string)responseList[currentThread] + "currentThread={" + currentThread + "}");
                     }
                     
                     clientSocket.Send(message);

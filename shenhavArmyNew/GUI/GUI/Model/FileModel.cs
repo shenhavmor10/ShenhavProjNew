@@ -9,7 +9,7 @@ namespace GUI.Model
 {
     public class FileModel : ViewModelBase
     {
-        private string filePath, projectPath, gccPath, otherInclude, destinationPath, eVarsPath,buttonName;
+        private string filePath, projectPath, gccPath, otherInclude, destinationPath, eVarsPath,resultBlock;
         public string FilePath
         {
             get
@@ -25,19 +25,16 @@ namespace GUI.Model
                 }
             }
         }
-        public string ButtonName
+        public string ResultBlock
         {
             get
             {
-                return buttonName;
+                return resultBlock;
             }
             set
             {
-                if (buttonName != value)
-                {
-                    buttonName = value;
-                    NotifyPropertyChanged("ButtonName");
-                }
+                resultBlock = value;
+                NotifyPropertyChanged("ResultBlock");
             }
         }
         public string ProjectPath
