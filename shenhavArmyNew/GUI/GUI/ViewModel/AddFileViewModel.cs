@@ -20,7 +20,6 @@ namespace GUI.ViewModel
     class AddFileViewModel : ViewModelBase
     {
         private ObservableCollection<ToolModel> toolsList;
-        private ObservableCollection<bool> visibilityArray=new ObservableCollection<bool>();
         private FileModel newFile;
         private MemoryModel customMemoryNames;
         private string resultBlock;
@@ -50,14 +49,6 @@ namespace GUI.ViewModel
             Memory = new MemoryModel();
             TestAllUntimedTools();
             initializeFiles();
-            initializeVisibility();
-        }
-        public void initializeVisibility()
-        {
-            VisibilityArray.Add(button2visibility);
-            VisibilityArray.Add(button3visibility);
-            VisibilityArray.Add(button4visibility);
-            VisibilityArray.Add(button5visibility);
         }
         public void initializeFiles()
         {
@@ -159,18 +150,6 @@ namespace GUI.ViewModel
                 NotifyPropertyChanged("Tools");
             }
         }
-        public ObservableCollection<bool> VisibilityArray
-        {
-            get
-            {
-                return visibilityArray;
-            }
-            set
-            {
-                visibilityArray = value;
-                NotifyPropertyChanged("VisibilityArray");
-            }
-        }
         public ICommand ConnectCommand
         {
             get
@@ -196,26 +175,34 @@ namespace GUI.ViewModel
         public void addFile()
         {
             //NavigationViewModel.fileList[fileNumber++].IsVisible = true;
-            switch (fileNumber)
+            if(fileNumber<4)
             {
-                case 0:
-                    Button2Visibility = true;
-                    break;
-                case 1:
-                    Button3Visibility = true;
-                    break;
-                case 2:
-                    Button4Visibility = true;
-                    break;
-                case 3:
-                    Button5Visibility = true;
-                    break;
-                default:
-                    break;
+                switch (fileNumber)
+                {
+                    case 0:
+                        Button2Visibility = true;
+                        break;
+                    case 1:
+                        Button3Visibility = true;
+                        break;
+                    case 2:
+                        Button4Visibility = true;
+                        break;
+                    case 3:
+                        Button5Visibility = true;
+                        break;
+                    default:
+                        break;
 
 
+                }
+                fileNumber++;
             }
-            fileNumber++;
+            else
+            {
+                MessageBox.Show("exceeded file amount", "Error max file", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            
             //make an array for each one.
         }
         /// Function - createProtocol

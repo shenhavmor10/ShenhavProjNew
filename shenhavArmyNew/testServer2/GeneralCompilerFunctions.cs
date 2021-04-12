@@ -681,7 +681,6 @@ namespace testServer2
                         blocksAndNames.Add(new ArrayList());
                         blocksAndDefines.Add(new ArrayList());
                         ((ArrayList)blocksAndNames[1]).AddRange(parameters);
-
                     }
                     for (i = 0; i < parameters.Count; i++)
                     {
