@@ -73,9 +73,9 @@ namespace testServer2
         /// <param name="message"> message to send to client type int.</param>
         /// <param name="closeType"> what is the type of the close connection for an example "ERROR".</param>
         /// <param name="filePath"> filePath type string.</param>
-        public static void CleanBeforeCloseThread(int threadNumber,string message,int closeType,string filePath)
+        public static void CleanBeforeCloseThread(int threadNumber,string message,int closeType,string filePath,string destPath)
         {
-            string logFilePath = createLogFile(threadNumber, filePath);
+            string logFilePath = createLogFile(threadNumber, filePath,destPath);
             AddToLogString(filePath, message);
             ConnectionServer.CloseConnection(threadNumber, message, closeType);
             if(final_json.ContainsKey(filePath))
@@ -160,7 +160,7 @@ namespace testServer2
                 //initialize 
                 try
                 {
-                    compileError=GeneralCompilerFunctions.initializeKeywordsAndSyntext(ansiCFile, filePath, CSyntextFile, ignoreVariablesTypesPath, keywords, includes, defines, eVars.Split(','), pathes, currentThreadNumber);
+                    compileError=GeneralCompilerFunctions.initializeKeywordsAndSyntext(ansiCFile,destPath, filePath, CSyntextFile, ignoreVariablesTypesPath, keywords, includes, defines, eVars.Split(','), pathes, currentThreadNumber);
                     Console.WriteLine("after initialize");
                 }
                 catch (Exception e)
@@ -173,7 +173,7 @@ namespace testServer2
                     //Syntax Check.
                     try
                     {
-                        compileError = GeneralCompilerFunctions.SyntaxCheck(filePath, globalVariable, calledFromFunc,callsFromThisFunction, memoryHandleFuncs, keywords, funcVariables, eVars.Split(','), currentThreadNumber, fileType, MemoryPattern, FreeMemoryPattern,functionsContent, ref codeContent);
+                        compileError = GeneralCompilerFunctions.SyntaxCheck(filePath,destPath, globalVariable, calledFromFunc,callsFromThisFunction, memoryHandleFuncs, keywords, funcVariables, eVars.Split(','), currentThreadNumber, fileType, MemoryPattern, FreeMemoryPattern,functionsContent, ref codeContent);
                     }
                     catch (Exception e)
                     {
@@ -213,7 +213,7 @@ namespace testServer2
                     writeToFile.Start();
                     writeToFile.Join(GeneralConsts.TIMEOUT_JOIN);*/
                 }
-                CleanBeforeCloseThread(currentThreadNumber, FINISH_SUCCESFULL, GeneralConsts.FINISHED_SUCCESFULLY, filePath);
+                CleanBeforeCloseThread(currentThreadNumber, FINISH_SUCCESFULL, GeneralConsts.FINISHED_SUCCESFULLY, filePath,destPath);
             }
         }
         /// Function - AddToolToLogFile
@@ -235,9 +235,9 @@ namespace testServer2
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns> Returns a path for the file type string.</returns>
-        static string createLogFile(int threadNumber,string filePath)
+        static string createLogFile(int threadNumber,string filePath,string destPath)
         {
-            filePath = filePath.Substring(0, filePath.LastIndexOf("\\"));
+            filePath = destPath+"\\";
             System.DateTime moment = DateTime.Today;
             string newPath = filePath + @"\" + moment.Day + "-" + moment.Month+".txt";
             try
@@ -247,7 +247,7 @@ namespace testServer2
             }
             catch(Exception e)
             {
-                CleanBeforeCloseThread(threadNumber, "Could not open file for writing", GeneralConsts.ERROR, filePath);
+                CleanBeforeCloseThread(threadNumber, "Could not open file for writing", GeneralConsts.ERROR, filePath,destPath);
             }
             return newPath;
         }
@@ -322,7 +322,7 @@ namespace testServer2
             }
             catch(Exception e)
             {
-                CleanBeforeCloseThread(threadNumber, e.Message, GeneralConsts.ERROR, srcPath);
+                CleanBeforeCloseThread(threadNumber, e.Message, GeneralConsts.ERROR, srcPath,destPath);
             }
             return tcs.Task;
 
@@ -439,7 +439,7 @@ namespace testServer2
         /// <param name="filePath"> the file path type string.</param>
         /// <param name="environmentVariablesPath"> the environment variables path.</param>
         /// <param name="currentThreadNumber"> the current thread number type int.</param>
-        static void SetEnvironmentVariables(string filePath,string environmentVariablesPath,int currentThreadNumber)
+        static void SetEnvironmentVariables(string filePath,string environmentVariablesPath,int currentThreadNumber,string destPath)
         {
             MyStream sr = null;
             try
@@ -448,7 +448,7 @@ namespace testServer2
             }
             catch(Exception e)
             {
-                CleanBeforeCloseThread(currentThreadNumber, "error = Couldnt open the environment variables file. error explained - "+e.Message, GeneralConsts.ERROR, filePath);
+                CleanBeforeCloseThread(currentThreadNumber, "error = Couldnt open the environment variables file. error explained - "+e.Message, GeneralConsts.ERROR, filePath,destPath);
             }
             string line = "";
             ArrayList tempArrayForEnvironmentVars = new ArrayList();
@@ -474,7 +474,7 @@ namespace testServer2
                 }
                 catch(Exception e)
                 {
-                    CleanBeforeCloseThread(currentThreadNumber, "error = there are more than one environment variable with the same name.", GeneralConsts.ERROR, filePath);
+                    CleanBeforeCloseThread(currentThreadNumber, "error = there are more than one environment variable with the same name.", GeneralConsts.ERROR, filePath,destPath);
                 }
             }
 
@@ -537,7 +537,19 @@ namespace testServer2
                         logFiles.Add(filePath, GeneralConsts.EMPTY_STRING);
                     }
                     AddToLogString(filePath, "FilePath - " + filePath);
-                    string[] pathes = { paths[PROJECT_FOLDER_INDEX], paths[GCC_INCLUDE_FOLDER_INDEX], paths[EXTRA_INCLUDE_FOLDER_INDEX] };
+                    string[] pathes;
+                    if (paths[EXTRA_INCLUDE_FOLDER_INDEX] != "null")
+                    {
+                        pathes = new string[3];
+                        pathes[EXTRA_INCLUDE_FOLDER_INDEX-1] = paths[EXTRA_INCLUDE_FOLDER_INDEX];
+                    }
+                    else
+                    {
+                        pathes = new string[2];
+                    }
+                    pathes[PROJECT_FOLDER_INDEX-1] = paths[PROJECT_FOLDER_INDEX];
+                    pathes[GCC_INCLUDE_FOLDER_INDEX-1] = paths[GCC_INCLUDE_FOLDER_INDEX];
+                    //string[] pathes = { paths[PROJECT_FOLDER_INDEX], paths[GCC_INCLUDE_FOLDER_INDEX], paths[EXTRA_INCLUDE_FOLDER_INDEX] };
                     string destPath = paths[DEST_PATH_INDEX];
                     tools.AddRange(toolsArray);
                     if(!test)
@@ -545,7 +557,7 @@ namespace testServer2
                         toolavgLineSeconds = getAllToolAvgLineSecondsArray(tools);
                     }
                     final_json.Add(filePath, new Dictionary<string, Dictionary<string, object>>());
-                    SetEnvironmentVariables(filePath, environmentVariablePath, threadNumber);
+                    SetEnvironmentVariables(filePath, environmentVariablePath, threadNumber,destPath);
                     //because i still dont have a prefect checks for headers so im giving the thread a default null so the program can run.
                     Thread runChecksThread=null;
                     runChecksThread = new Thread(() => RunAllChecks(filePath, destPath, pathes, tools, toolavgLineSeconds, rd, filePath.Substring(filePath.Length - 1),memoryArray, freeArray));

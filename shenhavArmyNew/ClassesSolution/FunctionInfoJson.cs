@@ -34,7 +34,6 @@ namespace ClassesSolution
             this.memoryAllocation = false;
             this.calledFromFunc = null;
         }
-
     }
     public class CodeInfoJson
     {

@@ -29,5 +29,10 @@ namespace GUI.Views
         {
 
         }
+
+        private void DestPath_TextChanged()
+        {
+
+        }
     }
 }

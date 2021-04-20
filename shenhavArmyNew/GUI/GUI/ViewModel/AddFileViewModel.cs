@@ -215,7 +215,15 @@ namespace GUI.ViewModel
         public string createProtocol(FileModel f,ArrayList toolsArrayExeOnly)
         {
             //add first paths.
-            string path = f.FilePath + "," + f.ProjectPath + "," + f.GccPath + "," + f.OtherInclude + "," + f.DestinationPath + ",";
+            string path = f.FilePath + "," + f.ProjectPath + "," + f.GccPath + ",";
+            if(f.OtherInclude!=null)
+            {
+                path += f.OtherInclude + "," + f.DestinationPath + ",";
+            }
+            else
+            {
+                path+="null"+ "," + f.DestinationPath + ",";
+            }
             string tools = "";
             foreach (string tool_exe in toolsArrayExeOnly)
             {

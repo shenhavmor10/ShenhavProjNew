@@ -663,7 +663,7 @@ namespace testServer2
         /// <param name="functionName"> the name of the function.</param>
         /// <param name="memoryHandleFunc"> all of the memory handles type arrayList.</param>
         /// <param name="MemoryPattern"> Regex of the memory pattern.</param>
-        static void ChecksInSyntaxCheck(string path, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding,string [] eVars, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames,ArrayList blocksAndDefines,Regex MemoryPattern, Regex FreeMemoryPattern,ref string codeContent, ArrayList parameters = null, Dictionary<string, ArrayList> calledFromFunc = null, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction = null, int functionLength = 0,string functionName="",Dictionary<string,string>functionsContent=null)
+        static void ChecksInSyntaxCheck(string path,string destPath, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding,string [] eVars, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames,ArrayList blocksAndDefines,Regex MemoryPattern, Regex FreeMemoryPattern,ref string codeContent, ArrayList parameters = null, Dictionary<string, ArrayList> calledFromFunc = null, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction = null, int functionLength = 0,string functionName="",Dictionary<string,string>functionsContent=null)
         {
             try
             {
@@ -900,7 +900,7 @@ namespace testServer2
             }
             catch(Exception e)
             {
-                MainProgram.CleanBeforeCloseThread(threadNumber, e.ToString(), GeneralConsts.ERROR, path);
+                MainProgram.CleanBeforeCloseThread(threadNumber, e.ToString(), GeneralConsts.ERROR, path,destPath);
             }
             
         }
@@ -954,7 +954,7 @@ namespace testServer2
         /// </summary>
         /// <param name="path"> The path of the c code type string.</param>
         /// <param name="keywords"> keywords type Hashtable that conatins the code keywords.</param>
-        public static bool SyntaxCheck(string path,ArrayList globalVariable,Dictionary<string,ArrayList>calledFromFunc, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction, Hashtable memoryHandleFunc, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,string [] eVars,int threadNumber,string typeEnding,Regex MemoryPattern,Regex FreeMemoryPattern,Dictionary<string,string> functionsContent,ref string codeContent)
+        public static bool SyntaxCheck(string path,string destPath,ArrayList globalVariable,Dictionary<string,ArrayList>calledFromFunc, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction, Hashtable memoryHandleFunc, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,string [] eVars,int threadNumber,string typeEnding,Regex MemoryPattern,Regex FreeMemoryPattern,Dictionary<string,string> functionsContent,ref string codeContent)
         {
             MyStream sr=null;
             try
@@ -963,7 +963,7 @@ namespace testServer2
             }
             catch(Exception e)
             {
-                MainProgram.CleanBeforeCloseThread(threadNumber, FILE_NOT_FOUND, GeneralConsts.ERROR, path);
+                MainProgram.CleanBeforeCloseThread(threadNumber, FILE_NOT_FOUND, GeneralConsts.ERROR, path,destPath);
                 CompileError = true;
             }
             if(sr!=null&&!CompileError)
@@ -988,7 +988,7 @@ namespace testServer2
                     if (OpenBlockPattern.IsMatch(codeLine))
                     {
                         NextScopeLength(sr, ref codeLine, ref scopeLength, true);
-                        ChecksInSyntaxCheck(path, sr, codeLine, true, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames,blocksAndDefines, MemoryPattern, FreeMemoryPattern,ref codeContent, parameters,calledFromFunc,callsFromThisFunction, scopeLength + 1,lastFuncLine,functionsContent);
+                        ChecksInSyntaxCheck(path,destPath, sr, codeLine, true, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames,blocksAndDefines, MemoryPattern, FreeMemoryPattern,ref codeContent, parameters,calledFromFunc,callsFromThisFunction, scopeLength + 1,lastFuncLine,functionsContent);
                         parameters.Clear();
                     }
                     // if there is a function it saves its parameters (only if its C)..
@@ -1008,7 +1008,7 @@ namespace testServer2
                         }
                         catch (Exception e)
                         {
-                            MainProgram.CleanBeforeCloseThread(threadNumber, e.ToString(), GeneralConsts.ERROR, path);
+                            MainProgram.CleanBeforeCloseThread(threadNumber, e.ToString(), GeneralConsts.ERROR, path,destPath);
                         }
                         string funcKeyInDict = GeneralRestApiServerMethods.FindNameFromCodeLine(codeLine);
                         funcKeyInDict += "(";
@@ -1026,12 +1026,12 @@ namespace testServer2
                     {
                         parameters.AddRange(GeneralRestApiServerMethods.FindParameters(cleanLineFromDoc(codeLine)));
                         lastFuncLine = codeLine;
-                        ChecksInSyntaxCheck(path, sr, codeLine, false, keywords,memoryHandleFunc, threadNumber, typeEnding,eVars, variables, globalVariable, blocksAndNames, blocksAndDefines, MemoryPattern, FreeMemoryPattern, ref codeContent, parameters);
+                        ChecksInSyntaxCheck(path, destPath, sr, codeLine, false, keywords,memoryHandleFunc, threadNumber, typeEnding,eVars, variables, globalVariable, blocksAndNames, blocksAndDefines, MemoryPattern, FreeMemoryPattern, ref codeContent, parameters);
                     }
                     //handling outside the scopes.
                     else
                     {
-                        ChecksInSyntaxCheck(path, sr, codeLine, false, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames, blocksAndDefines, MemoryPattern, FreeMemoryPattern, ref codeContent);
+                        ChecksInSyntaxCheck(path, destPath, sr, codeLine, false, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames, blocksAndDefines, MemoryPattern, FreeMemoryPattern, ref codeContent);
                     }
 
                 }
@@ -1539,7 +1539,7 @@ namespace testServer2
         /// <param name="includes"> Hashtable to store the includes.</param>
         /// <param name="defines"> Dictionary to store the defines.</param>
         /// <param name="pathes"> Paths for all the places where the imports might be.</param>
-        public static bool initializeKeywordsAndSyntext(string ansiPath, string cFilePath, string CSyntextPath, string ignoreVariablesTypesPath, Hashtable keywords, Hashtable includes,Dictionary<string,string> defines,string [] eVars,string [] pathes,int threadNumber)
+        public static bool initializeKeywordsAndSyntext(string ansiPath,string destPath, string cFilePath, string CSyntextPath, string ignoreVariablesTypesPath, Hashtable keywords, Hashtable includes,Dictionary<string,string> defines,string [] eVars,string [] pathes,int threadNumber)
         {
             try
             {
@@ -1552,7 +1552,7 @@ namespace testServer2
             }
             catch(Exception e)
             {
-                MainProgram.CleanBeforeCloseThread(threadNumber, e.Message, GeneralConsts.ERROR, cFilePath);
+                MainProgram.CleanBeforeCloseThread(threadNumber, e.Message, GeneralConsts.ERROR, cFilePath,destPath);
             }
             return CompileError;
             
