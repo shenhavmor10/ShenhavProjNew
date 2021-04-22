@@ -26,6 +26,7 @@ namespace testServer2
         static Regex StructPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?struct(([^;]*$)|(\s(.+{$|.*{$|[^\s;]+$)))");
         static Regex EnumPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?(enum\s(.+{$|.*{$;?|[^\s;]+;?$))");
         static Regex TypedefOneLine = new Regex(@"^.*typedef\s(struct|enum)\s[^\s]+\s[^\s]+;$");
+        static Regex TypdedefNoStruct = new Regex(@"^.*typedef\s.+\s[^\s]+;$");
         static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?[^\s()]+\s((\*)*(\s))?[^\s()=]+(\s?=.+;|[^()=]*;))");
         static Regex VariableEquation = new Regex(@"^(?!.*return)(?=(\s)?([^\s()]+\s)?((\*)*(\s))?[^\s()]+(\s)?=(\s)?[A-Za-z][^\s()]*;$)");
         //static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^\d][^ ()]*( [^ ()]+)?$");
@@ -748,7 +749,7 @@ namespace testServer2
                         }
 
                     }
-                    if (CallFunction.IsMatch(codeLine))
+                    if (CallFunction.IsMatch(codeLine)&&!functionPatternInH.IsMatch(codeLine))
                     {
                         MatchCollection m = Regex.Matches(codeLine, CallFunction.ToString());
                         string convertedLine = m[0].ToString();
@@ -1025,6 +1026,7 @@ namespace testServer2
                     // if there is a function in h it checks it keywords to see if they are good.
                     else if (functionPatternInH.IsMatch(codeLine))
                     {
+                        parameters.Clear();
                         parameters.AddRange(GeneralRestApiServerMethods.FindParameters(cleanLineFromDoc(codeLine)));
                         lastFuncLine = codeLine;
                         ChecksInSyntaxCheck(path, sr, codeLine, false, keywords,memoryHandleFunc, threadNumber, typeEnding,eVars, variables, globalVariable, blocksAndNames, blocksAndDefines, MemoryPattern, FreeMemoryPattern, ref codeContent, parameters);
@@ -1232,6 +1234,7 @@ namespace testServer2
         static void PreprocessorActions(string path,string originalFile, int threadNumber, Hashtable keywords, Hashtable includes,Dictionary<string,string> defines,string [] eVars,string [] pathes,int fileThreadNumber)
         {
             bool endLoop = false;
+            bool openThread = true;
             MyStream sr = null;
             //try to open the buffer.
             try
@@ -1286,6 +1289,10 @@ namespace testServer2
                 {
                     AddStructNames(sr, codeLine, keywords);
                 }
+                else if(TypdedefNoStruct.IsMatch(codeLine)&&threadNumber!=0)
+                {
+                    AddStructNames(sr, codeLine, keywords);
+                }
                 //if the code line is an include it creates a thread and enters to the defines , structs and more to 
                 //the Hashtables and Dictionaries.
                 else if (IncludeTrianglesPattern.IsMatch(codeLine) || IncludeRegularPattern.IsMatch(codeLine))
@@ -1318,14 +1325,19 @@ namespace testServer2
                             for(int i=0;i<pathes.Length;i++)
                             {
                                 //checks if the file exists in one of those folders.
-                                if(File.Exists(pathes[i]+"\\"+result))
+                                if (Directory.GetFiles(pathes[i], result, SearchOption.AllDirectories).Length>0)
+                                {
+                                    currentPath = Directory.GetFiles(pathes[i], result, SearchOption.AllDirectories)[0];
+                                    break;
+                                }
+                                /*if(File.Exists(pathes[i]+"\\"+result))
                                 {
                                     currentPath = pathes[i];
                                     break;                                
-                                }
+                                }*/
                             }    
                             //creats a thread.
-                            preprocessorThread = new Thread(() => PreprocessorActions(currentPath+"\\" + result, originalFile, threadNumber + 1, keywords, includes,defines,eVars, pathes,fileThreadNumber));
+                            preprocessorThread = new Thread(() => PreprocessorActions(currentPath, originalFile, threadNumber + 1, keywords, includes,defines,eVars, pathes,fileThreadNumber));
                         }
                         preprocessorThread.Start();
                         preprocessorThread.Join(GeneralConsts.TIMEOUT_JOIN);
@@ -1337,6 +1349,121 @@ namespace testServer2
             {
                 sr.Close();
             }
+        }
+        static void PreprocessorActions1(string path, string originalFile, int threadNumber, Hashtable keywords, Hashtable includes, Dictionary<string, string> defines, string[] eVars, string[] pathes, int fileThreadNumber)
+        {
+            bool endLoop = false;
+            MyStream sr = null;
+            //try to open the buffer.
+            try
+            {
+                sr = new MyStream(path, System.Text.Encoding.UTF8);
+            }
+            catch (Exception e)
+            {
+                endLoop = true;
+                CompileError = true;
+            }
+
+            string codeLine;
+
+            while (!endLoop && (codeLine = sr.ReadLine()) != null)
+            {
+                codeLine = cleanLineFromDoc(codeLine);
+                if (DefineDecleration.IsMatch(codeLine))
+                {
+                    (string, string) temp = DefineHandler(keywords, codeLine);
+                    if (!defines.ContainsKey(temp.Item1))
+                    {
+                        defines.Add(temp.Item1, temp.Item2);
+                    }
+                }
+                //Handling almost the same patterns as the syntaxCheck function.
+                if (StructPattern.IsMatch(codeLine) || EnumPattern.IsMatch(codeLine))
+                {
+                    AddStructNames(sr, codeLine, keywords);
+                }
+                if (IfdefPattern.IsMatch(codeLine))
+                {
+                    if (!checkIfEvarIsTurned(codeLine, eVars))
+                    {
+                        if (!checkInDefinesDict(defines, codeLine))
+                        {
+                            Skip_Ifdef_Or_Ifndef(sr, codeLine, threadNumber);
+                        }
+                    }
+                }
+                else if (IfndefPattern.IsMatch(codeLine))
+                {
+                    if (checkIfEvarIsTurned(codeLine, eVars))
+                    {
+                        if (checkInDefinesDict(defines, codeLine))
+                        {
+                            Skip_Ifdef_Or_Ifndef(sr, codeLine, threadNumber);
+                        }
+                    }
+                }
+                else if (TypedefOneLine.IsMatch(codeLine))
+                {
+                    AddStructNames(sr, codeLine, keywords);
+                }
+                else if (TypdedefNoStruct.IsMatch(codeLine))
+                {
+                    AddStructNames(sr, codeLine, keywords);
+                }
+                //if the code line is an include it creates a thread and enters to the defines , structs and more to 
+                //the Hashtables and Dictionaries.
+                else if (IncludeTrianglesPattern.IsMatch(codeLine) || IncludeRegularPattern.IsMatch(codeLine))
+                {
+                    string currentPath = GeneralConsts.EMPTY_STRING;
+                    string result;
+                    if (codeLine.IndexOf("<") != -1 && codeLine.IndexOf(">") != -1)
+                    {
+                        result = CutBetween2Strings(codeLine, "<", ">");
+                    }
+                    else
+                    {
+                        result = CutBetween2Strings(codeLine, "\"", "\"");
+                    }
+                    //only enters an include if it didnt already included him.
+                    if (!includes.Contains(CreateMD5(result)))
+                    {
+                        includes.Add(CreateMD5(result), result);
+                        //if the include includes a path inside of it.
+                        if (result.IndexOf("\\") != -1)
+                        {
+                            //opens the thread (thread number +1).
+                            PreprocessorActions1(result, originalFile, threadNumber + 1, keywords, includes, defines, eVars, pathes, fileThreadNumber);
+                        }
+                        //if it does not include an exact path.
+                        else
+                        {
+                            //runs on the pathes that the import files might be in.
+                            for (int i = 0; i < pathes.Length; i++)
+                            {
+                                //checks if the file exists in one of those folders.
+                                if (Directory.GetFiles(pathes[i], result, SearchOption.AllDirectories).Length > 0)
+                                {
+                                    currentPath = Directory.GetFiles(pathes[i], result, SearchOption.AllDirectories)[0];
+                                    break;
+                                }
+                                /*if(File.Exists(pathes[i]+"\\"+result))
+                                {
+                                    currentPath = pathes[i];
+                                    break;                                
+                                }*/
+                            }
+                            //creats a thread.
+                            if(currentPath != "" && currentPath != null&&currentPath.Length>0)
+                            {
+                                PreprocessorActions1(currentPath, originalFile, threadNumber + 1, keywords, includes, defines, eVars, pathes, fileThreadNumber);
+                            }
+                        }
+                    }
+                }
+
+            }
+
         }
         /// Function - ConcatenateIfNeeded
         /// <summary>
@@ -1434,9 +1561,10 @@ namespace testServer2
             if (codeLine.IndexOf("typedef") != GeneralConsts.NOT_FOUND_STRING)
             {
                 //if thats not a typedef declaration.
-                if (!TypedefOneLine.IsMatch(codeLine))
+                if (!TypedefOneLine.IsMatch(codeLine)&&!TypdedefNoStruct.IsMatch(codeLine))
                 {
                     string structKeyword = codeLine.Trim(CharsToTrim);
+                    
                     structKeyword = (structKeyword.IndexOf("enum") != -1) ? structKeyword.Substring(structKeyword.IndexOf("enum")):structKeyword.Substring(structKeyword.IndexOf("struct"));
                     if (!keywords.Contains(CreateMD5(structKeyword))&&(structKeyword!="struct"|| structKeyword != "enum"))
                     {
@@ -1462,20 +1590,35 @@ namespace testServer2
                 }
                 else
                 {
-                    //if thats one line of typedef.
-                    spaceIndex = codeLine.IndexOf(GeneralConsts.SPACEBAR) + 1;
-                    //take after the line after the first space.
-                    tempString = newVariableName = codeLine.Substring(spaceIndex);
-                    tempString = tempString.TrimEnd(' ').Remove(tempString.LastIndexOf(GeneralConsts.SPACEBAR) + 1);
-                    tempString = tempString.Trim(CharsToTrim);
-                    newVariableName = CutBetween2Strings(codeLine, tempString, ";");
-                    newVariableName = newVariableName.Trim(CharsToTrim);
-                    if (keywords.Contains(CreateMD5(tempString)) && !keywords.Contains(CreateMD5(newVariableName)))
+                    if(TypedefOneLine.IsMatch(codeLine))
                     {
-                        //adds the keyword for the line.
-                        keywords.Add(CreateMD5(newVariableName), newVariableName);
-                        results.Add(CreateMD5(newVariableName));
+                        //if thats one line of typedef.
+                        spaceIndex = codeLine.IndexOf(GeneralConsts.SPACEBAR) + 1;
+                        //take after the line after the first space.
+                        tempString = newVariableName = codeLine.Substring(spaceIndex);
+                        tempString = tempString.TrimEnd(' ').Remove(tempString.LastIndexOf(GeneralConsts.SPACEBAR) + 1);
+                        tempString = tempString.Trim(CharsToTrim);
+                        newVariableName = CutBetween2Strings(codeLine, tempString, ";");
+                        newVariableName = newVariableName.Trim(CharsToTrim);
+                        if (keywords.Contains(CreateMD5(tempString)) && !keywords.Contains(CreateMD5(newVariableName)))
+                        {
+                            //adds the keyword for the line.
+                            keywords.Add(CreateMD5(newVariableName), newVariableName);
+                            results.Add(CreateMD5(newVariableName));
+                        }
+                        
                     }
+                    else
+                    {
+                        tempString = codeLine.Substring(codeLine.LastIndexOf(" "), codeLine.IndexOf(";")- codeLine.LastIndexOf(" "));
+                        tempString=tempString.Trim();
+                        if(!keywords.Contains(CreateMD5(tempString)))
+                        {
+                            keywords.Add(CreateMD5(tempString), tempString);
+                            results.Add(CreateMD5(tempString));
+                        }
+                    }
+                    
                 }
             }
             //if thats a regular struct.
@@ -1549,7 +1692,8 @@ namespace testServer2
                 AddToArrayListFromFile(ignoreVariablesTypesPath, ignoreVarialbesType, ",", threadNumber);
                 //C Syntext File To Syntext ArrayList.
                 //AddToListFromFile(CSyntextPath, syntext, " ");
-                PreprocessorActions(cFilePath, cFilePath, 0, keywords, includes, defines, eVars, pathes, threadNumber);
+                //PreprocessorActions(cFilePath, cFilePath, 0, keywords, includes, defines, eVars, pathes, threadNumber);
+                PreprocessorActions1(cFilePath, cFilePath, 0, keywords, includes, defines, eVars, pathes, threadNumber);
             }
             catch(Exception e)
             {
