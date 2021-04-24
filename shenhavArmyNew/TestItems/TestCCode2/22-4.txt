@@ -1,0 +1,23 @@
+FilePath - C:\Users\Shenhav\Desktop\ShenhavArmyNew\ShenhavProjNew\shenhavArmyNew\TestItems\TestCCode2\test.c
+
+
+Environment Variable = evar1
+Tool = ..\..\..\ToolsExe\MemoryHandleTool\bin\Debug\MemoryHandleTool.exe
+"Variable shlomi that was created in function main was not being free'd.Variable pointer5 that was created in function main was not being free'd."
+
+
+Environment Variable = evar2
+Tool = ..\..\..\ToolsExe\MemoryHandleTool\bin\Debug\MemoryHandleTool.exe
+"Variable pointer5 that was created in function main was not being free'd."
+
+
+Environment Variable = evar1,evar2
+Tool = ..\..\..\ToolsExe\MemoryHandleTool\bin\Debug\MemoryHandleTool.exe
+"Variable shlomi that was created in function main was not being free'd.Variable pointer5 that was created in function main was not being free'd."
+
+
+Environment Variable = NoEvarTurnedOn
+Tool = ..\..\..\ToolsExe\MemoryHandleTool\bin\Debug\MemoryHandleTool.exe
+"Variable pointer5 that was created in function main was not being free'd."
+Finished succesfully code is ready at the destination path.
+
