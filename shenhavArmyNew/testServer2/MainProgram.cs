@@ -121,8 +121,11 @@ namespace testServer2
             string customMalloc = @"(?<=\n\r\t)(\s)*?[^\n]+(\s*?)=(\s*?)(malloc|calloc|alloc|realloc";
             for (int i=0;i<memoryPatterns.Length;i++)
             {
-                memoryPatternTemp += memoryPatterns[i]+"|";
-                customMalloc += memoryPatterns[i] + "|";
+                if(memoryPatterns[i]!="")
+                {
+                    memoryPatternTemp += memoryPatterns[i] + "|";
+                    customMalloc += memoryPatterns[i] + "|";
+                }
             }
             memoryPatternTemp=memoryPatternTemp.Substring(0, memoryPatternTemp.Length - 1);
             customMalloc = customMalloc.Substring(0, customMalloc.Length - 1);
@@ -135,8 +138,11 @@ namespace testServer2
             string freePatternTemp = @"(?!.*return)(?=(\s)?(free|";
             for(int i=0;i<freePatterns.Length;i++)
             {
-                freePatternTemp += freePatterns[i] + "|";
-                customFree += freePatterns[i] + "|";
+                if(freePatterns[i]=="")
+                {
+                    freePatternTemp += freePatterns[i] + "|";
+                    customFree += freePatterns[i] + "|";
+                }
             }
             customFree = customFree.Substring(0, customFree.Length - 1);
             customFree += @")\(.+\);(\s)*?(?=\n\r)";
@@ -156,11 +162,12 @@ namespace testServer2
                 Dictionary<string, ArrayList> funcVariables = new Dictionary<string, ArrayList>();
                 Dictionary<string, string> functionsContent = new Dictionary<string, string>();
                 ArrayList globalVariable = new ArrayList();
+                Hashtable anciCWords = new Hashtable();
                 string codeContent = "";
                 //initialize 
                 try
                 {
-                    compileError=GeneralCompilerFunctions.initializeKeywordsAndSyntext(ansiCFile,destPath, filePath, CSyntextFile, ignoreVariablesTypesPath, keywords, includes, defines, eVars.Split(','), pathes, currentThreadNumber);
+                    compileError=GeneralCompilerFunctions.initializeKeywordsAndSyntext(ansiCFile,destPath, filePath, CSyntextFile, ignoreVariablesTypesPath, keywords, includes, defines, eVars.Split(','), pathes, currentThreadNumber, anciCWords);
                     Console.WriteLine("after initialize");
                 }
                 catch (Exception e)
@@ -173,7 +180,7 @@ namespace testServer2
                     //Syntax Check.
                     try
                     {
-                        compileError = GeneralCompilerFunctions.SyntaxCheck(filePath,destPath, globalVariable, calledFromFunc,callsFromThisFunction, memoryHandleFuncs, keywords, funcVariables, eVars.Split(','), currentThreadNumber, fileType, MemoryPattern, FreeMemoryPattern,functionsContent, ref codeContent);
+                        compileError = GeneralCompilerFunctions.SyntaxCheck(filePath,destPath,anciCWords, globalVariable, calledFromFunc,callsFromThisFunction, memoryHandleFuncs, keywords, funcVariables, eVars.Split(','), currentThreadNumber, fileType, MemoryPattern, FreeMemoryPattern,functionsContent, ref codeContent);
                     }
                     catch (Exception e)
                     {

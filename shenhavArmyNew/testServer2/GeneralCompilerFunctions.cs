@@ -27,7 +27,7 @@ namespace testServer2
         static Regex EnumPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?(enum\s(.+{$|.*{$;?|[^\s;]+;?$))");
         static Regex TypedefOneLine = new Regex(@"^.*typedef\s(struct|enum)\s[^\s]+\s[^\s]+;$");
         static Regex TypdedefNoStruct = new Regex(@"^.*typedef\s.+\s[^\s]+;$");
-        static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?[^\s()]+\s((\*)*(\s))?[^\s()=]+(\s?=.+;|[^()=]*;))");
+        static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?([^\s()]+\s)?[^\s()+\-]+\s((\*)*(\s))?[^\s\-+()=]+(\s?((\+|\-))?=.+;|[^()=]+;))");
         static Regex VariableEquation = new Regex(@"^(?!.*return)(?=(\s)?([^\s()]+\s)?((\*)*(\s))?[^\s()]+(\s)?=(\s)?[A-Za-z][^\s()]*;$)");
         //static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^\d][^ ()]*( [^ ()]+)?$");
         static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^ ()]*( [^ ()]+)?$");
@@ -235,6 +235,15 @@ namespace testServer2
             {
                 name = line.Substring(line.LastIndexOf(GeneralConsts.ASTERIX), (line.Length - (line.LastIndexOf(GeneralConsts.ASTERIX) + 1)));
             }
+            else if(name=="+"&&line.Split(' ').Length>2)
+            {
+                name = line.Substring(line.IndexOf(GeneralConsts.SPACEBAR) + 1, (line.Length - (line.IndexOf(GeneralConsts.SPACEBAR) + 1)));
+            }
+            else if (name == "+" && line.Split(' ').Length <= 2)
+            {
+                name = line.Substring(0, (line.IndexOf(GeneralConsts.SPACEBAR) + 1));
+                name = name.Trim();
+            }
             //last index of space
             lastIndex = line.LastIndexOf(GeneralConsts.SPACEBAR);
             if (lastIndex != GeneralConsts.NOT_FOUND_STRING)
@@ -268,14 +277,14 @@ namespace testServer2
         ///                        outside a scope.</param>
         /// <param name="sr"> buffer type MyStream.</param>
         /// <returns></returns>
-        static bool VariableDeclarationHandler(ref string codeLine, ref int pos, Hashtable keywords, int threadNumber, bool IsScope, MyStream sr,string typeEnding, ArrayList variables=null, ArrayList globalVariables=null, ArrayList blocksAndNames=null)
+        static bool VariableDeclarationHandler(ref string codeLine, ref int pos,Hashtable anciCWords, Hashtable keywords, int threadNumber, bool IsScope, MyStream sr,string typeEnding, ArrayList variables=null, ArrayList globalVariables=null, ArrayList blocksAndNames=null)
         {
             bool DifferentTypes = true;
             int loopCount;
             string parameterType = GeneralConsts.EMPTY_STRING;
             int j;
             bool found = true;
-            char[] trimChars = { '\t', ' ', ';' };
+            char[] trimChars = { '\t', ' ', ';','*' };
             
             loopCount = KeywordsAmountOnVariableDeclaration(codeLine);
             for (j = 0; j < loopCount; j++)
@@ -298,19 +307,45 @@ namespace testServer2
             }
             string name;
             ParametersType result;
+            string tempCut;
+            string parameterName;
             //if the line has equation in the declaration.
             if (codeLine.IndexOf(GeneralConsts.EQUAL_SIGN) != -1)
             {
+                parameterType = parameterType.Trim();
                 parameterType = Regex.Split(codeLine, GeneralConsts.EQUAL_SIGN)[0];
+                parameterType = parameterType.Trim();
+                parameterName = parameterType;
+                if (parameterType.Split(' ').Length>2)
+                {
+                    tempCut= parameterType.Substring(parameterType.IndexOf(' ') + 1, parameterType.Length - (parameterType.IndexOf(' ') + 1));
+                    if(tempCut.IndexOf(' ')!=GeneralConsts.NOT_FOUND_STRING)
+                    {
+                        parameterType = tempCut.Substring(0, tempCut.Length - (tempCut.IndexOf(' ') + 1));
+                    }
+                    else
+                    {
+                        parameterType = tempCut;
+                    }
+                }
+                else
+                {
+                    tempCut = parameterType;
+                    parameterType = parameterType.Substring(0, parameterType.Length - (parameterType.IndexOf(' ') + 1));
+                }
                 parameterType = parameterType.Trim(trimChars);
-                result = GetParameterNameFromLine(parameterType);
+                parameterName = parameterName.Trim();
+                parameterName = parameterName.Substring(parameterName.LastIndexOf(' ')).Trim();
+                result = new ParametersType(parameterName, parameterType);
             }
             //only declaration.
             else
             {
                 parameterType = codeLine;
                 parameterType = parameterType.Trim(trimChars);
-                result = GetParameterNameFromLine(parameterType);
+                parameterName = parameterType.Substring(parameterType.IndexOf(' ') + 1).Trim();
+                parameterType = parameterType.Substring(0, parameterType.IndexOf(' '));
+                result = new ParametersType(parameterName, parameterType);
             }
             name = result.parameterName;
             parameterType = result.parameterType;
@@ -345,7 +380,7 @@ namespace testServer2
             //if the declaration is also a equation.
             if (VariableEquation.IsMatch(codeLine))
             {
-                DifferentTypes = VariableEquationHandler(sr, codeLine, blocksAndNames, threadNumber);
+                DifferentTypes = VariableEquationHandler(sr,anciCWords, codeLine, blocksAndNames, threadNumber);
             }
             if (!DifferentTypes)
             {
@@ -386,15 +421,27 @@ namespace testServer2
         /// <param name="codeLine"> the code line type string.</param>
         /// <param name="blocksAndNames"> ArrayList of variables.</param>
         /// <returns>returns if the variable equation is good.</returns>
-        static bool VariableEquationHandler(MyStream sr, string codeLine, ArrayList blocksAndNames, int threadNumber)
+        static bool VariableEquationHandler(MyStream sr,Hashtable anciCWords, string codeLine, ArrayList blocksAndNames, int threadNumber)
         {
             char[] trimChars = { '\t', ' ' };
             bool isSameType = true;
             //splits the equation to 2 lines before the '=' and after it.
             string temp = Regex.Split(codeLine, GeneralConsts.EQUAL_SIGN)[0].Trim(trimChars);
+            if(temp.Length>0)
+            {
+                if (temp.Length >codeLine.Split('+','-')[0].Trim(trimChars).Length && codeLine.Split('+','-')[0].Trim(trimChars).Length > 0)
+                {
+                    temp = codeLine.Split('+','-')[0].Trim(trimChars);
+                }
+                temp = temp.Trim();
+                if(temp.IndexOf(' ')!=GeneralConsts.NOT_FOUND_STRING)
+                {
+                    temp = temp.Substring(temp.IndexOf(' '));
+                }
+            }
+            
             //takes the first param name.
-            ParametersType result = GetParameterNameFromLine(temp);
-            string varName1 = result.parameterName;
+            string varName1 = temp;
             temp = Regex.Split(codeLine, GeneralConsts.EQUAL_SIGN)[1];
             char[] searchingChars = { ';' };
             //takes the second param name.
@@ -414,6 +461,10 @@ namespace testServer2
             if (isSameType && var1.parameterType != var2.parameterType)
             {
                 isSameType = false;
+                if(anciCWords.ContainsKey(CreateMD5(var1.parameterType))&&anciCWords.ContainsKey(CreateMD5(var2.parameterType)))
+                {
+                    isSameType = true;
+                }
             }
             return isSameType;
         }
@@ -664,7 +715,7 @@ namespace testServer2
         /// <param name="functionName"> the name of the function.</param>
         /// <param name="memoryHandleFunc"> all of the memory handles type arrayList.</param>
         /// <param name="MemoryPattern"> Regex of the memory pattern.</param>
-        static void ChecksInSyntaxCheck(string path,string destPath, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding,string [] eVars, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames,ArrayList blocksAndDefines,Regex MemoryPattern, Regex FreeMemoryPattern,ref string codeContent, ArrayList parameters = null, Dictionary<string, ArrayList> calledFromFunc = null, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction = null, int functionLength = 0,string functionName="",Dictionary<string,string>functionsContent=null)
+        static void ChecksInSyntaxCheck(string path,string destPath, MyStream sr, string codeLine, bool IsScope, Hashtable keywords,Hashtable memoryHandleFunc, int threadNumber,string typeEnding,string [] eVars, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames,ArrayList blocksAndDefines,Regex MemoryPattern, Regex FreeMemoryPattern,ref string codeContent, ArrayList parameters = null, Dictionary<string, ArrayList> calledFromFunc = null, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction = null, int functionLength = 0,string functionName="",Dictionary<string,string>functionsContent=null,bool isFunction=false,Hashtable anciCWords=null)
         {
             try
             {
@@ -679,9 +730,12 @@ namespace testServer2
                     if (typeEnding == "c")
                     {
                         //adds the parameters of the function to the blocksAndNames.
-                        blocksAndNames.Add(new ArrayList());
-                        blocksAndDefines.Add(new ArrayList());
-                        ((ArrayList)blocksAndNames[1]).AddRange(parameters);
+                        if(isFunction)
+                        {
+                            blocksAndNames.Add(new ArrayList());
+                            blocksAndDefines.Add(new ArrayList());
+                            ((ArrayList)blocksAndNames[blocksAndNames.Count-1]).AddRange(parameters);
+                        }
                     }
                     for (i = 0; i < parameters.Count; i++)
                     {
@@ -806,7 +860,7 @@ namespace testServer2
                     //for all variable declerations.
                     if (VariableDecleration.IsMatch(codeLine) && !(codeLine.IndexOf("typedef") != GeneralConsts.NOT_FOUND_STRING))
                     {
-                        keywordCheck = VariableDeclarationHandler(ref codeLine, ref pos, keywords, threadNumber, IsScope, sr, typeEnding, variables, globalVariables, blocksAndNames);
+                        keywordCheck = VariableDeclarationHandler(ref codeLine, ref pos,anciCWords, keywords, threadNumber, IsScope, sr, typeEnding, variables, globalVariables, blocksAndNames);
                         if (!keywordCheck)
                         {
                             string error = (codeLine + " keyword does not exist. row : " + sr.curRow);
@@ -817,12 +871,13 @@ namespace testServer2
                     }
                     else if (typeEnding == "c" && VariableEquation.IsMatch(codeLine))
                     {
-                        DifferentTypesCheck = VariableEquationHandler(sr, codeLine, blocksAndNames, threadNumber);
+                        DifferentTypesCheck = VariableEquationHandler(sr,anciCWords, codeLine, blocksAndNames, threadNumber);
                         if (!DifferentTypesCheck)
                         {
-                            string error = (codeLine + " types of both variables are different in row : " + sr.curRow);
-                            CompileError = true;
-                            throw new Exception(error);
+                            string error = (codeLine + " types of both variables might be different in row : " + sr.curRow);
+                            /*CompileError = true;
+                            throw new Exception(error);*/
+                            MainProgram.AddToLogString(path, "warning - " + error);
                         }
                     }
                     codeLine = codeLine.Trim();
@@ -955,7 +1010,7 @@ namespace testServer2
         /// </summary>
         /// <param name="path"> The path of the c code type string.</param>
         /// <param name="keywords"> keywords type Hashtable that conatins the code keywords.</param>
-        public static bool SyntaxCheck(string path,string destPath,ArrayList globalVariable,Dictionary<string,ArrayList>calledFromFunc, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction, Hashtable memoryHandleFunc, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,string [] eVars,int threadNumber,string typeEnding,Regex MemoryPattern,Regex FreeMemoryPattern,Dictionary<string,string> functionsContent,ref string codeContent)
+        public static bool SyntaxCheck(string path,string destPath,Hashtable anciCWords,ArrayList globalVariable,Dictionary<string,ArrayList>calledFromFunc, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction, Hashtable memoryHandleFunc, Hashtable keywords,Dictionary<string,ArrayList> funcVariables,string [] eVars,int threadNumber,string typeEnding,Regex MemoryPattern,Regex FreeMemoryPattern,Dictionary<string,string> functionsContent,ref string codeContent)
         {
             MyStream sr=null;
             try
@@ -981,6 +1036,7 @@ namespace testServer2
                 codeContent += codeLine + GeneralConsts.NEW_LINE;
                 int scopeLength = 0;
                 string lastFuncLine = "";
+                bool isFunction = false;
                 while (((codeLine = sr.ReadLine())!=null) && !CompileError)
                 {
                     codeContent += codeLine + GeneralConsts.NEW_LINE;
@@ -990,15 +1046,16 @@ namespace testServer2
                     {
                         
                         NextScopeLength(sr, ref codeLine, ref scopeLength, true);
-                        ChecksInSyntaxCheck(path,destPath, sr, codeLine, true, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames,blocksAndDefines, MemoryPattern, FreeMemoryPattern,ref codeContent, parameters,calledFromFunc,callsFromThisFunction, scopeLength + 1,lastFuncLine,functionsContent);
+                        ChecksInSyntaxCheck(path,destPath, sr, codeLine, true, keywords,memoryHandleFunc, threadNumber,typeEnding,eVars, variables, globalVariable, blocksAndNames,blocksAndDefines, MemoryPattern, FreeMemoryPattern,ref codeContent, parameters,calledFromFunc,callsFromThisFunction, scopeLength + 1,lastFuncLine,functionsContent,isFunction,anciCWords);
                         parameters.Clear();
+                        isFunction = false;
                     }
                     // if there is a function it saves its parameters (only if its C)..
-                    else if (FunctionPatternInC.IsMatch(codeLine))
+                    else if (FunctionPatternInC.IsMatch(codeLine)&&!functionPatternInH.IsMatch(codeLine))
                     {
-                        
+                        isFunction = true;
                         parameters.AddRange(GeneralRestApiServerMethods.FindParameters(cleanLineFromDoc(codeLine)));
-                        if (lastFuncLine != "")
+                        if (lastFuncLine != ""&&!(lastFuncLine.IndexOf(";")!=GeneralConsts.NOT_FOUND_STRING))
                         {
                             funcVariables.Add(lastFuncLine, new ArrayList(variables));
                             variables.Clear();
@@ -1018,7 +1075,14 @@ namespace testServer2
                         {
                             funcKeyInDict += ((ParametersType)parameters[i]).parameterType + ",";
                         }
-                        funcKeyInDict += ((ParametersType)parameters[parameters.Count - 1]).parameterType + ")";
+                        if(parameters.Count>0)
+                        {
+                            funcKeyInDict += ((ParametersType)parameters[parameters.Count - 1]).parameterType + ")";
+                        }
+                        else
+                        {
+                            funcKeyInDict += ")";
+                        }
                         calledFromFunc.Add(funcKeyInDict, new ArrayList());
                         callsFromThisFunction.Add(lastFuncLine, new Dictionary<string, string[]>());
 
@@ -1066,7 +1130,7 @@ namespace testServer2
         /// <param name="path"> The path for the file.</param>
         /// <param name="a"> Hashtable to store the keywords.</param>
         /// <param name="splitBy"> String that the file needs to split by.</param>
-        public static void AddToHashFromFile(string path, Hashtable a, string splitBy,int threadNumber)
+        public static void AddToHashFromFile(string path, Hashtable a,Hashtable anciCFile, string splitBy,int threadNumber)
         {
 
             MyStream sr = null;
@@ -1087,6 +1151,7 @@ namespace testServer2
                 for (int i = 0; i < keysArr.Length; i++)
                 {
                     a.Add(CreateMD5(keysArr[i]), keysArr[i]);
+                    anciCFile.Add(CreateMD5(keysArr[i]), keysArr[i]);
                 }
                 sr.Close();
             }
@@ -1683,12 +1748,12 @@ namespace testServer2
         /// <param name="includes"> Hashtable to store the includes.</param>
         /// <param name="defines"> Dictionary to store the defines.</param>
         /// <param name="pathes"> Paths for all the places where the imports might be.</param>
-        public static bool initializeKeywordsAndSyntext(string ansiPath,string destPath, string cFilePath, string CSyntextPath, string ignoreVariablesTypesPath, Hashtable keywords, Hashtable includes,Dictionary<string,string> defines,string [] eVars,string [] pathes,int threadNumber)
+        public static bool initializeKeywordsAndSyntext(string ansiPath,string destPath, string cFilePath, string CSyntextPath, string ignoreVariablesTypesPath, Hashtable keywords, Hashtable includes,Dictionary<string,string> defines,string [] eVars,string [] pathes,int threadNumber,Hashtable anciCWords)
         {
             try
             {
                 //ansiC File To Keywords ArrayList.
-                AddToHashFromFile(ansiPath, keywords, ",", threadNumber);
+                AddToHashFromFile(ansiPath, keywords,anciCWords, ",", threadNumber);
                 AddToArrayListFromFile(ignoreVariablesTypesPath, ignoreVarialbesType, ",", threadNumber);
                 //C Syntext File To Syntext ArrayList.
                 //AddToListFromFile(CSyntextPath, syntext, " ");
