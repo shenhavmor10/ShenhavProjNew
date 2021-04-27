@@ -331,7 +331,7 @@ namespace testServer2
                 else
                 {
                     tempCut = parameterType;
-                    parameterType = parameterType.Substring(0, parameterType.Length - (parameterType.IndexOf(' ') + 1));
+                    parameterType = parameterType.Substring(0, parameterType.Length - (parameterType.Length-parameterType.IndexOf(' ')));
                 }
                 parameterType = parameterType.Trim(trimChars);
                 parameterName = parameterName.Trim();
@@ -350,6 +350,10 @@ namespace testServer2
             name = result.parameterName;
             parameterType = result.parameterType;
             parameterType = parameterType.Replace(GeneralConsts.SPACEBAR, GeneralConsts.EMPTY_STRING);
+            if(keywords.ContainsKey(CreateMD5(parameterType))||anciCWords.ContainsKey(CreateMD5(parameterType)))
+            {
+                found = true;
+            }
             // checks if there is already the same name in the same scope.
             if (IsExistInArrayList(((ArrayList)blocksAndNames[blocksAndNames.Count - 1]), name) != null)
             {
@@ -442,6 +446,7 @@ namespace testServer2
             
             //takes the first param name.
             string varName1 = temp;
+            varName1=varName1.Trim();
             temp = Regex.Split(codeLine, GeneralConsts.EQUAL_SIGN)[1];
             char[] searchingChars = { ';' };
             //takes the second param name.
@@ -451,14 +456,14 @@ namespace testServer2
             ParametersType var1 = GetVariableTypeParameterFromArrayList(blocksAndNames, varName1.Trim(GeneralConsts.ASTERIX));
             ParametersType var2 = GetVariableTypeParameterFromArrayList(blocksAndNames, varName2.Trim(GeneralConsts.ASTERIX));
             //make sures the variable 2 is exist.
-            if (var2 == null)
+            /*if (var2 == null)
             {
                 Server.ConnectionServer.CloseConnection(threadNumber, "There is no parameter named " + varName2 + " in row : " + sr.curRow, GeneralConsts.ERROR);
                 CompileError = true;
                 isSameType = false;
-            }
+            }*/
             //checks if their type is the same.
-            if (isSameType && var1.parameterType != var2.parameterType)
+            if (var2!=null&&isSameType && var1.parameterType != var2.parameterType)
             {
                 isSameType = false;
                 if(anciCWords.ContainsKey(CreateMD5(var1.parameterType))&&anciCWords.ContainsKey(CreateMD5(var2.parameterType)))
@@ -934,7 +939,7 @@ namespace testServer2
                         }
                     }
                     //if the code line is in a scope or if its not the last line in the scope continute to the next line.
-                    if (IsScope && i != functionLength)
+                    if (IsScope && i < functionLength)
                     {
                         codeLine = sr.ReadLine();
                         codeContent += codeLine + GeneralConsts.NEW_LINE;
@@ -1323,6 +1328,7 @@ namespace testServer2
                     if(!defines.ContainsKey(temp.Item1))
                     {
                         defines.Add(temp.Item1, temp.Item2);
+                        keywords.Add(CreateMD5(temp.Item1), temp.Item1);
                     }
                 }
                 //Handling almost the same patterns as the syntaxCheck function.
@@ -1433,6 +1439,11 @@ namespace testServer2
                         if (!defines.ContainsKey(temp.Item1))
                         {
                             defines.Add(temp.Item1, temp.Item2);
+                            
+                        }
+                        if(!keywords.ContainsKey(CreateMD5(temp.Item1)))
+                        {
+                            keywords.Add(CreateMD5(temp.Item1), temp.Item1);
                         }
                     }
                     //Handling almost the same patterns as the syntaxCheck function.
