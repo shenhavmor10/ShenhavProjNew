@@ -27,8 +27,8 @@ namespace testServer2
         static Regex EnumPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?(enum\s(.+{$|.*{$;?|[^\s;]+;?$))");
         static Regex TypedefOneLine = new Regex(@"^.*typedef\s(struct|enum)\s[^\s]+\s[^\s]+;$");
         static Regex TypdedefNoStruct = new Regex(@"^.*typedef\s.+\s[^\s]+;$");
-        static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?([^\s()]+\s)?[^\s()+\-]+\s((\*)*(\s))?[^\s\-+()=]+(\s?((\+|\-))?=.+;|[^()=]+;))");
-        static Regex VariableEquation = new Regex(@"^(?!.*return)(?=(\s)?([^\s()]+\s)?((\*)*(\s))?[^\s()]+(\s)?=(\s)?[A-Za-z][^\s()]*;$)");
+        static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?([^\s.()]+\s)?[^\s().+\-]+\s((\*)*(\s))?[^\s\-+()=]+(\s?((\+|\-))?=.+;|[^()=]+;))");
+        static Regex VariableEquation = new Regex(@"^(?!.*return)(?=(\s)?([^\s()]+\s)?((\*)*(\s))?[^\s.()]+(\s)?=(\s)?[A-Za-z][^\s()]*;$)");
         //static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^\d][^ ()]*( [^ ()]+)?$");
         static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^ ()]*( [^ ()]+)?$");
         //include <NAME>
@@ -1555,7 +1555,7 @@ namespace testServer2
             {
                 stop = true;
             }
-            while(!stop&&codeLine!=null&&newCodeLine.IndexOf(";")==-1)
+            while(!stop&&codeLine!=null&&newCodeLine.IndexOf(";")==-1&&newCodeLine.IndexOf("{")==-1&& newCodeLine.IndexOf("{") == -1)
             {
                 newCodeLine += buffer.ReadLine();
             }
