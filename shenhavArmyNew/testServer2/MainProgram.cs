@@ -117,7 +117,7 @@ namespace testServer2
             //create regex for all memory handles (malloc alloc etc... and custom memory handles aswell).
             bool compileError = false;
             int currentThreadNumber = threadNumber;
-            string memoryPatternTemp = @"(?!.*return)(?= (\s)?([^\s()] + (\s)?((\*)*(\s))?)?[^\s()]+(\s ?= (\s)?(malloc|alloc|realloc|calloc|";
+            string memoryPatternTemp = @"(?!return)(?=(\s)?([^\s()]+(\s)?((\*)*(\s))?)?[^\s()]+(\s ?=(\s)?(malloc|alloc|realloc|calloc|";
             string customMalloc = @"(?<=\n\r\t)(\s)*?[^\n]+(\s*?)=(\s*?)(malloc|calloc|alloc|realloc";
             for (int i=0;i<memoryPatterns.Length;i++)
             {
@@ -300,7 +300,7 @@ namespace testServer2
         static Task<int> RunProcessAsync(string fileName,double avgLine,string tool_exe_name,string srcPath,string destPath,string eVar)
         {
             int maxTimeNeeded;
-            maxTimeNeeded = ((CodeInfoJson)final_json[srcPath][eVar]["codeInfo"]).rowNumber * (int)avgLine * 3;
+            maxTimeNeeded = ((CodeInfoJson)final_json[srcPath][eVar]["codeInfo"]).rowNumber * (int)avgLine * 10;
             Console.WriteLine(Directory.GetCurrentDirectory());
             Console.WriteLine("running async waiting for exit.");
             Console.WriteLine("FileName =" + fileName);

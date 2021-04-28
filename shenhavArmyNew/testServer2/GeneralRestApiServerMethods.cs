@@ -13,10 +13,10 @@ namespace testServer2
     {
         //Patterns Declaration.
         const int NOT_FOUND_STRING = -1;
-        static Regex functionPatternInH = new Regex(@"^[a-zA-Z]+.*\s[a-zA-Z].*[(].*[)]\;$");
+        static Regex functionPatternInH = new Regex(@"^[a-zA-Z]+((\*)*(\s))?[a-zA-Z].*[(].*[)]\;$");
         static Regex OpenBlockPattern = new Regex(@".*{.*");
         static Regex CloseBlockPattern = new Regex(@".*}.*");
-        static Regex FunctionPatternInC = new Regex(@"^([^ ]+\s)?[^ ]+\s(.*\s)?[^ ]+\([^()]*\)$");
+        static Regex FunctionPatternInC = new Regex(@"^([^ ]+\s)?[^# ]+\s(.*\s)?[^ ]+\([^();]*\)$");
         const string ReturnPattern = @"(\s)+?return(\s)?[^\s]+;";
         const string patternFilePath = @"..\..\..\ConfFiles\Patterns.txt";
 
@@ -349,6 +349,7 @@ namespace testServer2
         /// <param name="final_json"> the final big json.</param>
         static void CreateFunctionsJsonFile(string path, Regex pattern, string typeEnding, Dictionary<string, Dictionary<string, Dictionary<string, Object>>> final_json, string eVars, Dictionary<string,ArrayList> variables=null,Hashtable memoryHandleFuncs=null,Dictionary<string,ArrayList>calledFromFunc=null, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction = null, Dictionary<string,string>functionsContent=null)
         {
+            
             string codeLine = GeneralConsts.EMPTY_STRING;
             string fName;
             string[] temp;
@@ -366,9 +367,12 @@ namespace testServer2
                 if (codeLine == null)
                     exitFlag = true;
                 //saves the last documentation.
-                while (!exitFlag && !pattern.IsMatch(codeLine))
+                if (typeEnding == "c")
                 {
 
+                }
+                while (!exitFlag && !pattern.IsMatch(codeLine))
+                {
                     firstLineDocumentation = GeneralConsts.EMPTY_STRING;
                     if(codeLine!=null)
                     {
@@ -380,7 +384,11 @@ namespace testServer2
                         while ((codeLine.IndexOf("//") != NOT_FOUND_STRING))
                         {
                             if (codeLine != null)
+                            {
                                 codeLine = sr.ReadLine();
+                                codeLine = codeLine.Trim();
+                            }
+
                         }
                         if ((codeLine.IndexOf("/*") != NOT_FOUND_STRING))
                         {
@@ -389,18 +397,25 @@ namespace testServer2
                             while (!(codeLine.IndexOf("*/") != NOT_FOUND_STRING))
                             {
                                 if (codeLine != null)
+                                {
                                     codeLine = sr.ReadLine();
+                                    codeLine = codeLine.Trim();
+                                }
                             }
                             if ((codeLine.IndexOf("*/") != NOT_FOUND_STRING))
                             {
                                 if (codeLine != null)
+                                {
                                     codeLine = sr.ReadLine();
+                                    codeLine = codeLine.Trim();
+                                }
                             }
                         }
                     }
                     if (codeLine != null&&!pattern.IsMatch(codeLine))
                     {
                         codeLine = sr.ReadLine();
+                        codeLine = codeLine.Trim();
                     }
                     if(codeLine==null)
                     {
@@ -436,7 +451,15 @@ namespace testServer2
                                 ((FunctionInfoJson)tempStorage).content = functionsContent[fName];
                             }
                             //gets the variables of the function
-                            ((FunctionInfoJson)tempStorage).variables = FindVariables(variables[fName]);
+                            try
+                            {
+                                ((FunctionInfoJson)tempStorage).variables = FindVariables(variables[fName]);
+                            }
+                            catch(Exception e)
+                            {
+                                ((FunctionInfoJson)tempStorage).variables = new ParametersType[0];
+                                Console.WriteLine(e.Message);
+                            }
                             //gets the exit points.
                             ((FunctionInfoJson)tempStorage).allExitPoints = FindPatternInCode(((FunctionInfoJson)tempStorage).content,ReturnPattern);
                             //gets the amount of the exit points.
@@ -469,7 +492,11 @@ namespace testServer2
                             {
                                 funcKeyInDict += (((FunctionInfoJson)tempStorage).parameters[i]).parameterType + ",";
                             }
-                            funcKeyInDict += (((FunctionInfoJson)tempStorage).parameters[((FunctionInfoJson)tempStorage).parameters.Length - 1]).parameterType + ")";
+                            if(((FunctionInfoJson)tempStorage).parameters.Length>0)
+                            {
+                                funcKeyInDict += (((FunctionInfoJson)tempStorage).parameters[((FunctionInfoJson)tempStorage).parameters.Length - 1]).parameterType;
+                            }
+                            funcKeyInDict += ")";
                             ((FunctionInfoJson)tempStorage).calledFromFunc = (string[])calledFromFunc[funcKeyInDict].ToArray(typeof(string));
                             ((FunctionInfoJson)tempStorage).callsFromThisFunction=callsFromThisFunction[fName];
                         }

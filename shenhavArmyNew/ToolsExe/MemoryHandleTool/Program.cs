@@ -54,7 +54,9 @@ namespace MemoryHandleTool
                     ArrayList freesArrayList = new ArrayList();
                     Console.WriteLine("before mallocs");
                     //mallocs = RemoveAllFreedMallocs(ChangeAllFreeNames(frees), ChangeAllMallocNames(mallocs));
+					Console.WriteLine("Before before mallocs");
                     mallocs = ChangeAllMallocNames(mallocs);
+					Console.Read();
                     frees = ChangeAllFreeNames(frees);
                     freesArrayList.AddRange(frees);
                     mallocs =mallocs.Distinct<string>().ToArray();

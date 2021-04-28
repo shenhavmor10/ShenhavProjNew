@@ -19,7 +19,7 @@ namespace testServer2
         //All Patterns That is being searched in the code.
         static Regex OpenBlockPattern = new Regex(@".*{.*");
         static Regex CloseBlockPattern = new Regex(@".*}.*");
-        static Regex functionPatternInH = new Regex(@"^[a-zA-Z]+.*\s[a-zA-Z].*[(].*[)]\;$");
+        static Regex functionPatternInH = new Regex(@"^[a-zA-Z]+((\*)*(\s))?[a-zA-Z].*[(].*[)]\;$");
         static Regex staticFunctionPatternInC = new Regex(@"^.*static.*\s.*[a-zA-Z]+.*\s[a-zA-Z].*[(].*[)]$");
         static Regex FunctionPatternInC = new Regex(@"^([^ ]+\s)?[^# ]+\s(.*\s)?[^ ]+\([^()]*\)$");
         static Regex CallFunction = new Regex(@"[^ ]+\([^()]*\);$");
@@ -27,7 +27,7 @@ namespace testServer2
         static Regex EnumPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?(enum\s(.+{$|.*{$;?|[^\s;]+;?$))");
         static Regex TypedefOneLine = new Regex(@"^.*typedef\s(struct|enum)\s[^\s]+\s[^\s]+;$");
         static Regex TypdedefNoStruct = new Regex(@"^.*typedef\s.+\s[^\s]+;$");
-        static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?([^\s.()]+\s)?[^\s().+\-]+\s((\*)*(\s))?[^\s\-+()=]+(\s?((\+|\-))?=.+;|[^()=]+;))");
+        static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?([^\s.(),]+\s)?[^\s().+\-,=]+\s((\*)*(\s))?[^\s\-+()=]+((\s?((\+|\-))?=.+;)|([^()=]+;)))");
         static Regex VariableEquation = new Regex(@"^(?!.*return)(?=(\s)?([^\s()]+\s)?((\*)*(\s))?[^\s.()]+(\s)?=(\s)?[A-Za-z][^\s()]*;$)");
         //static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^\d][^ ()]*( [^ ()]+)?$");
         static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^ ()]*( [^ ()]+)?$");
@@ -776,7 +776,7 @@ namespace testServer2
                 bool DifferentTypesCheck = true;
                 int pos = 0;
                 ArrayList keywordResults = new ArrayList();
-                for (i = 0; i < functionLength + 1 && !CompileError && codeLine != null; i++)
+                for (i = 0; i < functionLength && !CompileError && codeLine != null; i++)
                 {
                     if (codeLine.Trim(GeneralConsts.TAB_SPACE) == GeneralConsts.EMPTY_STRING)
                     {
@@ -817,6 +817,7 @@ namespace testServer2
                             try
                             {
                                 calledFromFunc[convertedLine].Add(functionName);
+                                Console.WriteLine(SetCallsFromThisFunctionValue(convertedLine, callsFromThisFunction), FindCallingFunctionParameters(codeLine));
                                 callsFromThisFunction[functionName].Add(SetCallsFromThisFunctionValue(convertedLine, callsFromThisFunction),FindCallingFunctionParameters(codeLine));
                             }
                             catch (Exception e)
@@ -998,8 +999,12 @@ namespace testServer2
                 {
                     funcKeyInDict += ((ParametersType)parameters[i]).parameterType + ",";
                 }
-                funcKeyInDict += ((ParametersType)parameters[parameters.Count - 1]).parameterType + ")";
-                if(funcKeyInDict==name)
+                if(parameters.Count>0)
+                {
+                    funcKeyInDict += ((ParametersType)parameters[parameters.Count - 1]).parameterType;
+                }
+                funcKeyInDict += ")";
+                if (funcKeyInDict==name)
                 {
                     result = key;
                 }
@@ -1249,7 +1254,7 @@ namespace testServer2
             else
             {
                 //if there is only one type in the old definition.
-                if (CheckIfStringInHash(keywords, firstNewVariableWord))
+                /*if (CheckIfStringInHash(keywords, firstNewVariableWord))
                 {
                     newKeyword=AddToKeywords(newKeyword, keywords, codeLine);
                     result = (newKeyword, defineOriginalWord);
@@ -1263,7 +1268,9 @@ namespace testServer2
                 {
                     newKeyword = AddToKeywords(newKeyword, keywords, codeLine);
                     result = (newKeyword, defineOriginalWord);
-                }
+                }*/
+                newKeyword = AddToKeywords(newKeyword, keywords, codeLine);
+                result = (newKeyword, defineOriginalWord);
             }
             return result;
         }
