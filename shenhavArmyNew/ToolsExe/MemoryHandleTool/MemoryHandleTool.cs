@@ -241,7 +241,14 @@ namespace MemoryHandleTool
             string [] result = new string [frees.Length];
             for(int i=0;i<frees.Length;i++)
             {
-                result[i] = GetFreeName(frees[i]).Trim();
+                try
+                {
+                    result[i] = GetFreeName(frees[i]).Trim();
+                }
+                catch(Exception e)
+                {
+                    logs += e.Message;
+                }
             }
             return result;
         }
@@ -257,7 +264,15 @@ namespace MemoryHandleTool
             string[] result = new string[mallocs.Length];
             for (int i = 0; i < mallocs.Length; i++)
             {
-                result[i] = GetMallocName(mallocs[i]).Trim();
+                try
+                {
+                    result[i] = GetMallocName(mallocs[i]).Trim();
+                }
+                catch(Exception e)
+                {
+                    logs += e.Message+result[i]+" might be a problem.";
+                }
+                
             }
             return result;
         }
@@ -271,7 +286,15 @@ namespace MemoryHandleTool
         {
             string result = mallocCall.Split('=')[0];
             result = result.Trim();
-            result = result.Substring(result.LastIndexOf(' '));
+            if(result.IndexOf(' ')!=-1)
+            {
+                result = result.Substring(result.LastIndexOf(' '));
+            }
+            if(result.IndexOf('*')!=-1)
+            {
+                result=result.Replace("*","");
+            }
+            result = result.Trim();
             return result;
         }
     }

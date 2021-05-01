@@ -386,7 +386,8 @@ namespace testServer2
                             if (codeLine != null)
                             {
                                 codeLine = sr.ReadLine();
-                                codeLine = codeLine.Trim();
+                                if (codeLine != null)
+                                    codeLine = codeLine.Trim();
                             }
 
                         }
@@ -399,7 +400,8 @@ namespace testServer2
                                 if (codeLine != null)
                                 {
                                     codeLine = sr.ReadLine();
-                                    codeLine = codeLine.Trim();
+                                    if (codeLine != null)
+                                        codeLine = codeLine.Trim();
                                 }
                             }
                             if ((codeLine.IndexOf("*/") != NOT_FOUND_STRING))
@@ -407,7 +409,8 @@ namespace testServer2
                                 if (codeLine != null)
                                 {
                                     codeLine = sr.ReadLine();
-                                    codeLine = codeLine.Trim();
+                                    if (codeLine != null)
+                                        codeLine = codeLine.Trim();
                                 }
                             }
                         }
@@ -415,7 +418,8 @@ namespace testServer2
                     if (codeLine != null&&!pattern.IsMatch(codeLine))
                     {
                         codeLine = sr.ReadLine();
-                        codeLine = codeLine.Trim();
+                        if(codeLine!=null)
+                            codeLine = codeLine.Trim();
                     }
                     if(codeLine==null)
                     {
