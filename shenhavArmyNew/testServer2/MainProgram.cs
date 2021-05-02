@@ -96,7 +96,16 @@ namespace testServer2
         public static void AddToLogString(string filePath,string content)
         {
             mutexAddLogFiles.WaitOne();
-            logFiles[filePath] += content + GeneralConsts.NEW_LINE;
+            if(content.IndexOf(@"\n")!=GeneralConsts.NOT_FOUND_STRING)
+            {
+                logFiles[filePath] += Regex.Unescape(content) + GeneralConsts.NEW_LINE;
+            }
+            else
+            {
+                logFiles[filePath] += content + GeneralConsts.NEW_LINE;
+            }
+            
+
             mutexAddLogFiles.ReleaseMutex();
         }
         
@@ -117,8 +126,8 @@ namespace testServer2
             //create regex for all memory handles (malloc alloc etc... and custom memory handles aswell).
             bool compileError = false;
             int currentThreadNumber = threadNumber;
-            string memoryPatternTemp = @"(?!return)(?=(\s)?([^\s()]+(\s)?((\*)*(\s))?)?[^\s()]+(\s ?=(\s)?(malloc|alloc|realloc|calloc|";
-            string customMalloc = @"(?<=\n\r\t)(\s)*?[^\n]+(\s*?)=(\s*?)(malloc|calloc|alloc|realloc";
+            string memoryPatternTemp = @"(?!return)(?=(\s)?([^\s()]+(\s)?((\*)*(\s))?)?[^\s()]+\s?=(\s)?[^\s]*(malloc|alloc|realloc|calloc|";
+            string customMalloc = @"(?<=\n)(\s)*?[^\n]+(\s*)=(\s*)[^\n]*(\s*)(malloc|calloc|realloc|alloc|";
             for (int i=0;i<memoryPatterns.Length;i++)
             {
                 if(memoryPatterns[i]!="")
@@ -129,8 +138,8 @@ namespace testServer2
             }
             memoryPatternTemp=memoryPatternTemp.Substring(0, memoryPatternTemp.Length - 1);
             customMalloc = customMalloc.Substring(0, customMalloc.Length - 1);
-            customMalloc += @")\([^\n]+\);(\s)*?(?=\n\r\t)";
-            memoryPatternTemp += @")\(.+\);$))";
+            customMalloc += @")\([^\n]+\);(\s)*?(?=\n)";
+            memoryPatternTemp += @")\(.+\);$)";
             readyPatterns.Add("CustomMalloc", customMalloc);
             Regex MemoryPattern = new Regex(memoryPatternTemp);
             //create regex for all free handles plus custom frees.
@@ -138,7 +147,7 @@ namespace testServer2
             string freePatternTemp = @"(?!.*return)(?=(\s)?(free|";
             for(int i=0;i<freePatterns.Length;i++)
             {
-                if(freePatterns[i]=="")
+                if(freePatterns[i]!="")
                 {
                     freePatternTemp += freePatterns[i] + "|";
                     customFree += freePatterns[i] + "|";
@@ -167,6 +176,7 @@ namespace testServer2
                 //initialize 
                 try
                 {
+                    
                     compileError=GeneralCompilerFunctions.initializeKeywordsAndSyntext(ansiCFile,destPath, filePath, CSyntextFile, ignoreVariablesTypesPath, keywords, includes, defines, eVars.Split(','), pathes, currentThreadNumber, anciCWords);
                     Console.WriteLine("after initialize");
                 }
@@ -180,6 +190,10 @@ namespace testServer2
                     //Syntax Check.
                     try
                     {
+                        foreach (string k in includes.Keys)
+                        {
+                            Console.WriteLine(includes[k]);
+                        }
                         compileError = GeneralCompilerFunctions.SyntaxCheck(filePath,destPath,anciCWords, globalVariable, calledFromFunc,callsFromThisFunction, memoryHandleFuncs, keywords, funcVariables, eVars.Split(','), currentThreadNumber, fileType, MemoryPattern, FreeMemoryPattern,functionsContent, ref codeContent);
                     }
                     catch (Exception e)

@@ -162,46 +162,44 @@ namespace testServer2
             string[] tempSplit;
             string[] finalSplit;
             string tempSplit2;
-            string finalType;
+            string finalType="";
+            string tempCut;
             int i;
             tempSplit = Regex.Split(codeLine, @"\(");
             tempSplit2 = tempSplit[1];
             tempSplit = Regex.Split(tempSplit2, @"\,|\)");
             ParametersType[] finalParameters = new ParametersType[tempSplit.Length - 1];
-            char[] charsToTrim = { '*', '&' };
+            char[] charsToTrim = { '*', '&',' ' };
             if (tempSplit2.Length > 2)
             {
                 for (i = 0; i < tempSplit.Length - 1; i++)
                 {
-                    tempSplit2 = tempSplit[i];
-                    if (tempSplit2.IndexOf("*") != NOT_FOUND_STRING)
+                    tempSplit[i] = tempSplit[i].Trim();
+                    if (tempSplit[i].Split(' ').Length > 2 && !(tempSplit[i].IndexOf("struct") != GeneralConsts.NOT_FOUND_STRING))
                     {
-                        finalSplit = Regex.Split(tempSplit2, @"\*");
+                        tempCut = tempSplit[i].Substring(tempSplit[i].IndexOf(' ') + 1, tempSplit[i].Length - (tempSplit[i].IndexOf(' ') + 1));
+                        if (tempCut.IndexOf(' ') != GeneralConsts.NOT_FOUND_STRING)
+                        {
+                            finalType = tempCut.Substring(0, tempCut.IndexOf(' '));
+                        }
+                        else
+                        {
+                            finalType = tempCut;
+                        }
+                    }
+                    else if (tempSplit[i].Split(' ').Length > 2 && (tempSplit[i].IndexOf("struct") != GeneralConsts.NOT_FOUND_STRING))
+                    {
+                        finalType = tempSplit[i].Substring(0, tempSplit[i].LastIndexOf(" "));
                     }
                     else
                     {
-                        finalSplit = Regex.Split(tempSplit2, @"\s");
-
+                        tempCut = tempSplit[i];
+                        finalType = tempSplit[i].Substring(0, tempSplit[i].Length - (tempSplit[i].Length - tempSplit[i].IndexOf(' ')));
                     }
-
-                    if (finalSplit.Length == 1)
-                    {
-                        tempSplit2 = finalSplit[0];
-                    }
-                    else
-                    {
-                        tempSplit2 = takeSecondNotNullString(finalSplit);
-                    }
-                    if (tempSplit2.IndexOf("&") != NOT_FOUND_STRING || tempSplit2.IndexOf("*") != NOT_FOUND_STRING)
-                    {
-                        tempSplit2 = tempSplit2.Trim(charsToTrim);
-                    }
-                    //trimEnd
-                    tempSplit[i] = tempSplit[i].Substring(0, tempSplit[i].Length - (tempSplit2.Length));
-                    finalType = tempSplit[i].Replace(GeneralConsts.SPACEBAR, GeneralConsts.EMPTY_STRING);
-                    tempSplit2 = tempSplit2.Replace(GeneralConsts.SPACEBAR, GeneralConsts.EMPTY_STRING);
+                    finalType = finalType.Trim(charsToTrim);
+                    tempSplit2 = tempSplit[i].Trim();
+                    tempSplit2 = tempSplit2.Substring(tempSplit2.LastIndexOf(' ')).Trim();
                     finalParameters[i] = new ParametersType(tempSplit2, finalType);
-
                 }
             }
             else
@@ -367,10 +365,6 @@ namespace testServer2
                 if (codeLine == null)
                     exitFlag = true;
                 //saves the last documentation.
-                if (typeEnding == "c")
-                {
-
-                }
                 while (!exitFlag && !pattern.IsMatch(codeLine))
                 {
                     firstLineDocumentation = GeneralConsts.EMPTY_STRING;

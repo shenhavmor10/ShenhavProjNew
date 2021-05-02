@@ -27,7 +27,7 @@ namespace testServer2
         static Regex EnumPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?(enum\s(.+{$|.*{$;?|[^\s;]+;?$))");
         static Regex TypedefOneLine = new Regex(@"^.*typedef\s(struct|enum)\s[^\s]+\s[^\s]+;$");
         static Regex TypdedefNoStruct = new Regex(@"^.*typedef\s.+\s[^\s]+;$");
-        static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?([^\s.(),]+\s)?[^\s().+\-,=]+\s((\*)*(\s))?[^\s\-+()=]+((\s?((\+|\-))?=.+;)|([^()=]+;)))");
+        static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?([^\s.(),]+\s)?[^\s().+*\/\-,=]+\s((\*)*(\s))?[^\s\-+*\/()=]+((\s?((\+|\-))?=.+;)|([^()=]+;)))");
         static Regex VariableEquation = new Regex(@"^(?!.*return)(?=(\s)?([^\s()]+\s)?((\*)*(\s))?[^\s.()]+(\s)?=(\s)?[A-Za-z][^\s()]*;$)");
         //static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^\d][^ ()]*( [^ ()]+)?$");
         static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^ ()]*( [^ ()]+)?$");
@@ -316,7 +316,7 @@ namespace testServer2
                 parameterType = Regex.Split(codeLine, GeneralConsts.EQUAL_SIGN)[0];
                 parameterType = parameterType.Trim();
                 parameterName = parameterType;
-                if (parameterType.Split(' ').Length>2)
+                if (parameterType.Split(' ').Length>2&&!(parameterType.IndexOf("struct")!=GeneralConsts.NOT_FOUND_STRING))
                 {
                     tempCut= parameterType.Substring(parameterType.IndexOf(' ') + 1, parameterType.Length - (parameterType.IndexOf(' ') + 1));
                     if(tempCut.IndexOf(' ')!=GeneralConsts.NOT_FOUND_STRING)
@@ -327,6 +327,10 @@ namespace testServer2
                     {
                         parameterType = tempCut;
                     }
+                }
+                else if (parameterType.Split(' ').Length > 2 && (parameterType.IndexOf("struct") != GeneralConsts.NOT_FOUND_STRING))
+                {
+                    parameterType = parameterType.Substring(0, parameterType.LastIndexOf(" "));
                 }
                 else
                 {
@@ -349,7 +353,10 @@ namespace testServer2
             }
             name = result.parameterName;
             parameterType = result.parameterType;
-            parameterType = parameterType.Replace(GeneralConsts.SPACEBAR, GeneralConsts.EMPTY_STRING);
+            if(!(parameterType.IndexOf("struct")!=GeneralConsts.NOT_FOUND_STRING))
+            {
+                parameterType = parameterType.Replace(GeneralConsts.SPACEBAR, GeneralConsts.EMPTY_STRING);
+            }
             if(keywords.ContainsKey(CreateMD5(parameterType))||anciCWords.ContainsKey(CreateMD5(parameterType)))
             {
                 found = true;
@@ -776,9 +783,9 @@ namespace testServer2
                 bool DifferentTypesCheck = true;
                 int pos = 0;
                 ArrayList keywordResults = new ArrayList();
-                for (i = 0; i < functionLength && !CompileError && codeLine != null; i++)
+                for (i = 0; i < functionLength+1 && !CompileError && codeLine != null; i++)
                 {
-                    if (codeLine.Trim(GeneralConsts.TAB_SPACE) == GeneralConsts.EMPTY_STRING)
+                    /*if (codeLine.Trim(GeneralConsts.TAB_SPACE) == GeneralConsts.EMPTY_STRING)
                     {
                         codeLine = sr.ReadLine();
                         codeContent += codeLine + GeneralConsts.NEW_LINE;
@@ -786,9 +793,13 @@ namespace testServer2
                         {
                             functionsContent[functionName] += codeLine + GeneralConsts.NEW_LINE;
                         }
-                    }
+                    }*/
+                    
                     codeLine = cleanLineFromDoc(codeLine).Trim();
-                    codeLine = ConcatenateIfNeeded(codeLine, sr, functionsContent,functionName);
+                    if(functionName!="")
+                    {
+                        codeLine = ConcatenateIfNeeded(codeLine, ref i, sr, functionsContent, functionName);
+                    }
                     //take cares to all of those situations.
                     if (StructPattern.IsMatch(codeLine) || TypedefOneLine.IsMatch(codeLine))
                     {
@@ -838,6 +849,7 @@ namespace testServer2
                         {
                             memoryHandleFunc.Add(CreateMD5(functionName), GeneralConsts.MEMORY_ALLOCATION);
                             memoryAllocation = true;
+                            
                         }
                         else
                         {
@@ -911,7 +923,7 @@ namespace testServer2
                             }
                         }
                     }
-                    if (codeLine.IndexOf("//") != GeneralConsts.NOT_FOUND_STRING || codeLine.IndexOf("/*") != GeneralConsts.NOT_FOUND_STRING)
+                    if (codeLine.IndexOf("//") != GeneralConsts.NOT_FOUND_STRING && codeLine.IndexOf("//") < 4 || codeLine.IndexOf("/*") != GeneralConsts.NOT_FOUND_STRING && codeLine.IndexOf("/*") < 4)
                     {
                         //skips documentation if needed.
                         i += skipDocumentation(sr, codeLine);
@@ -1521,7 +1533,6 @@ namespace testServer2
                                     if (Directory.GetFiles(pathes[i], result, SearchOption.AllDirectories).Length > 0)
                                     {
                                         currentPath = Directory.GetFiles(pathes[i], result, SearchOption.AllDirectories)[0];
-                                        break;
                                     }
                                     /*if(File.Exists(pathes[i]+"\\"+result))
                                     {
@@ -1556,7 +1567,7 @@ namespace testServer2
         /// <param name="functionContent"> the content of the function</param>
         /// <param name="functionName">function Name</param>
         /// <returns></returns>
-        static string ConcatenateIfNeeded(string codeLine,MyStream buffer,Dictionary<string,string>functionContent,string functionName)
+        static string ConcatenateIfNeeded(string codeLine,ref int index,MyStream buffer,Dictionary<string,string>functionContent,string functionName)
         {
             bool stop = false;
             string newCodeLine = codeLine;
@@ -1576,6 +1587,7 @@ namespace testServer2
             while(!stop&&codeLine!=null&&newCodeLine.IndexOf(";")==-1&&newCodeLine.IndexOf("{")==-1&& newCodeLine.IndexOf("{") == -1)
             {
                 newCodeLine += buffer.ReadLine();
+                index += 1;
             }
             if(codeLine!=newCodeLine)
             {

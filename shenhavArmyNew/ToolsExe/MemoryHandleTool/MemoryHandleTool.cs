@@ -102,14 +102,14 @@ namespace MemoryHandleTool
                         //isnt being free'd.
                         if (tuple.Item1=="")
                         {
-                            logs += "Variable " + keyName + " that was created in function " + resultsJson[key].fName + " was not being free'd.";
+                            logs += "Variable " + keyName + " that was created in function " + resultsJson[key].fName + " was not being free'.\n\r";
                         }
                         else
                         {
                             //recursion check if in other function calls the allocation is being free'd.
                             if(await CheckIfFreed(tuple.Item2, tuple.Item1, client, sourcePath, eVar)==false)
                             {
-                                logs += "Variable " + keyName + " that was created in function " + resultsJson[key].fName + " was not being free'd.";
+                                logs += "Variable " + keyName + " that was created in function " + resultsJson[key].fName + " was not being free'd.\n\r";
                             }
                         }
                     }

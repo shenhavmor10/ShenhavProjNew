@@ -20,3 +20,13 @@ C:\Users\Shenhav\Desktop\ShenhavArmyNew\ShenhavProjNew\shenhavArmyNew\ToolsExe\M
 C:\Users\Shenhav\Desktop\ShenhavArmyNew\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\obj\Debug\MemoryHandleTool.csproj.CopyComplete
 C:\Users\Shenhav\Desktop\ShenhavArmyNew\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\obj\Debug\MemoryHandleTool.exe
 C:\Users\Shenhav\Desktop\ShenhavArmyNew\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\obj\Debug\MemoryHandleTool.pdb
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\bin\Debug\MemoryHandleTool.exe.config
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\bin\Debug\MemoryHandleTool.exe
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\bin\Debug\MemoryHandleTool.pdb
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\bin\Debug\ClassesSolutionDLL.pdb
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\bin\Debug\Newtonsoft.Json.xml
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\obj\Debug\MemoryHandleTool.csprojAssemblyReference.cache
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\obj\Debug\MemoryHandleTool.csproj.CoreCompileInputs.cache
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\obj\Debug\MemoryHandleTool.csproj.CopyComplete
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\obj\Debug\MemoryHandleTool.exe
+C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\ToolsExe\MemoryHandleTool\obj\Debug\MemoryHandleTool.pdb
