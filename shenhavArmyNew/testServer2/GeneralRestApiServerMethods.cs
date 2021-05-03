@@ -164,12 +164,13 @@ namespace testServer2
             string tempSplit2;
             string finalType="";
             string tempCut;
+            bool header=false;
             int i;
             tempSplit = Regex.Split(codeLine, @"\(");
             tempSplit2 = tempSplit[1];
             tempSplit = Regex.Split(tempSplit2, @"\,|\)");
             ParametersType[] finalParameters = new ParametersType[tempSplit.Length - 1];
-            char[] charsToTrim = { '*', '&',' ' };
+            char[] charsToTrim = { '*', '&', ' ' };
             if (tempSplit2.Length > 2)
             {
                 for (i = 0; i < tempSplit.Length - 1; i++)
@@ -194,11 +195,35 @@ namespace testServer2
                     else
                     {
                         tempCut = tempSplit[i];
-                        finalType = tempSplit[i].Substring(0, tempSplit[i].Length - (tempSplit[i].Length - tempSplit[i].IndexOf(' ')));
+                        if (tempSplit[i].IndexOf(" ") != GeneralConsts.NOT_FOUND_STRING)
+                        {
+                            finalType = tempSplit[i].Substring(0, tempSplit[i].Length - (tempSplit[i].Length - tempSplit[i].IndexOf(' ')));
+                        }
+                        else if (tempSplit[i].IndexOf("*") != GeneralConsts.NOT_FOUND_STRING)
+                        {
+                            finalType = tempSplit[i].Substring(0, tempSplit[i].Length - (tempSplit[i].Length - tempSplit[i].IndexOf('*')));
+                        }
+                        else
+                        {
+                            finalType = tempSplit[i];
+                            tempSplit2 = "";
+                            header = true;
+                        }
                     }
                     finalType = finalType.Trim(charsToTrim);
-                    tempSplit2 = tempSplit[i].Trim();
-                    tempSplit2 = tempSplit2.Substring(tempSplit2.LastIndexOf(' ')).Trim();
+                    if (!header)
+                    {
+                        tempSplit2 = tempSplit[i].Trim();
+                        if (tempSplit2.IndexOf(' ') != NOT_FOUND_STRING)
+                        {
+                            tempSplit2 = tempSplit2.Substring(tempSplit2.LastIndexOf(' ')).Trim();
+                        }
+                        else
+                        {
+                            tempSplit2 = tempSplit2.Substring(tempSplit2.LastIndexOf('*')).Trim();
+                        }
+
+                    }
                     finalParameters[i] = new ParametersType(tempSplit2, finalType);
                 }
             }
@@ -208,6 +233,8 @@ namespace testServer2
             }
             return finalParameters;
         }
+            
+        
         /// Function - FindDocumentation
         /// <summary>
         /// Finds the documentation of a function.

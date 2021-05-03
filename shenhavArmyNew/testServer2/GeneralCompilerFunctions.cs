@@ -27,7 +27,7 @@ namespace testServer2
         static Regex EnumPattern = new Regex(@"^([^\s\/\*()]+)?(\s)?(enum\s(.+{$|.*{$;?|[^\s;]+;?$))");
         static Regex TypedefOneLine = new Regex(@"^.*typedef\s(struct|enum)\s[^\s]+\s[^\s]+;$");
         static Regex TypdedefNoStruct = new Regex(@"^.*typedef\s.+\s[^\s]+;$");
-        static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?([^\s.(),]+\s)?[^\s().+*\/\-,=]+\s((\*)*(\s))?[^\s\-+*\/()=]+((\s?((\+|\-))?=.+;)|([^()=]+;)))");
+        static Regex VariableDecleration = new Regex(@"^(?!.*return)(?=(\s)?([^\s.(),]+\s)?[^\s().+*\/\-,=]+(\s|\s?(\*)+\s?)[^\s\-*+\/()=]+((\s?((\+|\-))?(\*)?=.+;)|([^()=]+;)))");
         static Regex VariableEquation = new Regex(@"^(?!.*return)(?=(\s)?([^\s()]+\s)?((\*)*(\s))?[^\s.()]+(\s)?=(\s)?[A-Za-z][^\s()]*;$)");
         //static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^\d][^ ()]*( [^ ()]+)?$");
         static Regex DefineDecleration = new Regex(@"^(\s)?#define ([^ ]+) [^ ()]*( [^ ()]+)?$");
@@ -755,9 +755,8 @@ namespace testServer2
 
                         if (!keywords.ContainsKey(CreateMD5(((ParametersType)parameters[i]).parameterType.Trim(CharsToTrim))))
                         {
-                            CompileError = true;
                             string error = (codeLine + " keyword does not exist. row : " + sr.curRow);
-                            throw new Exception(error);
+                            MainProgram.AddToLogString(path, "warning - " + error);
                         }
                     }
 
@@ -795,172 +794,173 @@ namespace testServer2
                         }
                     }*/
                     
-                    codeLine = cleanLineFromDoc(codeLine).Trim();
-                    if(functionName!="")
-                    {
-                        codeLine = ConcatenateIfNeeded(codeLine, ref i, sr, functionsContent, functionName);
-                    }
-                    //take cares to all of those situations.
-                    if (StructPattern.IsMatch(codeLine) || TypedefOneLine.IsMatch(codeLine))
-                    {
-                        keywordResults = AddStructNames(sr, codeLine, keywords);
-                    }
-                    if (DefineDecleration.IsMatch(codeLine))
-                    {
-                        (string, string) temp = DefineHandler(keywords, codeLine);
-                        if (temp.Item1 != "")
+                        codeLine = cleanLineFromDoc(codeLine).Trim();
+                        if (functionName != "")
                         {
-                            if(!blocksAndDefines.Contains(temp.Item1))
-                            {
-                                ((ArrayList)blocksAndDefines[blocksAndDefines.Count - 1]).Add(temp.Item1);
-                            }
-                            
+                            codeLine = ConcatenateIfNeeded(codeLine, ref i, sr, functionsContent, functionName);
                         }
+                        //take cares to all of those situations.
+                        if (StructPattern.IsMatch(codeLine) || TypedefOneLine.IsMatch(codeLine))
+                        {
+                            keywordResults = AddStructNames(sr, codeLine, keywords);
+                        }
+                        if (DefineDecleration.IsMatch(codeLine))
+                        {
+                            (string, string) temp = DefineHandler(keywords, codeLine);
+                            if (temp.Item1 != "")
+                            {
+                                if (!blocksAndDefines.Contains(temp.Item1))
+                                {
+                                    ((ArrayList)blocksAndDefines[blocksAndDefines.Count - 1]).Add(temp.Item1);
+                                }
 
-                    }
-                    if (CallFunction.IsMatch(codeLine) && !functionPatternInH.IsMatch(codeLine))
-                    {
-                        MatchCollection m = Regex.Matches(codeLine, CallFunction.ToString());
-                        string convertedLine = m[0].ToString();
-                        convertedLine = ConverterFromRegularCallToTypeCall(codeLine, variables, globalVariables, calledFromFunc);
-                        if (convertedLine != "error" && calledFromFunc.ContainsKey(convertedLine))
+                            }
+
+                        }
+                        if (CallFunction.IsMatch(codeLine) && !functionPatternInH.IsMatch(codeLine))
+                        {
+                            MatchCollection m = Regex.Matches(codeLine, CallFunction.ToString());
+                            string convertedLine = m[0].ToString();
+                            convertedLine = ConverterFromRegularCallToTypeCall(codeLine, variables, globalVariables, calledFromFunc);
+                            if (convertedLine != "error" && calledFromFunc.ContainsKey(convertedLine))
+                            {
+                                try
+                                {
+                                    calledFromFunc[convertedLine].Add(functionName);
+                                    Console.WriteLine(SetCallsFromThisFunctionValue(convertedLine, callsFromThisFunction), FindCallingFunctionParameters(codeLine));
+                                    callsFromThisFunction[functionName].Add(SetCallsFromThisFunctionValue(convertedLine, callsFromThisFunction), FindCallingFunctionParameters(codeLine));
+                                }
+                                catch (Exception e)
+                                {
+                                    MainProgram.AddToLogString(path, e.ToString());
+                                }
+                            }
+                            /*else
+                            {
+                                throw new Exception(string.Format("function does not exist : " + codeLine));
+                            }*/
+
+                        }
+                        //checks for memory allocation.
+                        if (!memoryAllocation && MemoryPattern.IsMatch(codeLine))
+                        {
+                            if (!memoryHandleFunc.ContainsKey(CreateMD5(functionName)))
+                            {
+                                memoryHandleFunc.Add(CreateMD5(functionName), GeneralConsts.MEMORY_ALLOCATION);
+                                memoryAllocation = true;
+
+                            }
+                            else
+                            {
+                                if (memoryRelease)
+                                {
+                                    memoryHandleFunc[CreateMD5(functionName)] = GeneralConsts.MEMORY_MANAGEMENT;
+                                }
+                            }
+                        }
+                        //checks for memory releases (free,etc..).
+                        if (!memoryRelease && FreeMemoryPattern.IsMatch(codeLine))
+                        {
+                            if (!memoryHandleFunc.ContainsKey(CreateMD5(functionName)))
+                            {
+                                memoryHandleFunc.Add(CreateMD5(functionName), GeneralConsts.MEMORY_FREE);
+                                memoryRelease = true;
+                            }
+                            else
+                            {
+                                if (memoryAllocation)
+                                {
+                                    memoryHandleFunc[CreateMD5(functionName)] = GeneralConsts.MEMORY_MANAGEMENT;
+                                }
+                            }
+                        }
+                        //for all variable declerations.
+                        if (VariableDecleration.IsMatch(codeLine) && !(codeLine.IndexOf("typedef") != GeneralConsts.NOT_FOUND_STRING))
+                        {
+                            keywordCheck = VariableDeclarationHandler(ref codeLine, ref pos, anciCWords, keywords, threadNumber, IsScope, sr, typeEnding, variables, globalVariables, blocksAndNames);
+                            if (!keywordCheck)
+                            {
+                                string error = (codeLine + " keyword does not exist. row : " + sr.curRow);
+                                MainProgram.AddToLogString(path, error);
+
+                            }
+                        }
+                        else if (typeEnding == "c" && VariableEquation.IsMatch(codeLine))
+                        {
+                            DifferentTypesCheck = VariableEquationHandler(sr, anciCWords, codeLine, blocksAndNames, threadNumber);
+                            if (!DifferentTypesCheck)
+                            {
+                                string error = (codeLine + " types of both variables might be different in row : " + sr.curRow);
+                                /*CompileError = true;
+                                throw new Exception(error);*/
+                                MainProgram.AddToLogString(path, "warning - " + error);
+                            }
+                        }
+                        codeLine = codeLine.Trim();
+                        //checks if any of the error bools is on.
+                        pos = 0;
+                        //resets the error bools.
+                        keywordCheck = DifferentTypesCheck = true;
+                        if (IfdefPattern.IsMatch(codeLine))
+                        {
+                            if (!checkIfEvarIsTurned(codeLine, eVars))
+                            {
+                                if (!CheckInDefines(blocksAndDefines, blocksAndDefines.Count - 1, codeLine))
+                                {
+                                    i += Skip_Ifdef_Or_Ifndef(sr, codeLine, threadNumber);
+                                }
+                            }
+                        }
+                        else if (IfndefPattern.IsMatch(codeLine))
+                        {
+                            if (checkIfEvarIsTurned(codeLine, eVars))
+                            {
+                                if (CheckInDefines(blocksAndDefines, blocksAndDefines.Count - 1, codeLine))
+                                {
+                                    i += Skip_Ifdef_Or_Ifndef(sr, codeLine, threadNumber);
+                                }
+                            }
+                        }
+                        if (codeLine.IndexOf("//") != GeneralConsts.NOT_FOUND_STRING && codeLine.IndexOf("//") < 4 || codeLine.IndexOf("/*") != GeneralConsts.NOT_FOUND_STRING && codeLine.IndexOf("/*") < 4)
+                        {
+                            //skips documentation if needed.
+                            i += skipDocumentation(sr, codeLine);
+                        }
+                        //adds a new ArrayList inside the keywordsAndNames ArrayList for the scope that has started.
+                        if (OpenBlockPattern.IsMatch(codeLine))
+                        {
+                            blocksAndNames.Add(new ArrayList());
+                            blocksAndDefines.Add(new ArrayList());
+                        }
+                        if (CloseBlockPattern.IsMatch(codeLine))
                         {
                             try
                             {
-                                calledFromFunc[convertedLine].Add(functionName);
-                                Console.WriteLine(SetCallsFromThisFunctionValue(convertedLine, callsFromThisFunction), FindCallingFunctionParameters(codeLine));
-                                callsFromThisFunction[functionName].Add(SetCallsFromThisFunctionValue(convertedLine, callsFromThisFunction),FindCallingFunctionParameters(codeLine));
+                                //close the last scope that just closed.
+                                blocksAndNames.RemoveAt(blocksAndNames.Count - 1);
+                                blocksAndDefines.RemoveAt(blocksAndDefines.Count - 1);
                             }
                             catch (Exception e)
                             {
-                                MainProgram.AddToLogString(path, e.ToString());
-                            }
-                        }
-                        /*else
-                        {
-                            throw new Exception(string.Format("function does not exist : " + codeLine));
-                        }*/
+                                //bad scoping causes the function to remove from an ArrayList something while its already 0.
+                                Server.ConnectionServer.CloseConnection(threadNumber, "bad scoping in function in row " + sr.curRow + "error message = " + e.ToString(), GeneralConsts.ERROR);
+                                CompileError = true;
+                                throw new Exception("Bad Scoping in Row " + sr.curRow);
 
-                    }
-                    //checks for memory allocation.
-                    if (!memoryAllocation && MemoryPattern.IsMatch(codeLine))
-                    {
-                        if (!memoryHandleFunc.ContainsKey(CreateMD5(functionName)))
-                        {
-                            memoryHandleFunc.Add(CreateMD5(functionName), GeneralConsts.MEMORY_ALLOCATION);
-                            memoryAllocation = true;
-                            
-                        }
-                        else
-                        {
-                            if (memoryRelease)
-                            {
-                                memoryHandleFunc[CreateMD5(functionName)] = GeneralConsts.MEMORY_MANAGEMENT;
                             }
                         }
-                    }
-                    //checks for memory releases (free,etc..).
-                    if (!memoryRelease && FreeMemoryPattern.IsMatch(codeLine))
-                    {
-                        if (!memoryHandleFunc.ContainsKey(CreateMD5(functionName)))
+                        //if the code line is in a scope or if its not the last line in the scope continute to the next line.
+                        if (IsScope && i < functionLength)
                         {
-                            memoryHandleFunc.Add(CreateMD5(functionName), GeneralConsts.MEMORY_FREE);
-                            memoryRelease = true;
-                        }
-                        else
-                        {
-                            if (memoryAllocation)
+                            codeLine = sr.ReadLine();
+                            codeContent += codeLine + GeneralConsts.NEW_LINE;
+                            if (functionName != "")
                             {
-                                memoryHandleFunc[CreateMD5(functionName)] = GeneralConsts.MEMORY_MANAGEMENT;
+                                functionsContent[functionName] += codeLine + GeneralConsts.NEW_LINE;
                             }
                         }
-                    }
-                    //for all variable declerations.
-                    if (VariableDecleration.IsMatch(codeLine) && !(codeLine.IndexOf("typedef") != GeneralConsts.NOT_FOUND_STRING))
-                    {
-                        keywordCheck = VariableDeclarationHandler(ref codeLine, ref pos,anciCWords, keywords, threadNumber, IsScope, sr, typeEnding, variables, globalVariables, blocksAndNames);
-                        if (!keywordCheck)
-                        {
-                            string error = (codeLine + " keyword does not exist. row : " + sr.curRow);
-                            CompileError = true;
-                            throw new Exception(error);
-
-                        }
-                    }
-                    else if (typeEnding == "c" && VariableEquation.IsMatch(codeLine))
-                    {
-                        DifferentTypesCheck = VariableEquationHandler(sr,anciCWords, codeLine, blocksAndNames, threadNumber);
-                        if (!DifferentTypesCheck)
-                        {
-                            string error = (codeLine + " types of both variables might be different in row : " + sr.curRow);
-                            /*CompileError = true;
-                            throw new Exception(error);*/
-                            MainProgram.AddToLogString(path, "warning - " + error);
-                        }
-                    }
-                    codeLine = codeLine.Trim();
-                    //checks if any of the error bools is on.
-                    pos = 0;
-                    //resets the error bools.
-                    keywordCheck = DifferentTypesCheck = true;
-                    if (IfdefPattern.IsMatch(codeLine))
-                    {
-                        if (!checkIfEvarIsTurned(codeLine, eVars))
-                        {
-                            if (!CheckInDefines(blocksAndDefines, blocksAndDefines.Count - 1, codeLine))
-                            {
-                                i += Skip_Ifdef_Or_Ifndef(sr, codeLine, threadNumber);
-                            }
-                        }
-                    }
-                    else if (IfndefPattern.IsMatch(codeLine))
-                    {
-                        if (checkIfEvarIsTurned(codeLine, eVars))
-                        {
-                            if (CheckInDefines(blocksAndDefines, blocksAndDefines.Count - 1, codeLine))
-                            {
-                                i += Skip_Ifdef_Or_Ifndef(sr, codeLine, threadNumber);
-                            }
-                        }
-                    }
-                    if (codeLine.IndexOf("//") != GeneralConsts.NOT_FOUND_STRING && codeLine.IndexOf("//") < 4 || codeLine.IndexOf("/*") != GeneralConsts.NOT_FOUND_STRING && codeLine.IndexOf("/*") < 4)
-                    {
-                        //skips documentation if needed.
-                        i += skipDocumentation(sr, codeLine);
-                    }
-                    //adds a new ArrayList inside the keywordsAndNames ArrayList for the scope that has started.
-                    if (OpenBlockPattern.IsMatch(codeLine))
-                    {
-                        blocksAndNames.Add(new ArrayList());
-                        blocksAndDefines.Add(new ArrayList());
-                    }
-                    if (CloseBlockPattern.IsMatch(codeLine))
-                    {
-                        try
-                        {
-                            //close the last scope that just closed.
-                            blocksAndNames.RemoveAt(blocksAndNames.Count - 1);
-                            blocksAndDefines.RemoveAt(blocksAndDefines.Count - 1);
-                        }
-                        catch (Exception e)
-                        {
-                            //bad scoping causes the function to remove from an ArrayList something while its already 0.
-                            Server.ConnectionServer.CloseConnection(threadNumber, "bad scoping in function in row " + sr.curRow+"error message = "+e.ToString(), GeneralConsts.ERROR);
-                            CompileError = true;
-                            throw new Exception("Bad Scoping in Row "+ sr.curRow);
-                            
-                        }
-                    }
-                    //if the code line is in a scope or if its not the last line in the scope continute to the next line.
-                    if (IsScope && i < functionLength)
-                    {
-                        codeLine = sr.ReadLine();
-                        codeContent += codeLine + GeneralConsts.NEW_LINE;
-                        if (functionName != "")
-                        {
-                            functionsContent[functionName] += codeLine + GeneralConsts.NEW_LINE;
-                        }
-                    }
+                    
+                    
                 }
                 //if that was a scope it removes all the keywords of the scope.
                 if (IsScope)
@@ -1443,7 +1443,6 @@ namespace testServer2
             catch (Exception e)
             {
                 endLoop = true;
-                CompileError = true;
             }
             try
             {
@@ -1533,6 +1532,7 @@ namespace testServer2
                                     if (Directory.GetFiles(pathes[i], result, SearchOption.AllDirectories).Length > 0)
                                     {
                                         currentPath = Directory.GetFiles(pathes[i], result, SearchOption.AllDirectories)[0];
+                                        break;
                                     }
                                     /*if(File.Exists(pathes[i]+"\\"+result))
                                     {
