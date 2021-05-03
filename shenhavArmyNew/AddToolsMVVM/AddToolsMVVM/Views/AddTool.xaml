@@ -5,9 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AddToolsMVVM.Views"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="600">
-    <Grid Background="White">
+    <UserControl.Resources>
+        <ResourceDictionary>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="White"
+          >
         <Button Content="Browse" HorizontalAlignment="Left" Margin="304,156,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn" FontSize="18" Command="{Binding Path=BrowseCommand}"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="296" FontSize="24"><Run Text="Add A New Tool ! "/><Run Text=":)"/></TextBlock>
         <TextBox HorizontalAlignment="Left" Height="41" Margin="10,156,0,0" TextWrapping="Wrap" Text="{Binding Tool.ToolFolder,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolFolderPath" materialDesign:HintAssist.Hint="Browse Tools Folder.."/>
@@ -15,15 +21,30 @@
         <TextBox HorizontalAlignment="Left" Height="41" Margin="10,64,0,0" TextWrapping="Wrap" Text="{Binding Tool.ToolName,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolName" materialDesign:HintAssist.Hint="ToolName"/>
         <TextBox HorizontalAlignment="Left" Height="41" Margin="10,110,0,0" TextWrapping="Wrap" Text="{Binding Tool.ToolDescription,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolDescription" materialDesign:HintAssist.Hint="Tool Description"/>
         <Button Content="Apply" HorizontalAlignment="Left" Margin="447,11,0,0" VerticalAlignment="Top" Width="143" Height="72" FontSize="40" Name ="ApplyBtn" Command="{Binding Path=ApplyCommand}"/>
-        <ListView Name="ToolsGrid" Margin="0,259,10,13" ItemsSource="{Binding Tools}"  >
+
+        <ListView Name="ToolsGrid" Margin="0,263,0,-44" ItemsSource="{Binding Tools}" BorderBrush="Black" BorderThickness="2">
+
+            <ListView.Resources>
+                <Style TargetType="{x:Type GridViewColumnHeader}">
+                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                    <Setter Property="FontSize" Value="16"/>
+                    <Setter Property="Margin" Value="10"/>
+                </Style>
+            </ListView.Resources>
             <ListView.View>
-                <GridView x:Name="grdTest">
-                    <GridViewColumn Header="Tool Name" DisplayMemberBinding="{Binding ToolName}"  Width="200" />
+
+                <GridView x:Name="grdTest" AllowsColumnReorder="True" >
+                    <GridViewColumn Header="Tool Name" DisplayMemberBinding="{Binding ToolName}" Width="200"/>
                     <GridViewColumn Header="Tool Description" DisplayMemberBinding="{Binding ToolDescription}" Width="240" />
                     <GridViewColumn Header="Tool Result Needed" DisplayMemberBinding="{Binding ToolResultNeeded}" Width="200" />
                 </GridView>
             </ListView.View>
+            
         </ListView>
+        
         <TextBlock HorizontalAlignment="Left" Margin="447,92,0,0" TextWrapping="Wrap" Text="{Binding ResultBlockAdd,Mode=TwoWay}" VerticalAlignment="Top" Height="133" Width="143" FontSize="12"/>
+       
     </Grid>
+    
 </UserControl>
+
