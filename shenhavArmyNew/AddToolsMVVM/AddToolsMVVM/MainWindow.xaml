@@ -8,7 +8,7 @@
         xmlns:views="clr-namespace:AddToolsMVVM.Views"
         mc:Ignorable="d"
         Title="AddToolsGui" Height="450" Width="800"
-        Background="{DynamicResource MaterialDesignPaper}"
+        Background="#212121"
         FontFamily="{DynamicResource MaterialDesignFont}">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewmodels:AddToolViewModel}">
@@ -46,7 +46,7 @@
 
 
 
-        <DockPanel Background="Gray" Grid.Column="0" Grid.Row="0" Grid.RowSpan="5">
+        <DockPanel Background="#161616" Grid.Column="0" Grid.Row="0" Grid.RowSpan="5">
             <StackPanel Width="157">
                 <Button Content="Add Tool" FontSize="20" Command="{Binding _AddToolCommand}"></Button>
                 <Button Content="Update Tool" FontSize="20" Command="{Binding _UpdateToolCommand}"></Button>

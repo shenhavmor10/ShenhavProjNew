@@ -85,6 +85,7 @@ namespace testServer2
             if(!test)
             {
                 File.WriteAllText(logFilePath, logFiles[filePath]);
+                File.WriteAllText(logFile, logFiles[MAIN_DICT_INDEX]);
             }
             
         }
@@ -418,7 +419,6 @@ namespace testServer2
             ResetDictionary rd = new ResetDictionary();
             Thread restApi = new Thread(() => new SyncServer(rd));
             restApi.Start();
-            
             AddToLogString(MAIN_DICT_INDEX, "started rest api");
             //Initialize all the things that needs to come before the syntax check.
             Thread serverThread;

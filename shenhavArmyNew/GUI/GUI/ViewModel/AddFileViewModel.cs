@@ -23,6 +23,7 @@ namespace GUI.ViewModel
         private FileModel newFile;
         private MemoryModel customMemoryNames;
         private string resultBlock;
+        static string defaultCompilerPath;
         static string configFile= @"ConfigurationFile.txt";
         static string connectionString;
         private ICommand _ConnectCommand;
@@ -215,14 +216,30 @@ namespace GUI.ViewModel
         public string createProtocol(FileModel f,ArrayList toolsArrayExeOnly)
         {
             //add first paths.
-            string path = f.FilePath + "," + f.ProjectPath + "," + f.GccPath + ",";
-            if(f.OtherInclude!=null)
+            string path = f.FilePath + "," + f.ProjectPath + ",";
+            if(f.GccPath!=null)
             {
-                path += f.OtherInclude + "," + f.DestinationPath + ",";
+                path += f.GccPath + ",";
             }
             else
             {
-                path+="null"+ "," + f.DestinationPath + ",";
+                path += defaultCompilerPath + ",";
+            }
+            if(f.OtherInclude!=null)
+            {
+                path += f.OtherInclude + ",";
+            }
+            else
+            {
+                path += "null" + ",";
+            }
+            if (f.DestinationPath != null)
+            {
+                path += f.DestinationPath + ",";
+            }
+            else
+            {
+                path += f.ProjectPath + ",";
             }
             string tools = "";
             foreach (string tool_exe in toolsArrayExeOnly)
@@ -350,6 +367,7 @@ namespace GUI.ViewModel
                     }
                 }
                 string connectionStringFile = configDict["SqlConnectionString"];
+                defaultCompilerPath = configDict["CompilerPath"];
                 Console.WriteLine(connectionStringFile);
                 /*if (!System.IO.File.Exists(connectionStringFile))
                 {

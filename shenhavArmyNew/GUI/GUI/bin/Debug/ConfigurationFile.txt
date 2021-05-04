@@ -1,1 +1,2 @@
 SqlConnectionString=..\..\..\..\ConfFiles\SqlConnectionString.txt
+CompilerPath=..\..\..\Compiler

@@ -162,72 +162,79 @@ namespace testServer2
             string[] tempSplit;
             string[] finalSplit;
             string tempSplit2;
-            string finalType="";
+            string finalType = "";
             string tempCut;
-            bool header=false;
+            bool header = false;
             int i;
             tempSplit = Regex.Split(codeLine, @"\(");
             tempSplit2 = tempSplit[1];
             tempSplit = Regex.Split(tempSplit2, @"\,|\)");
             ParametersType[] finalParameters = new ParametersType[tempSplit.Length - 1];
             char[] charsToTrim = { '*', '&', ' ' };
-            if (tempSplit2.Length > 2)
+            try
             {
-                for (i = 0; i < tempSplit.Length - 1; i++)
+                if (tempSplit2.Length > 2)
                 {
-                    tempSplit[i] = tempSplit[i].Trim();
-                    if (tempSplit[i].Split(' ').Length > 2 && !(tempSplit[i].IndexOf("struct") != GeneralConsts.NOT_FOUND_STRING))
+                    for (i = 0; i < tempSplit.Length - 1; i++)
                     {
-                        tempCut = tempSplit[i].Substring(tempSplit[i].IndexOf(' ') + 1, tempSplit[i].Length - (tempSplit[i].IndexOf(' ') + 1));
-                        if (tempCut.IndexOf(' ') != GeneralConsts.NOT_FOUND_STRING)
+                        tempSplit[i] = tempSplit[i].Trim();
+                        if (tempSplit[i].Split(' ').Length > 2 && !(tempSplit[i].IndexOf("struct") != GeneralConsts.NOT_FOUND_STRING))
                         {
-                            finalType = tempCut.Substring(0, tempCut.IndexOf(' '));
+                            tempCut = tempSplit[i].Substring(tempSplit[i].IndexOf(' ') + 1, tempSplit[i].Length - (tempSplit[i].IndexOf(' ') + 1));
+                            if (tempCut.IndexOf(' ') != GeneralConsts.NOT_FOUND_STRING)
+                            {
+                                finalType = tempCut.Substring(0, tempCut.IndexOf(' '));
+                            }
+                            else
+                            {
+                                finalType = tempCut;
+                            }
+                        }
+                        else if (tempSplit[i].Split(' ').Length > 2 && (tempSplit[i].IndexOf("struct") != GeneralConsts.NOT_FOUND_STRING))
+                        {
+                            finalType = tempSplit[i].Substring(0, tempSplit[i].LastIndexOf(" "));
                         }
                         else
                         {
-                            finalType = tempCut;
+                            tempCut = tempSplit[i];
+                            if (tempSplit[i].IndexOf(" ") != GeneralConsts.NOT_FOUND_STRING)
+                            {
+                                finalType = tempSplit[i].Substring(0, tempSplit[i].Length - (tempSplit[i].Length - tempSplit[i].IndexOf(' ')));
+                            }
+                            else if (tempSplit[i].IndexOf("*") != GeneralConsts.NOT_FOUND_STRING)
+                            {
+                                finalType = tempSplit[i].Substring(0, tempSplit[i].Length - (tempSplit[i].Length - tempSplit[i].IndexOf('*')));
+                            }
+                            else
+                            {
+                                finalType = tempSplit[i];
+                                tempSplit2 = "";
+                                header = true;
+                            }
                         }
-                    }
-                    else if (tempSplit[i].Split(' ').Length > 2 && (tempSplit[i].IndexOf("struct") != GeneralConsts.NOT_FOUND_STRING))
-                    {
-                        finalType = tempSplit[i].Substring(0, tempSplit[i].LastIndexOf(" "));
-                    }
-                    else
-                    {
-                        tempCut = tempSplit[i];
-                        if (tempSplit[i].IndexOf(" ") != GeneralConsts.NOT_FOUND_STRING)
+                        finalType = finalType.Trim(charsToTrim);
+                        if (!header)
                         {
-                            finalType = tempSplit[i].Substring(0, tempSplit[i].Length - (tempSplit[i].Length - tempSplit[i].IndexOf(' ')));
-                        }
-                        else if (tempSplit[i].IndexOf("*") != GeneralConsts.NOT_FOUND_STRING)
-                        {
-                            finalType = tempSplit[i].Substring(0, tempSplit[i].Length - (tempSplit[i].Length - tempSplit[i].IndexOf('*')));
-                        }
-                        else
-                        {
-                            finalType = tempSplit[i];
-                            tempSplit2 = "";
-                            header = true;
-                        }
-                    }
-                    finalType = finalType.Trim(charsToTrim);
-                    if (!header)
-                    {
-                        tempSplit2 = tempSplit[i].Trim();
-                        if (tempSplit2.IndexOf(' ') != NOT_FOUND_STRING)
-                        {
-                            tempSplit2 = tempSplit2.Substring(tempSplit2.LastIndexOf(' ')).Trim();
-                        }
-                        else
-                        {
-                            tempSplit2 = tempSplit2.Substring(tempSplit2.LastIndexOf('*')).Trim();
-                        }
+                            tempSplit2 = tempSplit[i].Trim();
+                            if (tempSplit2.IndexOf(' ') != NOT_FOUND_STRING)
+                            {
+                                tempSplit2 = tempSplit2.Substring(tempSplit2.LastIndexOf(' ')).Trim();
+                            }
+                            else
+                            {
+                                tempSplit2 = tempSplit2.Substring(tempSplit2.LastIndexOf('*')).Trim();
+                            }
 
+                        }
+                        finalParameters[i] = new ParametersType(tempSplit2, finalType);
                     }
-                    finalParameters[i] = new ParametersType(tempSplit2, finalType);
+                }
+                else
+                {
+                    finalParameters = new ParametersType[0];
                 }
             }
-            else
+            catch(Exception e)
             {
                 finalParameters = new ParametersType[0];
             }
@@ -489,7 +496,7 @@ namespace testServer2
                             ((FunctionInfoJson)tempStorage).allExitPoints = FindPatternInCode(((FunctionInfoJson)tempStorage).content,ReturnPattern);
                             //gets the amount of the exit points.
                             ((FunctionInfoJson)tempStorage).exitPointsAmount = ((FunctionInfoJson)tempStorage).allExitPoints.Length;
-                            if(memoryHandleFuncs.ContainsKey(GeneralCompilerFunctions.CreateMD5(fName)))
+                            if (memoryHandleFuncs.ContainsKey(GeneralCompilerFunctions.CreateMD5(fName)))
                             {
                                 string tempIfCheck = (string)memoryHandleFuncs[GeneralCompilerFunctions.CreateMD5(fName)];
                                 if (tempIfCheck==GeneralConsts.MEMORY_MANAGEMENT)
@@ -508,7 +515,16 @@ namespace testServer2
                             }
                         }
                         //this one is for all files.
-                        ((FunctionInfoJson)tempStorage).parameters = FindParameters(fName);
+                        try
+                        {
+                            ((FunctionInfoJson)tempStorage).parameters = FindParameters(fName);
+                        }
+                        catch(Exception e)
+                        {
+                            MainProgram.AddToLogString(path, e.Message + "\n couldnt find parameters..");
+                            ((FunctionInfoJson)tempStorage).parameters = new ParametersType[0];
+                        }
+                        
                         if (typeEnding == "c")
                         {
                             string funcKeyInDict = FindNameFromCodeLine(fName);
@@ -522,8 +538,25 @@ namespace testServer2
                                 funcKeyInDict += (((FunctionInfoJson)tempStorage).parameters[((FunctionInfoJson)tempStorage).parameters.Length - 1]).parameterType;
                             }
                             funcKeyInDict += ")";
-                            ((FunctionInfoJson)tempStorage).calledFromFunc = (string[])calledFromFunc[funcKeyInDict].ToArray(typeof(string));
-                            ((FunctionInfoJson)tempStorage).callsFromThisFunction=callsFromThisFunction[fName];
+                            try
+                            {
+                                ((FunctionInfoJson)tempStorage).calledFromFunc = (string[])calledFromFunc[funcKeyInDict].ToArray(typeof(string));
+                            }
+                            catch(Exception e)
+                            {
+                                ((FunctionInfoJson)tempStorage).calledFromFunc = new string[0];
+                                MainProgram.AddToLogString(path, e.Message + "\n couldnt find the function in the array \"calledFromFunc\" (failed)");
+                            }
+                            try
+                            {
+                                ((FunctionInfoJson)tempStorage).callsFromThisFunction = callsFromThisFunction[fName];
+                            }
+                            catch(Exception e)
+                            {
+                                ((FunctionInfoJson)tempStorage).callsFromThisFunction = new Dictionary<string, string[]>();
+                                MainProgram.AddToLogString(path, e.Message + "\n couldnt find the function in the dictionary \"calls from this function\" (failed)");
+                            }
+                            
                         }
                         //those are for all files.
                         ((FunctionInfoJson)tempStorage).returnType = returnType;
@@ -707,7 +740,8 @@ namespace testServer2
         public static string [] SearchPattern(string pattern,string returnSize,string content)
         {
             ArrayList results = new ArrayList();
-            var m1 = Regex.Matches(content, pattern);
+            MatchCollection m1;
+            m1 = Regex.Matches(content, pattern);
             string tempNewMatch;
             if(m1.Count>0)
             {
