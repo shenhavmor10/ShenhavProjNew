@@ -8,9 +8,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="600">
     <Grid Background="#212121">
-        <TextBox HorizontalAlignment="Left" Height="41" Margin="10,79,0,0" TextWrapping="Wrap" Text="{Binding Tool.ToolName,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="18" Name="ToolName" materialDesign:HintAssist.Hint="Tool Name"/>
-        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="296" FontSize="24"><Run Text="Remove A Tool "/><Run Text=":)"/></TextBlock>
-        <Button Content="Remove" HorizontalAlignment="Left" Margin="447,11,0,0" VerticalAlignment="Top" Width="143" Height="72" FontSize="30"  Name ="BrowseBtn" Command="{Binding Path=RemoveCommand}" RenderTransformOrigin="0.468,0.656"/>
-        <TextBlock HorizontalAlignment="Left" Margin="447,92,0,0" TextWrapping="Wrap" Text="{Binding ResultBlockRemove,Mode=TwoWay}" VerticalAlignment="Top" Height="133" Width="143" FontSize="12"/>
+        <TextBox Foreground="White" HorizontalAlignment="Left" Height="41" Margin="10,79,0,0" TextWrapping="Wrap" Text="{Binding Tool.ToolName,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="ToolName" >
+            <materialDesign:HintAssist.Hint>
+                <TextBlock Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,0">* Tool Name</TextBlock>
+            </materialDesign:HintAssist.Hint>
+        </TextBox>
+        <TextBlock Foreground="White" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="296" FontSize="24"><Run Text="Remove A Tool "/><Run Text=":)"/></TextBlock>
+        <Button Content="Remove" HorizontalAlignment="Left" Margin="447,11,0,0" VerticalAlignment="Top" Width="143" Height="72" FontSize="30"  Name ="BrowseBtn" Command="{Binding Path=RemoveCommand}" RenderTransformOrigin="0.468,0.656" materialDesign:ButtonAssist.CornerRadius="12"/>
+        <TextBlock Foreground="White" HorizontalAlignment="Left" Margin="447,92,0,0" TextWrapping="Wrap" Text="{Binding ResultBlockRemove,Mode=TwoWay}" VerticalAlignment="Top" Height="133" Width="143" FontSize="12"/>
     </Grid>
 </UserControl>

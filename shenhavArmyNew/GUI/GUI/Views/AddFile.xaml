@@ -62,13 +62,13 @@
                     <TextBlock Foreground="White" FontSize="20" FontWeight="Bold" Margin="14,0,0,0">Destination Path</TextBlock>
                 </materialDesign:HintAssist.Hint>
             </TextBox>
-            <Button Content="Connect" HorizontalAlignment="Left" Margin="640,24,0,0" VerticalAlignment="Top" Width="143" Height="72" FontSize="30" Name ="ConnectBtn" Command="{Binding Path=ConnectCommand}"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,128,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn" FontSize="18" Command="{Binding Path=BrowseCommandFolderPath}"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,267,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn2" FontSize="18" Command="{Binding Path=BrowseCommandEVarsPath}"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,221,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn3" FontSize="18" Command="{Binding Path=BrowseCommandGCCPath2}"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,174,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn4" FontSize="18" Command="{Binding Path=BrowseCommandGCCPath}"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,82,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn5" FontSize="18" Command="{Binding Path=BrowseCommandFilePath}"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,313,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn6" FontSize="18" Command="{Binding Path=BrowseCommandDestPath}"/>
+            <Button Content="Connect" HorizontalAlignment="Left" Margin="640,24,0,0" VerticalAlignment="Top" Width="143" Height="72" FontSize="30" Name ="ConnectBtn" Command="{Binding Path=ConnectCommand}" materialDesign:ButtonAssist.CornerRadius="12"/>
+            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,128,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn" FontSize="18" Command="{Binding Path=BrowseCommandFolderPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
+            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,267,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn2" FontSize="18" Command="{Binding Path=BrowseCommandEVarsPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
+            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,221,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn3" FontSize="18" Command="{Binding Path=BrowseCommandGCCPath2}" materialDesign:ButtonAssist.CornerRadius="12"/>
+            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,174,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn4" FontSize="18" Command="{Binding Path=BrowseCommandGCCPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
+            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,82,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn5" FontSize="18" Command="{Binding Path=BrowseCommandFilePath}" materialDesign:ButtonAssist.CornerRadius="12"/>
+            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,313,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn6" FontSize="18" Command="{Binding Path=BrowseCommandDestPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
             <TextBlock Foreground="White" HorizontalAlignment="Left" Margin="604,376,0,0" TextWrapping="Wrap" Text="{Binding File.ResultBlock,Mode=TwoWay}" VerticalAlignment="Top" Height="77" Width="179" FontSize="12"/>
             <StackPanel HorizontalAlignment="Left" Height="31" Margin="203,420,0,59" VerticalAlignment="Center" Width="401" Name="StackPanelFree" Orientation="Horizontal">
                 <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap"  Text="{Binding Free1,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomFree" >
@@ -120,12 +120,12 @@
         </Grid>
         <DockPanel Background="#161616" Grid.RowSpan="5">
             <StackPanel Width="158" Height="519" VerticalAlignment="Top" >
-                <Button Content="Add File" FontSize="20" Command="{Binding ButtonAddFile}" />
-                <Button Content="File 1" FontSize="20" Command="{Binding GoToFile1Command}" Margin="0,10,0,0" />
-                <Button Content="File 2" FontSize="20" Command="{Binding GoToFile2Command}" Margin="0,10,0,0" Visibility="{Binding Button2Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                <Button Content="File 3" FontSize="20" Command="{Binding GoToFile3Command}" Margin="0,10,0,0" Visibility="{Binding Button3Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                <Button Content="File 4" FontSize="20" Command="{Binding GoToFile4Command}" Margin="0,10,0,0" Visibility="{Binding Button4Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                <Button Content="File 5" FontSize="20" Command="{Binding GoToFile5Command}" Margin="0,10,0,0" Visibility="{Binding Button5Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Content="Add File" FontSize="20" Command="{Binding ButtonAddFile}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <Button Content="File 1" FontSize="20" Command="{Binding GoToFile1Command}" Margin="0,10,0,0" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <Button Content="File 2" FontSize="20" Command="{Binding GoToFile2Command}" Margin="0,10,0,0" Visibility="{Binding Button2Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <Button Content="File 3" FontSize="20" Command="{Binding GoToFile3Command}" Margin="0,10,0,0" Visibility="{Binding Button3Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <Button Content="File 4" FontSize="20" Command="{Binding GoToFile4Command}" Margin="0,10,0,0" Visibility="{Binding Button4Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <Button Content="File 5" FontSize="20" Command="{Binding GoToFile5Command}" Margin="0,10,0,0" Visibility="{Binding Button5Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
             </StackPanel>
         </DockPanel>
 
