@@ -463,12 +463,6 @@ namespace testServer2
             ParametersType var1 = GetVariableTypeParameterFromArrayList(blocksAndNames, varName1.Trim(GeneralConsts.ASTERIX));
             ParametersType var2 = GetVariableTypeParameterFromArrayList(blocksAndNames, varName2.Trim(GeneralConsts.ASTERIX));
             //make sures the variable 2 is exist.
-            /*if (var2 == null)
-            {
-                Server.ConnectionServer.CloseConnection(threadNumber, "There is no parameter named " + varName2 + " in row : " + sr.curRow, GeneralConsts.ERROR);
-                CompileError = true;
-                isSameType = false;
-            }*/
             //checks if their type is the same.
             if (var2!=null&&isSameType && var1.parameterType != var2.parameterType)
             {
@@ -784,16 +778,8 @@ namespace testServer2
                 ArrayList keywordResults = new ArrayList();
                 for (i = 0; i < functionLength+1 && !CompileError && codeLine != null; i++)
                 {
-                    /*if (codeLine.Trim(GeneralConsts.TAB_SPACE) == GeneralConsts.EMPTY_STRING)
+                    try
                     {
-                        codeLine = sr.ReadLine();
-                        codeContent += codeLine + GeneralConsts.NEW_LINE;
-                        if (functionName != "")
-                        {
-                            functionsContent[functionName] += codeLine + GeneralConsts.NEW_LINE;
-                        }
-                    }*/
-                    
                         codeLine = cleanLineFromDoc(codeLine).Trim();
                         if (functionName != "")
                         {
@@ -835,10 +821,6 @@ namespace testServer2
                                     MainProgram.AddToLogString(path, e.ToString());
                                 }
                             }
-                            /*else
-                            {
-                                throw new Exception(string.Format("function does not exist : " + codeLine));
-                            }*/
 
                         }
                         //checks for memory allocation.
@@ -959,6 +941,18 @@ namespace testServer2
                                 functionsContent[functionName] += codeLine + GeneralConsts.NEW_LINE;
                             }
                         }
+                    }
+                    catch(Exception e)
+                    {
+                        MainProgram.AddToLogString(path,"an error have accured in line "+sr.curRow+"\n"+e.Message);
+                        codeLine = sr.ReadLine();
+                        codeContent += codeLine + GeneralConsts.NEW_LINE;
+                        if (functionName != "")
+                        {
+                            functionsContent[functionName] += codeLine + GeneralConsts.NEW_LINE;
+                        }
+                    }
+                        
                     
                     
                 }
@@ -1133,6 +1127,12 @@ namespace testServer2
             }
             return CompileError;
         }
+        /// Function - FindCallingFunctionParameters
+        /// <summary>
+        /// searching for all calling function in the code.
+        /// </summary>
+        /// <param name="codeLine"> the code line type string.</param>
+        /// <returns></returns>
         static string [] FindCallingFunctionParameters(string codeLine)
         {
             ArrayList result = new ArrayList();
@@ -1265,173 +1265,24 @@ namespace testServer2
             }
             else
             {
-                //if there is only one type in the old definition.
-                /*if (CheckIfStringInHash(keywords, firstNewVariableWord))
-                {
-                    newKeyword=AddToKeywords(newKeyword, keywords, codeLine);
-                    result = (newKeyword, defineOriginalWord);
-                }
-                else if(IsNumber(firstNewVariableWord))
-                {
-                    newKeyword = AddToKeywords(newKeyword, keywords, codeLine);
-                    result = (newKeyword, defineOriginalWord);
-                }
-                else if(codeLine.IndexOf(@"""")!= GeneralConsts.NOT_FOUND_STRING)
-                {
-                    newKeyword = AddToKeywords(newKeyword, keywords, codeLine);
-                    result = (newKeyword, defineOriginalWord);
-                }*/
                 newKeyword = AddToKeywords(newKeyword, keywords, codeLine);
                 result = (newKeyword, defineOriginalWord);
             }
             return result;
         }
-        /// Function - checkInDefinesDict
-        /// <summary>
-        /// Function checks in ifdef/ifndef situation if the define already defined.
-        /// </summary>
-        /// <param name="definesDict"> Dictionary of the "preprocessor" that contains defines key=new value=old</param>
-        /// <param name="codeLine"> codeLine type string.</param>
-        /// <returns></returns>
-        static bool checkInDefinesDict(Dictionary<string,string> definesDict,string codeLine)
-        {
-            bool found = false;
-            string ifdef;
-            ifdef = codeLine.Split(' ')[1].Trim();
-            foreach(string key in definesDict.Keys)
-            {
-                if(key==ifdef)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            return found;
-        }
-        //path to the code;
         /// Function - PreprocessorActions
         /// <summary>
-        /// 
+        /// this function is handeling all of the things that come before the code the "preproccessning part".
         /// </summary>
-        /// <param name="path"> The path for the C code.</param>
-        /// <param name="threadNumber"> thread number is a parameter to make sure when the main file is in.
-        ///                             number 0 means its the main file any other number means it  is currently
-        ///                             reads a file that is not the main. (Import).</param>
-        /// <param name="keywords"> Hashtable to store the keywords.</param>
-        /// <param name="includes"> Hashtable to store the includes.</param>
-        /// <param name="defines"> Dictionary to store the defines . (key - new keyword, value - old Definition)</param>
-        /// <param name="pathes"> Paths for all the places where the imports might be.</param>
-        static void PreprocessorActions(string path,string originalFile, int threadNumber, Hashtable keywords, Hashtable includes,Dictionary<string,string> defines,string [] eVars,string [] pathes,int fileThreadNumber)
-        {
-            bool endLoop = false;
-            MyStream sr = null;
-            //try to open the buffer.
-            try
-            {
-                sr = new MyStream(path, System.Text.Encoding.UTF8);
-            }
-            catch (Exception e)
-            {
-                endLoop = true;
-                CompileError = true;
-            }
-
-            string codeLine;
-            
-            while (!endLoop && (codeLine = sr.ReadLine()) != null)
-            {
-                codeLine = cleanLineFromDoc(codeLine);
-                if (DefineDecleration.IsMatch(codeLine))
-                {
-                    (string, string) temp = DefineHandler(keywords, codeLine);
-                    if(!defines.ContainsKey(temp.Item1))
-                    {
-                        defines.Add(temp.Item1, temp.Item2);
-                        keywords.Add(CreateMD5(temp.Item1), temp.Item1);
-                    }
-                }
-                //Handling almost the same patterns as the syntaxCheck function.
-                if (StructPattern.IsMatch(codeLine)||EnumPattern.IsMatch(codeLine) && threadNumber != 0)
-                {
-                    AddStructNames(sr, codeLine, keywords);
-                }
-                if (IfdefPattern.IsMatch(codeLine))
-                {
-                    if (!checkIfEvarIsTurned(codeLine, eVars))
-                    {
-                        if (!checkInDefinesDict(defines, codeLine))
-                        {
-                            Skip_Ifdef_Or_Ifndef(sr, codeLine, threadNumber);
-                        }
-                    }
-                }
-                else if (IfndefPattern.IsMatch(codeLine))
-                {
-                    if (checkIfEvarIsTurned(codeLine, eVars))
-                    {
-                        if (checkInDefinesDict(defines, codeLine))
-                        {
-                            Skip_Ifdef_Or_Ifndef(sr, codeLine, threadNumber);
-                        }
-                    }
-                }
-                else if (TypedefOneLine.IsMatch(codeLine) && threadNumber != 0)
-                {
-                    AddStructNames(sr, codeLine, keywords);
-                }
-                //if the code line is an include it creates a thread and enters to the defines , structs and more to 
-                //the Hashtables and Dictionaries.
-                else if (IncludeTrianglesPattern.IsMatch(codeLine) || IncludeRegularPattern.IsMatch(codeLine))
-                {
-                    string currentPath= GeneralConsts.EMPTY_STRING;
-                    string result;
-                    if (codeLine.IndexOf("<") != -1 && codeLine.IndexOf(">") != -1)
-                    {
-                        result = CutBetween2Strings(codeLine, "<", ">");
-                    }
-                    else
-                    {
-                        result = CutBetween2Strings(codeLine, "\"", "\"");
-                    }
-                    //only enters an include if it didnt already included him.
-                    if (!includes.Contains(CreateMD5(result)))
-                    {
-                        includes.Add(CreateMD5(result), result);
-                        Thread preprocessorThread;
-                        //if the include includes a path inside of it.
-                        if (result.IndexOf("\\") != -1)
-                        {
-                            //opens the thread (thread number +1).
-                            preprocessorThread = new Thread(() => PreprocessorActions(result,originalFile, threadNumber + 1, keywords, includes,defines,eVars, pathes,fileThreadNumber));
-                        }
-                        //if it does not include an exact path.
-                        else
-                        {
-                            //runs on the pathes that the import files might be in.
-                            for(int i=0;i<pathes.Length;i++)
-                            {
-                                //checks if the file exists in one of those folders.
-                                if(File.Exists(pathes[i]+"\\"+result))
-                                {
-                                    currentPath = pathes[i];
-                                    break;                                
-                                }
-                            }    
-                            //creats a thread.
-                            preprocessorThread = new Thread(() => PreprocessorActions(currentPath+"\\" + result, originalFile, threadNumber + 1, keywords, includes,defines,eVars, pathes,fileThreadNumber));
-                        }
-                        preprocessorThread.Start();
-                        preprocessorThread.Join(GeneralConsts.TIMEOUT_JOIN);
-                    }
-                }
-
-            }
-            if (sr != null)
-            {
-                sr.Close();
-            }
-        }
-        static void PreprocessorActions1(string path, string originalFile, int threadNumber, Hashtable keywords, Hashtable includes, Dictionary<string, string> defines, string[] eVars, string[] pathes, int fileThreadNumber)
+        /// <param name="path"> the path of the file that is being checked.</param>
+        /// <param name="threadNumber"> the thread number of the file checking.</param>
+        /// <param name="keywords"> all of the keywords that are in the code.</param>
+        /// <param name="includes"> all includes of the keywords in the code.</param>
+        /// <param name="defines"> all the defines in the code.</param>
+        /// <param name="eVars"> all the environment variables in the code.</param>
+        /// <param name="pathes"> all the pathes in the code that have files in it.</param>
+        /// <param name="fileThreadNumber"> the actual thread number.</param>
+        static void PreprocessorActions(string path, int threadNumber, Hashtable keywords, Hashtable includes, Dictionary<string, string> defines, string[] eVars, string[] pathes, int fileThreadNumber)
         {
             bool endLoop = false;
             MyStream sr = null;
@@ -1469,27 +1320,6 @@ namespace testServer2
                     {
                         AddStructNames(sr, codeLine, keywords);
                     }
-                    //ifed might remove keywords here.
-                    /*if (IfdefPattern.IsMatch(codeLine))
-                    {
-                        if (!checkIfEvarIsTurned(codeLine, eVars))
-                        {
-                            if (!checkInDefinesDict(defines, codeLine))
-                            {
-                                Skip_Ifdef_Or_Ifndef(sr, codeLine, threadNumber);
-                            }
-                        }
-                    }
-                    else if (IfndefPattern.IsMatch(codeLine))
-                    {
-                        if (checkIfEvarIsTurned(codeLine, eVars))
-                        {
-                            if (checkInDefinesDict(defines, codeLine))
-                            {
-                                Skip_Ifdef_Or_Ifndef(sr, codeLine, threadNumber);
-                            }
-                        }
-                    }*/
                     else if (TypedefOneLine.IsMatch(codeLine) && threadNumber != 0)
                     {
                         AddStructNames(sr, codeLine, keywords);
@@ -1520,7 +1350,7 @@ namespace testServer2
                             if (result.IndexOf("\\") != -1)
                             {
                                 //opens the thread (thread number +1).
-                                PreprocessorActions1(result, originalFile, threadNumber + 1, keywords, includes, defines, eVars, pathes, fileThreadNumber);
+                                PreprocessorActions(result, threadNumber + 1, keywords, includes, defines, eVars, pathes, fileThreadNumber);
                             }
                             //if it does not include an exact path.
                             else
@@ -1543,7 +1373,7 @@ namespace testServer2
                                 //creats a thread.
                                 if (currentPath != "" && currentPath != null && currentPath.Length > 0)
                                 {
-                                    PreprocessorActions1(currentPath, originalFile, threadNumber + 1, keywords, includes, defines, eVars, pathes, fileThreadNumber);
+                                    PreprocessorActions(currentPath, threadNumber + 1, keywords, includes, defines, eVars, pathes, fileThreadNumber);
                                 }
                             }
                         }
@@ -1788,7 +1618,7 @@ namespace testServer2
                 //C Syntext File To Syntext ArrayList.
                 //AddToListFromFile(CSyntextPath, syntext, " ");
                 //PreprocessorActions(cFilePath, cFilePath, 0, keywords, includes, defines, eVars, pathes, threadNumber);
-                PreprocessorActions1(cFilePath, cFilePath, 0, keywords, includes, defines, eVars, pathes, threadNumber);
+                PreprocessorActions(cFilePath, 0, keywords, includes, defines, eVars, pathes, threadNumber);
             }
             catch(Exception e)
             {

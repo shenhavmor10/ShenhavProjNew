@@ -47,7 +47,6 @@ namespace GUI.ViewModel
         {
             initializeConfig();
             GetAllToolsFromDB();
-            Memory = new MemoryModel();
             TestAllUntimedTools();
             initializeFiles();
         }
@@ -58,8 +57,11 @@ namespace GUI.ViewModel
             {
                 File = new FileModel();
                 NavigationViewModel.fileList.Add(File);
+                Memory = new MemoryModel();
+                NavigationViewModel.memoryList.Add(Memory);
             }
             File = NavigationViewModel.fileList[0];
+            Memory = NavigationViewModel.memoryList[0];
         }
         //ResultBlock Get Set
         
@@ -616,6 +618,7 @@ namespace GUI.ViewModel
         public void GoToFile2()
         {
             File = NavigationViewModel.fileList[1];
+            Memory = NavigationViewModel.memoryList[1];
         }
         public ICommand GoToFile1Command
         {
@@ -631,6 +634,7 @@ namespace GUI.ViewModel
         public void GoToFile1()
         {
             File = NavigationViewModel.fileList[0];
+            Memory = NavigationViewModel.memoryList[0];
         }
         public ICommand GoToFile3Command
         {
@@ -646,6 +650,7 @@ namespace GUI.ViewModel
         public void GoToFile3()
         {
             File = NavigationViewModel.fileList[2];
+            Memory = NavigationViewModel.memoryList[2];
         }
         public ICommand GoToFile4Command
         {
@@ -661,6 +666,7 @@ namespace GUI.ViewModel
         public void GoToFile4()
         {
             File = NavigationViewModel.fileList[3];
+            Memory = NavigationViewModel.memoryList[3];
         }
         public ICommand GoToFile5Command
         {
@@ -676,6 +682,7 @@ namespace GUI.ViewModel
         public void GoToFile5()
         {
             File = NavigationViewModel.fileList[4];
+            Memory = NavigationViewModel.memoryList[4];
         }
 
         /// Function - FindAllUntimedTools

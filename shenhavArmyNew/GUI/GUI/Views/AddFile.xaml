@@ -12,122 +12,125 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
-    <Grid Background="#212121">
-        
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
+    <Viewbox Stretch="Fill">
+        <Grid Background="#212121">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
 
 
-        <Grid Background="#212121" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="5">
-            <TextBlock HorizontalAlignment="Left" Margin="203,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="296" FontSize="24" Foreground="White"><Run Text="Add A New File ! "/><Run Text=":)"/></TextBlock>
-            <TextBox Foreground="White" HorizontalAlignment="Left" Height="41" Margin="203,82,0,0" TextWrapping="Wrap" Text="{Binding File.FilePath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="FilePath">
-                <materialDesign:HintAssist.Hint>
-                    <TextBlock Foreground="White" FontSize="20" FontWeight="Bold">* File Path</TextBlock>
-                </materialDesign:HintAssist.Hint>
-            </TextBox>
-            <TextBox Foreground="White"  HorizontalAlignment="Left" Height="41" Margin="203,128,0,0" TextWrapping="Wrap" Text="{Binding File.ProjectPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="ProjectPath">
-                <materialDesign:HintAssist.Hint>
-                    <TextBlock Foreground="White" FontSize="20" FontWeight="Bold">* Project Path</TextBlock>
-                </materialDesign:HintAssist.Hint>
-            </TextBox>
-            <TextBox Foreground="White"  HorizontalAlignment="Left" Height="41" Margin="203,175,0,0" TextWrapping="Wrap" Text="{Binding File.GccPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="GCCPath" >
-                <materialDesign:HintAssist.Hint>
-                    <TextBlock Foreground="White" FontSize="20" FontWeight="Bold" Margin="14,0,0,0">GCC Path</TextBlock>
-                </materialDesign:HintAssist.Hint>
-            </TextBox>
-            <TextBox Foreground="White"  HorizontalAlignment="Left" Height="41" Margin="203,221,0,0" TextWrapping="Wrap" Text="{Binding File.OtherInclude,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="OtherInclude" >
-                <materialDesign:HintAssist.Hint>
-                    <TextBlock Foreground="White" FontSize="20" FontWeight="Bold" Margin="14,0,0,0">Other Includes Path</TextBlock>
-                </materialDesign:HintAssist.Hint>
-            </TextBox>
-            <TextBox Foreground="White"  HorizontalAlignment="Left" Height="41" Margin="203,267,0,0" TextWrapping="Wrap" Text="{Binding File.EVarsPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="EVarsPath" >
-                <materialDesign:HintAssist.Hint>
-                    <TextBlock Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,0">* Evars Path</TextBlock>
-                </materialDesign:HintAssist.Hint>
-            </TextBox>
-            <TextBox Foreground="White"  HorizontalAlignment="Left" Height="41" Margin="203,313,0,0" TextWrapping="Wrap" Text="{Binding File.DestinationPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="DestPath" >
-                <materialDesign:HintAssist.Hint>
-                    <TextBlock Foreground="White" FontSize="20" FontWeight="Bold" Margin="14,0,0,0">Destination Path</TextBlock>
-                </materialDesign:HintAssist.Hint>
-            </TextBox>
-            <Button Content="Connect" HorizontalAlignment="Left" Margin="640,24,0,0" VerticalAlignment="Top" Width="143" Height="72" FontSize="30" Name ="ConnectBtn" Command="{Binding Path=ConnectCommand}" materialDesign:ButtonAssist.CornerRadius="12"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,128,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn" FontSize="18" Command="{Binding Path=BrowseCommandFolderPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,267,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn2" FontSize="18" Command="{Binding Path=BrowseCommandEVarsPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,221,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn3" FontSize="18" Command="{Binding Path=BrowseCommandGCCPath2}" materialDesign:ButtonAssist.CornerRadius="12"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,174,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn4" FontSize="18" Command="{Binding Path=BrowseCommandGCCPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,82,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn5" FontSize="18" Command="{Binding Path=BrowseCommandFilePath}" materialDesign:ButtonAssist.CornerRadius="12"/>
-            <Button Content="Browse" HorizontalAlignment="Left" Margin="499,313,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn6" FontSize="18" Command="{Binding Path=BrowseCommandDestPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
-            <TextBlock Foreground="White" HorizontalAlignment="Left" Margin="604,376,0,0" TextWrapping="Wrap" Text="{Binding File.ResultBlock,Mode=TwoWay}" VerticalAlignment="Top" Height="77" Width="179" FontSize="12"/>
-            <StackPanel HorizontalAlignment="Left" Height="31" Margin="203,420,0,59" VerticalAlignment="Center" Width="401" Name="StackPanelFree" Orientation="Horizontal">
-                <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap"  Text="{Binding Free1,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomFree" >
+            <Grid Background="#212121" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="5" Height="auto" Width="auto">
+                <TextBlock HorizontalAlignment="Left" Margin="203,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="296" FontSize="24" Foreground="White"><Run Text="Add A New File ! "/><Run Text=":)"/></TextBlock>
+                <TextBox Foreground="White" HorizontalAlignment="Left" Height="41" Margin="203,82,0,0" TextWrapping="Wrap" Text="{Binding File.FilePath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="FilePath">
                     <materialDesign:HintAssist.Hint>
-                        <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Custom Free</TextBlock>
+                        <TextBlock Foreground="White" FontSize="20" FontWeight="Bold">* File Path</TextBlock>
                     </materialDesign:HintAssist.Hint>
                 </TextBox>
-                <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Free2,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomFree2" >
+                <TextBox Foreground="White"  HorizontalAlignment="Left" Height="41" Margin="203,128,0,0" TextWrapping="Wrap" Text="{Binding File.ProjectPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="ProjectPath">
                     <materialDesign:HintAssist.Hint>
-                        <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Custom Free</TextBlock>
+                        <TextBlock Foreground="White" FontSize="20" FontWeight="Bold">* Project Path</TextBlock>
                     </materialDesign:HintAssist.Hint>
                 </TextBox>
-            </StackPanel>
+                <TextBox Foreground="White"  HorizontalAlignment="Left" Height="41" Margin="203,175,0,0" TextWrapping="Wrap" Text="{Binding File.GccPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="GCCPath" >
+                    <materialDesign:HintAssist.Hint>
+                        <TextBlock Foreground="White" FontSize="20" FontWeight="Bold" Margin="14,0,0,0">GCC Path</TextBlock>
+                    </materialDesign:HintAssist.Hint>
+                </TextBox>
+                <TextBox Foreground="White"  HorizontalAlignment="Left" Height="41" Margin="203,221,0,0" TextWrapping="Wrap" Text="{Binding File.OtherInclude,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="OtherInclude" >
+                    <materialDesign:HintAssist.Hint>
+                        <TextBlock Foreground="White" FontSize="20" FontWeight="Bold" Margin="14,0,0,0">Other Includes Path</TextBlock>
+                    </materialDesign:HintAssist.Hint>
+                </TextBox>
+                <TextBox Foreground="White"  HorizontalAlignment="Left" Height="41" Margin="203,267,0,0" TextWrapping="Wrap" Text="{Binding File.EVarsPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="EVarsPath" >
+                    <materialDesign:HintAssist.Hint>
+                        <TextBlock Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,0">* Evars Path</TextBlock>
+                    </materialDesign:HintAssist.Hint>
+                </TextBox>
+                <TextBox Foreground="White"  HorizontalAlignment="Left" Height="41" Margin="203,313,0,0" TextWrapping="Wrap" Text="{Binding File.DestinationPath,Mode=TwoWay}" VerticalAlignment="Top" Width="270" FontSize="14" Name="DestPath" >
+                    <materialDesign:HintAssist.Hint>
+                        <TextBlock Foreground="White" FontSize="20" FontWeight="Bold" Margin="14,0,0,0">Destination Path</TextBlock>
+                    </materialDesign:HintAssist.Hint>
+                </TextBox>
+                <Button Content="Connect" HorizontalAlignment="Left" Margin="640,24,0,0" VerticalAlignment="Top" Width="143" Height="72" FontSize="30" Name ="ConnectBtn" Command="{Binding Path=ConnectCommand}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <Button Content="Browse" HorizontalAlignment="Left" Margin="499,128,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn" FontSize="18" Command="{Binding Path=BrowseCommandFolderPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <Button Content="Browse" HorizontalAlignment="Left" Margin="499,267,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn2" FontSize="18" Command="{Binding Path=BrowseCommandEVarsPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <Button Content="Browse" HorizontalAlignment="Left" Margin="499,221,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn3" FontSize="18" Command="{Binding Path=BrowseCommandGCCPath2}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <Button Content="Browse" HorizontalAlignment="Left" Margin="499,174,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn4" FontSize="18" Command="{Binding Path=BrowseCommandGCCPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <Button Content="Browse" HorizontalAlignment="Left" Margin="499,82,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn5" FontSize="18" Command="{Binding Path=BrowseCommandFilePath}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <Button Content="Browse" HorizontalAlignment="Left" Margin="499,313,0,0" VerticalAlignment="Top" Width="95" Height="41" Name ="BrowseBtn6" FontSize="18" Command="{Binding Path=BrowseCommandDestPath}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                <TextBlock Foreground="White" HorizontalAlignment="Left" Margin="604,376,0,0" TextWrapping="Wrap" Text="{Binding File.ResultBlock,Mode=TwoWay}" VerticalAlignment="Top" Height="77" Width="179" FontSize="12"/>
+                <StackPanel HorizontalAlignment="Left" Height="31" Margin="203,420,0,59" VerticalAlignment="Center" Width="401" Name="StackPanelFree" Orientation="Horizontal">
+                    <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap"  Text="{Binding Memory.Free1,Mode=TwoWay}" VerticalAlignment="Stretch" Width="97" Name="CustomFree" FontSize="10">
+                        <materialDesign:HintAssist.Hint>
+                            <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Memory Release</TextBlock>
+                        </materialDesign:HintAssist.Hint>
+                    </TextBox>
+                    <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Memory.Free2,Mode=TwoWay}" VerticalAlignment="Stretch" Width="94" Name="CustomFree2" FontSize="10">
+                        <materialDesign:HintAssist.Hint>
+                            <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Memory Release</TextBlock>
+                        </materialDesign:HintAssist.Hint>
+                    </TextBox>
+                </StackPanel>
 
-            <ListView Height="270" Margin="640,101,17,0" VerticalAlignment="Top" ItemsSource="{Binding Tools}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <CheckBox IsChecked="{Binding ToolIsCheck}" Content="{Binding ToolName}"  FontSize="10" Foreground="White">
-                            
-                        </CheckBox>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                <ListView Height="270" Margin="640,101,17,0" VerticalAlignment="Top" ItemsSource="{Binding Tools}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding ToolIsCheck}" Content="{Binding ToolName}"  FontSize="10" Foreground="White">
+
+                            </CheckBox>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
 
 
 
-            <StackPanel HorizontalAlignment="Left" Height="31" Margin="203,380,0,95" VerticalAlignment="Stretch" Width="401" x:Name="StackPanelMallocs" Orientation="Horizontal" RenderTransformOrigin="0.505,-0.774">
-                <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap"  Text="{Binding Malloc1,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomMalloc" >
-                    <materialDesign:HintAssist.Hint>
-                        <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Custom Malloc</TextBlock>
-                    </materialDesign:HintAssist.Hint>
-                </TextBox>
-                <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Malloc2,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomMalloc2" >
-                    <materialDesign:HintAssist.Hint>
-                        <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Custom Malloc</TextBlock>
-                    </materialDesign:HintAssist.Hint>
-                </TextBox>
-                <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Malloc3,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomMalloc3" >
-                    <materialDesign:HintAssist.Hint>
-                        <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Custom Malloc</TextBlock>
-                    </materialDesign:HintAssist.Hint>
-                </TextBox>
-                <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Malloc4,Mode=TwoWay}" VerticalAlignment="Stretch" Width="91" Name="CustomMalloc4" >
-                    <materialDesign:HintAssist.Hint>
-                        <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Custom Malloc</TextBlock>
-                    </materialDesign:HintAssist.Hint>
-                </TextBox>
-            </StackPanel>
+                <StackPanel HorizontalAlignment="Left" Height="31" Margin="203,380,0,95" VerticalAlignment="Stretch" Width="401" x:Name="StackPanelMallocs" Orientation="Horizontal" RenderTransformOrigin="0.505,-0.774">
+                    <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap"  Text="{Binding Memory.Malloc1,Mode=TwoWay}" VerticalAlignment="Stretch" Width="97" Name="CustomMalloc" FontSize="10">
+                        <materialDesign:HintAssist.Hint>
+                            <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Memory Allocation</TextBlock>
+                        </materialDesign:HintAssist.Hint>
+                    </TextBox>
+                    <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Memory.Malloc2,Mode=TwoWay}" VerticalAlignment="Stretch" Width="94" Name="CustomMalloc2" FontSize="10" >
+                        <materialDesign:HintAssist.Hint>
+                            <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Memory Allocation</TextBlock>
+                        </materialDesign:HintAssist.Hint>
+                    </TextBox>
+                    <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Memory.Malloc3,Mode=TwoWay}" VerticalAlignment="Stretch" Width="97" Name="CustomMalloc3" FontSize="10">
+                        <materialDesign:HintAssist.Hint>
+                            <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Memory Allocation</TextBlock>
+                        </materialDesign:HintAssist.Hint>
+                    </TextBox>
+                    <TextBox Foreground="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Memory.Malloc4,Mode=TwoWay}" VerticalAlignment="Stretch" Width="97" Name="CustomMalloc4" FontSize="10">
+                        <materialDesign:HintAssist.Hint>
+                            <TextBlock Foreground="White" FontWeight="Bold" Margin="0,0,0,0">Memory Allocation</TextBlock>
+                        </materialDesign:HintAssist.Hint>
+                    </TextBox>
+                </StackPanel>
+            </Grid>
+            <DockPanel Background="#161616" Grid.RowSpan="5" Margin="0,0,420,0">
+                <StackPanel Width="auto" Height="auto" VerticalAlignment="Top" >
+                    <Button Content="Add File" FontSize="20" Command="{Binding ButtonAddFile}" materialDesign:ButtonAssist.CornerRadius="12" />
+                    <Button Content="File 1" FontSize="20" Command="{Binding GoToFile1Command}" Margin="0,10,0,0" materialDesign:ButtonAssist.CornerRadius="12"/>
+                    <Button Content="File 2" FontSize="20" Command="{Binding GoToFile2Command}" Margin="0,10,0,0" Visibility="{Binding Button2Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                    <Button Content="File 3" FontSize="20" Command="{Binding GoToFile3Command}" Margin="0,10,0,0" Visibility="{Binding Button3Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                    <Button Content="File 4" FontSize="20" Command="{Binding GoToFile4Command}" Margin="0,10,0,0" Visibility="{Binding Button4Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                    <Button Content="File 5" FontSize="20" Command="{Binding GoToFile5Command}" Margin="0,10,0,0" Visibility="{Binding Button5Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
+                </StackPanel>
+            </DockPanel>
+
         </Grid>
-        <DockPanel Background="#161616" Grid.RowSpan="5">
-            <StackPanel Width="158" Height="519" VerticalAlignment="Top" >
-                <Button Content="Add File" FontSize="20" Command="{Binding ButtonAddFile}" materialDesign:ButtonAssist.CornerRadius="12"/>
-                <Button Content="File 1" FontSize="20" Command="{Binding GoToFile1Command}" Margin="0,10,0,0" materialDesign:ButtonAssist.CornerRadius="12"/>
-                <Button Content="File 2" FontSize="20" Command="{Binding GoToFile2Command}" Margin="0,10,0,0" Visibility="{Binding Button2Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
-                <Button Content="File 3" FontSize="20" Command="{Binding GoToFile3Command}" Margin="0,10,0,0" Visibility="{Binding Button3Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
-                <Button Content="File 4" FontSize="20" Command="{Binding GoToFile4Command}" Margin="0,10,0,0" Visibility="{Binding Button4Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
-                <Button Content="File 5" FontSize="20" Command="{Binding GoToFile5Command}" Margin="0,10,0,0" Visibility="{Binding Button5Visibility,Mode=TwoWay,Converter={StaticResource BooleanToVisibilityConverter}}" materialDesign:ButtonAssist.CornerRadius="12"/>
-            </StackPanel>
-        </DockPanel>
-
-    </Grid>
+    </Viewbox>
+    
 </UserControl>

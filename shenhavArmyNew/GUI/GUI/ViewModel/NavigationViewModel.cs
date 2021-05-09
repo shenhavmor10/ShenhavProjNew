@@ -15,6 +15,7 @@ namespace GUI.ViewModel
 
     {
         public static ObservableCollection<FileModel> fileList = new ObservableCollection<FileModel>();
+        public static ObservableCollection<MemoryModel> memoryList = new ObservableCollection<MemoryModel>();
         private ObservableCollection<AddFileViewModel> addFileViewModels = new ObservableCollection<AddFileViewModel>();
         public ICommand _AddFileCommand { get; set; }
         public ICommand _DynamicButtonsCommand { get; set; }
@@ -33,7 +34,18 @@ namespace GUI.ViewModel
 
         }
 
-
+        public ObservableCollection<MemoryModel> Memories
+        {
+            get
+            {
+                return memoryList;
+            }
+            set
+            {
+                memoryList = value;
+                OnPropertyChanged("Memories");
+            }
+        }
         public ObservableCollection<FileModel> Files
         {
             get

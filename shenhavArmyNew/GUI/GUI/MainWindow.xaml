@@ -35,7 +35,7 @@
 
 
         <DockPanel Background="#161616" Grid.RowSpan="5">
-            <StackPanel Width="158" Height="519" VerticalAlignment="Top" >
+            <StackPanel Width="auto" Height="auto" VerticalAlignment="Top" >
                 <Button Content="Press Here" FontSize="20" Command="{Binding _AddFileCommand}" />
             </StackPanel>
         </DockPanel>

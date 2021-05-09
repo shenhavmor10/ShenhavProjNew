@@ -9,7 +9,8 @@
         mc:Ignorable="d"
         Title="AddToolsGui" Height="450" Width="800"
         Background="#212121"
-        FontFamily="{DynamicResource MaterialDesignFont}">
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewmodels:AddToolViewModel}">
 
@@ -48,9 +49,9 @@
 
         <DockPanel Background="#161616" Grid.Column="0" Grid.Row="0" Grid.RowSpan="5">
             <StackPanel Width="157">
-                <Button Content="Add Tool" FontSize="20" Command="{Binding _AddToolCommand}"></Button>
-                <Button Content="Update Tool" FontSize="20" Command="{Binding _UpdateToolCommand}"></Button>
-                <Button Content="Remove Tool" FontSize="20" Command="{Binding _RemoveToolCommand}"></Button>
+                <Button Content="Add Tool" FontSize="20" Command="{Binding _AddToolCommand}" materialDesign:ButtonAssist.CornerRadius="12"></Button>
+                <Button Content="Update Tool" FontSize="20" Command="{Binding _UpdateToolCommand}" materialDesign:ButtonAssist.CornerRadius="12" Margin="0,7,0,7"></Button>
+                <Button Content="Remove Tool" FontSize="20" Command="{Binding _RemoveToolCommand}" materialDesign:ButtonAssist.CornerRadius="12"></Button>
                 <TextBlock HorizontalAlignment="Left" Margin="0,25,0,0" TextWrapping="Wrap" Text="{Binding ResultBlock, Mode=TwoWay}" VerticalAlignment="Top" Height="278" Width="157" FontSize="12"/>
 
             </StackPanel>

@@ -350,6 +350,12 @@ namespace testServer2
 
 
         }
+        /// Function - InsertNewAvgToDB
+        /// <summary>
+        /// this function inserts a new avg to the database.
+        /// </summary>
+        /// <param name="avgTimePerSec"> the avg time it takes for the function to run a code line in miliseconds.</param>
+        /// <param name="tool_exe_name"> the name of the tool script.</param>
         static void InsertNewAvgToDB(double avgTimePerSec,string tool_exe_name)
         {
             try
@@ -396,10 +402,6 @@ namespace testServer2
                 logFile = configDict["logFile"];
                 string connectionStringFile = configDict["SqlConnectionString"];
                 Console.WriteLine(connectionStringFile);
-                /*if (!System.IO.File.Exists(connectionStringFile))
-                {
-                    connectionString = System.IO.File.ReadAllText(connectionStringFile);
-                }*/
                 connectionString = System.IO.File.ReadAllText(connectionStringFile);
             }
             catch(Exception e)
@@ -498,9 +500,6 @@ namespace testServer2
                     CleanBeforeCloseThread(currentThreadNumber, "error = there are more than one environment variable with the same name.", GeneralConsts.ERROR, filePath,destPath);
                 }
             }
-
-
-            
         }
         /// Function - MainLoopToGetFiles
         /// <summary>

@@ -58,12 +58,13 @@
                     <GridViewColumn Header="Tool Result Needed" DisplayMemberBinding="{Binding ToolResultNeeded}" Width="200" />
                 </GridView>
             </ListView.View>
-            
+
         </ListView>
-        
+
         <TextBlock Foreground="White" HorizontalAlignment="Left" Margin="447,92,0,0" TextWrapping="Wrap" Text="{Binding ResultBlockAdd,Mode=TwoWay}" VerticalAlignment="Top" Height="133" Width="143" FontSize="12"/>
-       
+
     </Grid>
-    
+
+
 </UserControl>
 
