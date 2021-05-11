@@ -42,7 +42,7 @@ namespace testServer2
         static string connectionString;
         static bool test = false;
         static Dictionary<string,Dictionary<string, Dictionary<string, Object>>> final_json = new Dictionary<string, Dictionary<string, Dictionary<string, object>>>();
-        static Dictionary<string, string> readyPatterns = new Dictionary<string, string>();
+        static Dictionary<string, Dictionary<string,string>> readyPatterns = new Dictionary<string, Dictionary<string, string>>();
         static Dictionary<string, string> logFiles = new Dictionary<string, string>();
         //static string librariesPath = @"C:\Users\Shenhav\Desktop\Check";
         //global variable declaration.
@@ -60,7 +60,7 @@ namespace testServer2
         {
             return final_json;
         }
-        public static Dictionary<string,string> GetReadyPatterns()
+        public static Dictionary<string,Dictionary<string,string>> GetReadyPatterns()
         {
             return readyPatterns;
         }
@@ -141,7 +141,9 @@ namespace testServer2
             customMalloc = customMalloc.Substring(0, customMalloc.Length - 1);
             customMalloc += @")\([^\n]+\);(\s)*?(?=\n)";
             memoryPatternTemp += @")\(.+\);$)";
-            readyPatterns.Add("CustomMalloc", customMalloc);
+            Dictionary<string, string> tempDictPatterns = new Dictionary<string, string>();
+            tempDictPatterns.Add("CustomMalloc", customMalloc);
+            
             Regex MemoryPattern = new Regex(memoryPatternTemp);
             //create regex for all free handles plus custom frees.
             string customFree = @"(?<=\n\r\t)(\s)*?(free|";
@@ -159,7 +161,8 @@ namespace testServer2
             freePatternTemp = freePatternTemp.Substring(0, freePatternTemp.Length - 1);
             freePatternTemp += @")\(.+\);$)";
             Console.WriteLine(customFree);
-            readyPatterns.Add("CustomFree", customFree);
+            tempDictPatterns.Add("CustomFree", customFree);
+            readyPatterns.Add(filePath, tempDictPatterns);
             Regex FreeMemoryPattern = new Regex(freePatternTemp);
             foreach(string eVars in final_json[filePath].Keys)
             {

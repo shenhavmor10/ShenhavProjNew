@@ -124,7 +124,7 @@ namespace testServer2
                     context.Response.ContentType = "application/json";
                     string dataJson = GeneralConsts.EMPTY_STRING;
                     Dictionary<string,Dictionary<string, Dictionary<string, object>>> final_json = MainProgram.GetFinalJson();
-                    Dictionary<string, string> customReadyPatterns = MainProgram.GetReadyPatterns();
+                    Dictionary<string, Dictionary<string,string>> customReadyPatterns = MainProgram.GetReadyPatterns();
                     string filePath = context.Request.QueryString["filePath"];
                     if(!ToolsData.ContainsKey(filePath))
                     {
@@ -187,14 +187,14 @@ namespace testServer2
                         //taking care of a ready pattern that is being taked or from the patterns file or from the customReadyPatterns Dictionary.
                         else if(context.Request.QueryString["readyPattern"] != null)
                         {
-                            if (GeneralRestApiServerMethods.TakePatternFromFile(context.Request.QueryString["readyPattern"]) == GeneralConsts.EMPTY_STRING&&!customReadyPatterns.ContainsKey(context.Request.QueryString["readyPattern"]))
+                            if (GeneralRestApiServerMethods.TakePatternFromFile(context.Request.QueryString["readyPattern"]) == GeneralConsts.EMPTY_STRING&&!customReadyPatterns[filePath].ContainsKey(context.Request.QueryString["readyPattern"]))
                                 not_found_pattern = true;
                             else
                             {
                                 string patternFromFile;
-                                if (customReadyPatterns.ContainsKey(context.Request.QueryString["readyPattern"]))
+                                if (customReadyPatterns[filePath].ContainsKey(context.Request.QueryString["readyPattern"]))
                                 {
-                                    patternFromFile = customReadyPatterns[context.Request.QueryString["readyPattern"]];
+                                    patternFromFile = customReadyPatterns[filePath][context.Request.QueryString["readyPattern"]];
                                 }
                                 else
                                 {
