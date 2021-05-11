@@ -34,7 +34,7 @@ namespace AddToolsMVVM.ViewModel
         }
 
 
-
+        // constructor for the view model.
         public NavigationViewModel()
         {
 
@@ -95,20 +95,33 @@ namespace AddToolsMVVM.ViewModel
                 OnPropertyChanged("ResultBlock");
             }
         }
+        /// Function - OpenAdd
+        /// <summary>
+        /// function to change to the add view model
+        /// </summary>
+        /// <param name="obj"></param>
         private void OpenAdd(object obj)
 
         {
             SelectedViewModel = new AddToolViewModel();
 
         }
-
+        /// Function - OpenUpdate
+        /// <summary>
+        /// function to change to the update view model
+        /// </summary>
+        /// <param name="obj"></param>
         private void OpenUpdate(object obj)
 
         {
             SelectedViewModel = new UpdateViewModel();
 
         }
-
+        /// Function - OpenRemove
+        /// <summary>
+        /// function to change to the remove view model
+        /// </summary>
+        /// <param name="obj"></param>
         private void OpenRemove(object obj)
 
         {
@@ -117,7 +130,11 @@ namespace AddToolsMVVM.ViewModel
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-
+        /// Function - OnPropertyChanged
+        /// <summary>
+        /// just make sure that whenever something is being changed in the data structures it make the changes.
+        /// </summary>
+        /// <param name="propName"></param>
         private void OnPropertyChanged(string propName)
 
         {

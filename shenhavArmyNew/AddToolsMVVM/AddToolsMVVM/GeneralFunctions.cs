@@ -9,6 +9,13 @@ namespace AddToolsMVVM
 {
     public static class GeneralFunctions
     {
+        /// Function - DirectoryCopy
+        /// <summary>
+        /// this fyuction is cpying a directory from the source to the dest.
+        /// </summary>
+        /// <param name="sourceDirName"> the source folder.</param>
+        /// <param name="destDirName"> the destination folder.</param>
+        /// <param name="copySubDirs"> copy sub directories aswell.</param>
         public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
         {
             // Get the subdirectories for the specified directory.
@@ -44,6 +51,11 @@ namespace AddToolsMVVM
                 }
             }
         }
+        /// Function - DeleteDirectory
+        /// <summary>
+        /// delete a directory in the target.
+        /// </summary>
+        /// <param name="target_dir"> target path to delete.</param>
         public static void DeleteDirectory(string target_dir)
         {
             string[] files = Directory.GetFiles(target_dir);

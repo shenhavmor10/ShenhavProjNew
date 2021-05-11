@@ -22,6 +22,12 @@ namespace GUI
 
             return byteSent;
         }
+        /// Function - recieveMessage
+        /// <summary>
+        /// this function for recieving a message and it returns the actually message that was being sent.
+        /// </summary>
+        /// <param name="sender"> the socket for i got the message from.</param>
+        /// <returns></returns>
         public static string recieveMessage(Socket sender)
         {
             byte[] messageReceived = new byte[1024];
@@ -30,7 +36,12 @@ namespace GUI
                                              0, byteRecv);
             return recieve;
         }
-        public static void ExecuteClient(string data,AddFileViewModel addFileViewModel)
+        /// Function - ExecuteClient
+        /// <summary>
+        /// execute the actuall client.
+        /// </summary>
+        /// <param name="data"> the data of the client.</param>
+        public static void ExecuteClient(string data)
         {
             Socket sender = null;
             try

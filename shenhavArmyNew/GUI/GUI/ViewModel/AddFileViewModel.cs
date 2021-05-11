@@ -50,6 +50,10 @@ namespace GUI.ViewModel
             TestAllUntimedTools();
             initializeFiles();
         }
+        /// Function - initializeFiles
+        /// <summary>
+        /// this function is the initialize of the GUI it sets all files and paths needed for the code.
+        /// </summary>
         public void initializeFiles()
         {
 
@@ -63,8 +67,6 @@ namespace GUI.ViewModel
             File = NavigationViewModel.fileList[0];
             Memory = NavigationViewModel.memoryList[0];
         }
-        //ResultBlock Get Set
-        
         //Memory Get Set
         public MemoryModel Memory
         {
@@ -91,6 +93,7 @@ namespace GUI.ViewModel
                 NotifyPropertyChanged("File");
             }
         }
+        //Visibility of button 2
         public bool Button2Visibility
         {
             get
@@ -103,6 +106,7 @@ namespace GUI.ViewModel
                 NotifyPropertyChanged("Button2Visibility");
             }
         }
+        //Visibility of button 3
         public bool Button3Visibility
         {
             get
@@ -115,6 +119,7 @@ namespace GUI.ViewModel
                 NotifyPropertyChanged("Button3Visibility");
             }
         }
+        //Visibility of button 4
         public bool Button4Visibility
         {
             get
@@ -127,6 +132,7 @@ namespace GUI.ViewModel
                 NotifyPropertyChanged("Button4Visibility");
             }
         }
+        //Visibility of button 5
         public bool Button5Visibility
         {
             get
@@ -153,6 +159,7 @@ namespace GUI.ViewModel
                 NotifyPropertyChanged("Tools");
             }
         }
+        //Command for connect function.
         public ICommand ConnectCommand
         {
             get
@@ -164,6 +171,7 @@ namespace GUI.ViewModel
                 return _ConnectCommand;
             }
         }
+        //Command for add file.
         public ICommand ButtonAddFile
         {
             get
@@ -175,9 +183,12 @@ namespace GUI.ViewModel
                 return _ButtonAddFile;
             }
         }
+        /// Function - addFile
+        /// <summary>
+        /// this function adds the next button for files which opens another file eventually.
+        /// </summary>
         public void addFile()
         {
-            //NavigationViewModel.fileList[fileNumber++].IsVisible = true;
             if(fileNumber<4)
             {
                 switch (fileNumber)
@@ -336,7 +347,7 @@ namespace GUI.ViewModel
                 }
                 string path = createProtocol(File, toolsArray);
                 Thread clientThread;
-                clientThread = new Thread(() => ClientConnection.ExecuteClient(path,this));
+                clientThread = new Thread(() => ClientConnection.ExecuteClient(path));
                 clientThread.Start();
             }
             catch(Exception e)
@@ -493,6 +504,10 @@ namespace GUI.ViewModel
                 return _BrowseCommandProjectPath;
             }
         }
+        /// Function - BrowseFolderPath
+        /// <summary>
+        /// Function for browsing the folder path.
+        /// </summary>
         public void BrowseFolderPath()
         {
             var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
@@ -513,6 +528,10 @@ namespace GUI.ViewModel
                 return _BrowseCommandFilePath;
             }
         }
+        /// Function - BrowseFilePath
+        /// <summary>
+        /// Function for browsing the file path.
+        /// </summary>
         public void BrowseFilePath()
         {
             Microsoft.Win32.OpenFileDialog openFileDlg = new Microsoft.Win32.OpenFileDialog();
@@ -534,6 +553,10 @@ namespace GUI.ViewModel
                 return _BrowseCommandEVarsPath;
             }
         }
+        /// Function - BrowseEVarsPath
+        /// <summary>
+        /// Function for browsing the evars path.
+        /// </summary>
         public void BrowseEVarsPath()
         {
             Microsoft.Win32.OpenFileDialog openFileDlg = new Microsoft.Win32.OpenFileDialog();
@@ -555,6 +578,10 @@ namespace GUI.ViewModel
                 return _BrowseCommandDestPath;
             }
         }
+        /// Function - BrowseDestPath
+        /// <summary>
+        /// Function for browsing the destination path.
+        /// </summary>
         public void BrowseDestPath()
         {
             var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
@@ -575,6 +602,10 @@ namespace GUI.ViewModel
                 return _BrowseCommandGccPath;
             }
         }
+        /// Function - BrowseGCCPath
+        /// <summary>
+        /// Function for browsing the GCC Path.
+        /// </summary>
         public void BrowseGCCPath()
         {
             var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
@@ -595,6 +626,10 @@ namespace GUI.ViewModel
                 return _BrowseCommandOtherIncludes;
             }
         }
+        /// Function - BrowseGCCPath2
+        /// <summary>
+        /// Function for browsing the other include path.
+        /// </summary>
         public void BrowseGCCPath2()
         {
             var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
@@ -716,7 +751,7 @@ namespace GUI.ViewModel
                 string path = createProtocol(testFile, toolsArray);
                 path += ",test!!";
                 Thread clientThread;
-                clientThread = new Thread(() => ClientConnection.ExecuteClient(path,this));
+                clientThread = new Thread(() => ClientConnection.ExecuteClient(path));
                 clientThread.Start();
             }
             

@@ -90,6 +90,7 @@ namespace AddToolsMVVM.ViewModel
                 NotifyPropertyChanged("Tools");
             }
         }
+        // Function to the apply button.
         public ICommand ApplyCommand
         {
             get
@@ -101,6 +102,7 @@ namespace AddToolsMVVM.ViewModel
                 return _ApplyCommand;
             }
         }
+        // Function to browse the folder path.
         public ICommand BrowseCommand
         {
             get

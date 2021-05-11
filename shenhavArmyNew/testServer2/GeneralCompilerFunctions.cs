@@ -217,52 +217,6 @@ namespace testServer2
             }
             return result;
         }
-        /// Function getParameterNameFromLine
-        /// <summary>
-        /// Gets a code line of a variable Declaration and gives back the node of the variable (name,type).
-        /// </summary>
-        /// <param name="line"> Code line type string.</param>
-        /// <returns> returns type - ParametersType the variable that was being declared.</returns>
-        static ParametersType GetParameterNameFromLine(string line)
-        {
-            string name;
-            string type = line;
-            int lastIndex;
-            //takes the substring that starts in the last space accurance and his length.
-            name = line.Substring(line.LastIndexOf(GeneralConsts.SPACEBAR) + 1, (line.Length - (line.LastIndexOf(GeneralConsts.SPACEBAR) + 1)));
-            //if there are no spaces in the line then it must be a '*', so doing the same thing with '*' instead of space.
-            if (name == GeneralConsts.EMPTY_STRING)
-            {
-                name = line.Substring(line.LastIndexOf(GeneralConsts.ASTERIX), (line.Length - (line.LastIndexOf(GeneralConsts.ASTERIX) + 1)));
-            }
-            else if(name=="+"&&line.Split(' ').Length>2)
-            {
-                name = line.Substring(line.IndexOf(GeneralConsts.SPACEBAR) + 1, (line.Length - (line.IndexOf(GeneralConsts.SPACEBAR) + 1)));
-            }
-            else if (name == "+" && line.Split(' ').Length <= 2)
-            {
-                name = line.Substring(0, (line.IndexOf(GeneralConsts.SPACEBAR) + 1));
-                name = name.Trim();
-            }
-            //last index of space
-            lastIndex = line.LastIndexOf(GeneralConsts.SPACEBAR);
-            if (lastIndex != GeneralConsts.NOT_FOUND_STRING)
-            {
-                //removes the variable name from the line to get the type
-                type = line.Remove(lastIndex).Trim();
-            }
-            //all variables that does not matter to the checks are being removed.
-            foreach (string var in ignoreVarialbesType)
-            {
-                if (type.IndexOf(var) != GeneralConsts.NOT_FOUND_STRING)
-                {
-                    type = type.Replace(var, GeneralConsts.EMPTY_STRING);
-                    type = type.Trim();
-                }
-            }
-            ParametersType result = new ParametersType(name, type);
-            return result;
-        }
         /// Function - VariableDeclarationHandler
         /// <summary>
         /// Handling the variable declaration part in the function "ChecksInSyntaxCheck" by
