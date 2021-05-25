@@ -771,40 +771,44 @@ namespace testServer2
         }
         /// Function  - AllChecksInSyntaxCheck
         /// <summary>
-        /// 
+        /// this function is responsible on most checks on the code. etc : 
+        /// adding all new keywords
+        /// check variables are not with same names
+        /// and more.
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="destPath"></param>
-        /// <param name="sr"></param>
-        /// <param name="codeLine"></param>
-        /// <param name="IsScope"></param>
-        /// <param name="keywords"></param>
-        /// <param name="memoryHandleFunc"></param>
-        /// <param name="threadNumber"></param>
-        /// <param name="typeEnding"></param>
-        /// <param name="eVars"></param>
-        /// <param name="variables"></param>
-        /// <param name="globalVariables"></param>
-        /// <param name="blocksAndNames"></param>
-        /// <param name="blocksAndDefines"></param>
-        /// <param name="MemoryPattern"></param>
-        /// <param name="FreeMemoryPattern"></param>
-        /// <param name="codeContent"></param>
-        /// <param name="i"></param>
-        /// <param name="keywordCheck"></param>
-        /// <param name="memoryAllocation"></param>
-        /// <param name="memoryRelease"></param>
-        /// <param name="DifferentTypesCheck"></param>
-        /// <param name="pos"></param>
-        /// <param name="keywordResults"></param>
-        /// <param name="functionLength"></param>
-        /// <param name="parameters"></param>
-        /// <param name="calledFromFunc"></param>
-        /// <param name="callsFromThisFunction"></param>
-        /// <param name="functionName"></param>
-        /// <param name="functionsContent"></param>
-        /// <param name="isFunction"></param>
-        /// <param name="anciCWords"></param>
+        /// <param name="path"> code path.</param>
+        /// <param name="destPath"> the destination path where the logs are going to be.</param>
+        /// <param name="sr"> the MyStream buffer. i read the code from it.</param>
+        /// <param name="codeLine"> current line in the code.</param>
+        /// <param name="IsScope"> if the call of the function is on a scope or just a line. depends if the code at the 
+        /// moment is inside a scope or not.</param>
+        /// <param name="keywords"> all keywords type Hashtable.</param>
+        /// <param name="memoryHandleFunc"> all of the memory handles type arrayList.</param>
+        /// <param name="threadNumber"> the current thread of the file.</param>
+        /// <param name="typeEnding"> c or h depends if the code is in c or a header file.</param>
+        /// <param name="eVars"> all enivironment variables type Hashtable.</param>
+        /// <param name="variables"> all of the variables that the scope knows.</param>
+        /// <param name="globalVariables"> global variables that are being created outside scopes.</param>
+        /// <param name="blocksAndNames"> all the variables in the code ordered by scopes.</param>
+        /// <param name="blocksAndDefines"> all defines in the code ordered by scopes.</param>
+        /// <param name="MemoryPattern"> the memory pattern that is matching the code.</param>
+        /// <param name="FreeMemoryPattern"> The free memory pattern that is matching the code.</param>
+        /// <param name="codeContent"> the content of the code.</param>
+        /// <param name="i"> the index of the for in the CheckInSyntaxCheck Function.</param>
+        /// <param name="keywordCheck"> a boolean for the code later.</param>
+        /// <param name="memoryAllocation"> if the function is having allocations type boolean.</param>
+        /// <param name="memoryRelease"> if the function is having memory frees type boolean.</param>
+        /// <param name="DifferentTypesCheck"> a boolean that checks if two types that are being equale</param>
+        /// <param name="pos"> position of the buffer.</param>
+        /// <param name="keywordResults"> one of the variables that are requiered for this function.</param>
+        /// <param name="functionLength"> the length of the function.</param>
+        /// <param name="parameters"> parameters of the functin type ParametersType</param>
+        /// <param name="calledFromFunc"> where did this function is being called from.</param>
+        /// <param name="callsFromThisFunction"> all function calls from this function.</param>
+        /// <param name="functionName"> the name of the function.</param>
+        /// <param name="functionsContent"> all of the content of the function.</param>
+        /// <param name="isFunction"> a boolean for if it is a function.</param>
+        /// <param name="anciCWords"> path of the anciCWords</param>
         static void AllChecksInSyntaxCheck(string path, MyStream sr, ref string codeLine, bool IsScope, Hashtable keywords, Hashtable memoryHandleFunc, int threadNumber, string typeEnding, string[] eVars, ArrayList variables, ArrayList globalVariables, ArrayList blocksAndNames, ArrayList blocksAndDefines, Regex MemoryPattern, Regex FreeMemoryPattern, ref string codeContent,ref int i,bool keywordCheck,bool memoryAllocation,bool memoryRelease, bool DifferentTypesCheck, int pos, ArrayList keywordResults, ref int functionLength, Dictionary<string, ArrayList> calledFromFunc = null, Dictionary<string, Dictionary<string, string[]>> callsFromThisFunction = null, string functionName = "", Dictionary<string, string> functionsContent = null, bool isFunction = false, Hashtable anciCWords = null)
         {
             codeLine = cleanLineFromDoc(codeLine).Trim();

@@ -1,7 +1,5 @@
 started rest api
 started socket for client listen
-C:\Users\student\Desktop\Analyzer-master\NewClient\NewClient\client.c,C:\Users\student\Desktop\Analyzer-master\NewClient\NewClient,..\..\..\Compiler,null,C:\Users\student\Desktop\Analyzer-master\NewClient\NewClient,tools={MemoryHandleTool\fileScript.txt},memory={,,,},free={,},environmentVariablePath={C:\Users\student\Desktop\Analyzer-master\NewServer\NewServer\Evars.txt}
-C:\Users\student\Desktop\Analyzer-master\NewServer\NewServer\server.c,C:\Users\student\Desktop\Analyzer-master\NewServer\NewServer,..\..\..\Compiler,null,C:\Users\student\Desktop\Analyzer-master\NewServer\NewServer,tools={MemoryHandleTool\fileScript.txt},memory={,,,},free={,},environmentVariablePath={C:\Users\student\Desktop\Analyzer-master\NewServer\NewServer\Evars.txt}
 C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\TestItems\TestCCode2\test.c,C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\TestItems\TestCCode2,..\..\..\Compiler,null,C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\TestItems\TestCCode2,tools={MemoryHandleTool\fileScript.txt},memory={,,,},free={,},environmentVariablePath={C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\TestItems\TestCCode2\Evars.txt}
 Evar - evar1
 Evar - evar2
