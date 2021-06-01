@@ -9,7 +9,8 @@ namespace GUI.Model
 {
     public class FileModel : ViewModelBase
     {
-        private string filePath, projectPath, gccPath, otherInclude, destinationPath, eVarsPath,resultBlock;
+        private string filePath, projectPath, gccPath, otherInclude, destinationPath, eVarsPath,resultBlock,newLogFile;
+        private bool saveLogFile;
         public string FilePath
         {
             get
@@ -23,6 +24,30 @@ namespace GUI.Model
                     filePath = value;
                     NotifyPropertyChanged("FilePath");
                 }
+            }
+        }
+        public string NewLogFile
+        {
+            get
+            {
+                return newLogFile;
+            }
+            set
+            {
+                newLogFile = value;
+                NotifyPropertyChanged("NewLogFile");
+            }
+        }
+        public bool SaveLogFile
+        {
+            get
+            {
+                return saveLogFile;
+            }
+            set
+            {
+                saveLogFile = value;
+                NotifyPropertyChanged("SaveLogFile");
             }
         }
         public string ResultBlock

@@ -77,15 +77,16 @@ namespace testServer2
         {
             string logFilePath = createLogFile(threadNumber, filePath,destPath);
             AddToLogString(filePath, message);
+            if (!test)
+            {
+                File.WriteAllText(logFilePath, logFiles[filePath]);
+                File.WriteAllText(logFile, logFiles[MAIN_DICT_INDEX]);
+                message = message + "logFilePath={" + logFilePath + "}";
+            }
             ConnectionServer.CloseConnection(threadNumber, message, closeType);
             if(final_json.ContainsKey(filePath))
             {
                 final_json.Remove(filePath);
-            }
-            if(!test)
-            {
-                File.WriteAllText(logFilePath, logFiles[filePath]);
-                File.WriteAllText(logFile, logFiles[MAIN_DICT_INDEX]);
             }
             
         }
@@ -283,18 +284,36 @@ namespace testServer2
         /// <param name="filePath"> the path of the file.</param>
         /// <param name="destPath"> the path of the destionation.</param>
         /// <param name="tools"> The array of the tools sorted from low to high priority.</param>
-        static void RunAllTasks(string filePath,string destPath,ArrayList tools,ArrayList toolsAvgSecLine,int currentThreadNumber,string eVar)
+        static void RunAllTasks(string filePath, string destPath, ArrayList tools, ArrayList toolsAvgSecLine, int currentThreadNumber, string eVar)
         {
             ArrayList toolsScripts = new ArrayList();
+            SqlConnection cnn = new SqlConnection(connectionString);
+            cnn.Open();
+            Dictionary<string, string> tempDictForNames = new Dictionary<string, string>();
+            SqlCommand command = new SqlCommand("SELECT tool_name,tool_exe_name FROM tools_table", cnn);
+            using (SqlDataReader reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    tempDictForNames.Add((string)reader["tool_exe_name"], (string)reader["tool_name"]);
+                }
+            }
             for (int i = START_INDEX_OF_TOOLS; i < tools.Count; i++)
             {
                 toolsScripts.Add(File.ReadAllText(toolExeFolder + "\\" + tools[i]));
             }
             //runs the tools one by one.
-            for (int i= START_INDEX_OF_TOOLS; i< toolsScripts.Count;i++)
+            for (int i = START_INDEX_OF_TOOLS; i < toolsScripts.Count; i++)
             {
-                AddToolToLogFile(filePath, eVar, (string)toolsScripts[i]);
-                if(test)
+                try
+                {
+                    AddToolToLogFile(filePath, eVar, tempDictForNames[(string)tools[i]]);
+                }
+                catch (Exception e)
+                {
+                    AddToolToLogFile(filePath, eVar, (string)toolsScripts[i]);
+                }
+                if (test)
                 {
                     RunProcessAsync((string)toolsScripts[i], 0.0, (string)tools[i], filePath, destPath, eVar);
 
@@ -303,7 +322,7 @@ namespace testServer2
                 {
                     RunProcessAsync((string)toolsScripts[i], (double)toolsAvgSecLine[i], (string)tools[i], filePath, destPath, eVar);
                 }
-                
+
             }
             toolsScripts.Clear();
         }

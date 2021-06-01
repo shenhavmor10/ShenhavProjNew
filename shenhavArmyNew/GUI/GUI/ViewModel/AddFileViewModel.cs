@@ -33,6 +33,7 @@ namespace GUI.ViewModel
         private ICommand _BrowseCommandProjectPath;
         private ICommand _BrowseCommandGccPath;
         private ICommand _BrowseCommandOtherIncludes;
+        private ICommand _ShowResultsCommand;
         private ICommand _ButtonAddFile;
         private ICommand _GoToFile1Command;
         private ICommand _GoToFile2Command;
@@ -60,6 +61,7 @@ namespace GUI.ViewModel
             for(int i=0;i<5;i++)
             {
                 File = new FileModel();
+                File.SaveLogFile = false;
                 NavigationViewModel.fileList.Add(File);
                 Memory = new MemoryModel();
                 NavigationViewModel.memoryList.Add(Memory);
@@ -157,6 +159,22 @@ namespace GUI.ViewModel
             {
                 toolsList = value;
                 NotifyPropertyChanged("Tools");
+            }
+        }
+        public void ShowResults()
+        {
+            Window1 showResults = new Window1(ClientConnection.GetClientNumber());
+            showResults.Show();
+        }
+        public ICommand ShowResultsCommand
+        {
+            get
+            {
+                if (_ShowResultsCommand == null)
+                {
+                    _ShowResultsCommand = new RelayCommand(param => this.ShowResults(), null);
+                }
+                return _ShowResultsCommand;
             }
         }
         //Command for connect function.

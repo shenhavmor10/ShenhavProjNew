@@ -1,6 +1,6 @@
 started rest api
 started socket for client listen
-C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\TestItems\TestCCode2\test.c,C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\TestItems\TestCCode2,..\..\..\Compiler,null,C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\TestItems\TestCCode2,tools={MemoryHandleTool\fileScript.txt},memory={,,,},free={,},environmentVariablePath={C:\Users\student\Desktop\ShenhavLastGit\ShenhavProjNew\shenhavArmyNew\TestItems\TestCCode2\Evars.txt}
+C:\Users\student\Desktop\ShenhavProjNew-master\shenhavArmyNew\TestItems\TestCCode2\test.c,C:\Users\student\Desktop\ShenhavProjNew-master\shenhavArmyNew\TestItems\TestCCode2,..\..\..\Compiler,null,C:\Users\student\Desktop\ShenhavProjNew-master\shenhavArmyNew\TestItems\TestCCode2,tools={MemoryHandleTool\fileScript.txt},memory={,,,},free={,},environmentVariablePath={C:\Users\student\Desktop\ShenhavProjNew-master\shenhavArmyNew\TestItems\TestCCode2\Evars.txt}
 Evar - evar1
 Evar - evar2
 

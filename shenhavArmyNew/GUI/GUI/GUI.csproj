@@ -82,6 +82,9 @@
     <Compile Include="Views\AddFile.xaml.cs">
       <DependentUpon>AddFile.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ShowLogs.xaml.cs">
+      <DependentUpon>ShowLogs.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -95,6 +98,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\AddFile.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ShowLogs.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

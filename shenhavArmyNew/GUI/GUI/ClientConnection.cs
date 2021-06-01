@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -13,6 +14,8 @@ namespace GUI
     class ClientConnection
     {
         static Regex CurrentThreadRegex = new Regex("currentThread={(.*?)}");
+        static Regex newLogFilePath = new Regex("logFilePath={(.*?)}");
+        static int clientNumber;
         public static int sendMessage(string data, Socket sender)
         {
             byte[] messageSent;
@@ -35,6 +38,10 @@ namespace GUI
             string recieve = Encoding.ASCII.GetString(messageReceived,
                                              0, byteRecv);
             return recieve;
+        }
+        public static int GetClientNumber()
+        {
+            return clientNumber;
         }
         /// Function - ExecuteClient
         /// <summary>
@@ -78,9 +85,11 @@ namespace GUI
                     if (data != "exit")
                     {
                         string newData = recieveMessage(sender);
-                        int clientNumber= int.Parse(CurrentThreadRegex.Match(newData).Groups[1].Value);
+                        clientNumber= int.Parse(CurrentThreadRegex.Match(newData).Groups[1].Value);
                         newData = Regex.Replace(newData, @"currentThread={(.*?)}", "");
-                        NavigationViewModel.fileList[clientNumber].ResultBlock = newData;
+                        NavigationViewModel.fileList[clientNumber].ResultBlock = newData.Substring(0,newData.IndexOf("logFilePath"));
+                        NavigationViewModel.fileList[clientNumber].NewLogFile = File.ReadAllText(newLogFilePath.Match(newData).Groups[1].Value);
+                        NavigationViewModel.fileList[clientNumber].SaveLogFile = true;
                         //Change the textBlock to the error or final path depends if the code is good or bad.
                     }
                     else

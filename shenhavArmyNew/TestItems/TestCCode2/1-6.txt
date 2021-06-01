@@ -1,0 +1,33 @@
+FilePath - C:\Users\student\Desktop\ShenhavProjNew-master\shenhavArmyNew\TestItems\TestCCode2\test.c
+warning - { keyword does not exist. row : 0
+warning - { keyword does not exist. row : 0
+warning - { keyword does not exist. row : 0
+warning - { keyword does not exist. row : 0
+
+
+Environment Variable = evar1
+Tool = MemoryHandleTool
+"Variable shlomi that was created in function main was not being free'.
+Variable pointer5 that was created in function main was not being free'.
+"
+
+
+Environment Variable = evar2
+Tool = MemoryHandleTool
+"Variable pointer5 that was created in function main was not being free'.
+"
+
+
+Environment Variable = evar1,evar2
+Tool = MemoryHandleTool
+"Variable shlomi that was created in function main was not being free'.
+Variable pointer5 that was created in function main was not being free'.
+"
+
+
+Environment Variable = NoEvarTurnedOn
+Tool = MemoryHandleTool
+"Variable pointer5 that was created in function main was not being free'.
+"
+Finished succesfully code is ready at the destination path.
+

@@ -118,6 +118,7 @@
                         </materialDesign:HintAssist.Hint>
                     </TextBox>
                 </StackPanel>
+                <Button Content="Show Result File" HorizontalAlignment="Left" Margin="604,459,0,0" VerticalAlignment="Top" Width="179" Height="41" x:Name ="ShowLogFile" FontSize="18" Command="{Binding ShowResultsCommand}" materialDesign:ButtonAssist.CornerRadius="12" IsEnabled="{Binding File.SaveLogFile,Mode=TwoWay}"/>
             </Grid>
             <DockPanel Background="#161616" Grid.RowSpan="5" Margin="0,0,420,0">
                 <StackPanel Width="auto" Height="auto" VerticalAlignment="Top" >
@@ -132,5 +133,5 @@
 
         </Grid>
     </Viewbox>
-    
+
 </UserControl>
