@@ -165,7 +165,8 @@ namespace testServer2
             tempDictPatterns.Add("CustomFree", customFree);
             readyPatterns.Add(filePath, tempDictPatterns);
             Regex FreeMemoryPattern = new Regex(freePatternTemp);
-            foreach(string eVars in final_json[filePath].Keys)
+            AddToLogString(filePath, "Warnings for the code - \n");
+            foreach (string eVars in final_json[filePath].Keys)
             {
                 Hashtable memoryHandleFuncs = new Hashtable();
                 Dictionary<string, ArrayList> calledFromFunc = new Dictionary<string, ArrayList>();
@@ -176,6 +177,7 @@ namespace testServer2
                 Dictionary<string, ArrayList> funcVariables = new Dictionary<string, ArrayList>();
                 Dictionary<string, string> functionsContent = new Dictionary<string, string>();
                 ArrayList globalVariable = new ArrayList();
+                AddToLogString(filePath, "\r\nEnvironment Variable = "+ eVars+"\n");
                 Hashtable anciCWords = new Hashtable();
                 string codeContent = "";
                 //initialize 
@@ -223,9 +225,10 @@ namespace testServer2
             }
             if(!compileError)
             {
+                AddToLogString(filePath, "\r\n Tool results for the code for each environment variable - \n");
                 foreach (string eVars in final_json[filePath].Keys)
                 {
-                    
+                   
                     Thread threadOpenTools = new Thread(() => RunAllTasks(filePath, destPath, tools,toolAvgSecLine, currentThreadNumber,eVars));
                     threadOpenTools.Start();
                     
@@ -251,7 +254,7 @@ namespace testServer2
         /// <param name="toolName"> the name of the tool.</param>
         static void AddToolToLogFile(string filePath,string eVar,string toolName)
         {
-            AddToLogString(filePath, "\n\nEnvironment Variable = "+eVar);
+            AddToLogString(filePath, "\r\nEnvironment Variable = "+eVar);
             AddToLogString(filePath, "Tool = "+toolName);
         }
 

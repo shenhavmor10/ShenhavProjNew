@@ -151,6 +151,15 @@ namespace testServer2
             }
             return result;
         }
+        public static string CloseKohavitIfNeeded(string a)
+        {
+            int index = a.IndexOf('*');
+            if(a[index-1]==' ')
+            {
+                a = a.Remove(index - 1, 1);
+            }
+            return a;
+        }
         /// Function - FindParameters
         /// <summary>
         /// get a string of a function and returns all the parameters of the function in a parameter type array.
@@ -178,6 +187,10 @@ namespace testServer2
                     for (i = 0; i < tempSplit.Length - 1; i++)
                     {
                         tempSplit[i] = tempSplit[i].Trim();
+                        if(tempSplit[i].IndexOf('*')!=GeneralConsts.NOT_FOUND_STRING)
+                        {
+                            tempSplit[i] = CloseKohavitIfNeeded(tempSplit[i]);
+                        }
                         if (tempSplit[i].Split(' ').Length > 2 && !(tempSplit[i].IndexOf("struct") != GeneralConsts.NOT_FOUND_STRING))
                         {
                             tempCut = tempSplit[i].Substring(tempSplit[i].IndexOf(' ') + 1, tempSplit[i].Length - (tempSplit[i].IndexOf(' ') + 1));

@@ -27,7 +27,7 @@ struct example2 {
 * @returns:
 * if the messege  djfdjfddn dfkdf mdfdk dfm
 */
-void spoi(char* a, char ** b)
+void spoi(char* a,char ** b)
 {
 	if (num == null)
 	{
@@ -45,6 +45,8 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 		int b;
 	};
 	struct example3 d;
+	char test22;
+	int test23;
 	int*** s;
 	int max = 5;
 	if (max)
@@ -54,6 +56,7 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 	char* yosi = "a";
 	char dosi = "s";
 	#ifdef evar1
+	int max;
 	struct example4 {
 		int a;
 		int b;
@@ -75,6 +78,7 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 	int EightIsGood;
 	#endif
 	char* runner = pointer;
+	inf testtest;
 	*retval = pointer;
 
 	/*                  sdfsdfsdfsd*/

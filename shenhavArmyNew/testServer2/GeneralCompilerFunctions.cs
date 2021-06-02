@@ -318,7 +318,7 @@ namespace testServer2
             // checks if there is already the same name in the same scope.
             if (IsExistInArrayList(((ArrayList)blocksAndNames[blocksAndNames.Count - 1]), name) != null)
             {
-                MainProgram.AddToLogString(path, ("you have used the same name for multiple variables in row " + sr.curRow + ". name - " + name));
+                
                 throw new Exception(("you have used the same name for multiple variables in row " + sr.curRow + ". name - " + name));
                 
             }
