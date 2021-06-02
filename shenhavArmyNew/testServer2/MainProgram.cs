@@ -107,6 +107,7 @@ namespace testServer2
                 logFiles[filePath] += content + GeneralConsts.NEW_LINE;
             }
             
+            
 
             mutexAddLogFiles.ReleaseMutex();
         }
@@ -177,7 +178,8 @@ namespace testServer2
                 Dictionary<string, ArrayList> funcVariables = new Dictionary<string, ArrayList>();
                 Dictionary<string, string> functionsContent = new Dictionary<string, string>();
                 ArrayList globalVariable = new ArrayList();
-                AddToLogString(filePath, "\r\nEnvironment Variable = "+ eVars+"\n");
+                AddToLogString(filePath, "\r\nEnvironment Variable = "+ eVars);
+                AddToLogString(filePath, "----------------------------------------------------------------------------");
                 Hashtable anciCWords = new Hashtable();
                 string codeContent = "";
                 //initialize 
@@ -222,6 +224,7 @@ namespace testServer2
                         }
                     }
                 }
+                AddToLogString(filePath, "----------------------------------------------------------------------------");
             }
             if(!compileError)
             {
@@ -241,6 +244,7 @@ namespace testServer2
                     Thread writeToFile = new Thread(() => File.WriteAllText(logFile, logFiles[filePath]));
                     writeToFile.Start();
                     writeToFile.Join(GeneralConsts.TIMEOUT_JOIN);*/
+                    AddToLogString(filePath, "----------------------------------------------------------------------------");
                 }
                 CleanBeforeCloseThread(currentThreadNumber, FINISH_SUCCESFULL, GeneralConsts.FINISHED_SUCCESFULLY, filePath,destPath);
             }
@@ -255,6 +259,7 @@ namespace testServer2
         static void AddToolToLogFile(string filePath,string eVar,string toolName)
         {
             AddToLogString(filePath, "\r\nEnvironment Variable = "+eVar);
+            AddToLogString(filePath, "----------------------------------------------------------------------------");
             AddToLogString(filePath, "Tool = "+toolName);
         }
 
