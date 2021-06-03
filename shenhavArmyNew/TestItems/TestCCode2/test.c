@@ -56,7 +56,7 @@ static int* main(int* podd, int** odpdf, char a, char* retval)
 	char* yosi = "a";
 	char dosi = "s";
 	#ifdef evar1
-	int max;
+	char max;
 	struct example4 {
 		int a;
 		int b;

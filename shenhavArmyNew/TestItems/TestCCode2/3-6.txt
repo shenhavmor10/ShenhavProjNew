@@ -1,0 +1,62 @@
+FilePath - C:\Users\Shenhav\Desktop\ShenhavArmyNew\ShenhavProjNew\shenhavArmyNew\TestItems\TestCCode2\test.c
+Warnings for the code - 
+
+
+Environment Variable = evar1
+----------------------------------------------------------------------------
+an error have accured in line 59
+you have used the same name for multiple variables in row 59. name - max
+inf testtest; keyword does not exist. row : 81
+----------------------------------------------------------------------------
+
+Environment Variable = evar2
+----------------------------------------------------------------------------
+inf testtest; keyword does not exist. row : 81
+----------------------------------------------------------------------------
+
+Environment Variable = evar1,evar2
+----------------------------------------------------------------------------
+an error have accured in line 59
+you have used the same name for multiple variables in row 59. name - max
+inf testtest; keyword does not exist. row : 81
+----------------------------------------------------------------------------
+
+Environment Variable = NoEvarTurnedOn
+----------------------------------------------------------------------------
+inf testtest; keyword does not exist. row : 81
+----------------------------------------------------------------------------
+
+ Tool results for the code for each environment variable - 
+
+
+Environment Variable = evar1
+----------------------------------------------------------------------------
+Tool = MemoryHandleTool
+"Variable shlomi that was created in function main was not being free'.
+Variable pointer5 that was created in function main was not being free'.
+"
+----------------------------------------------------------------------------
+
+Environment Variable = evar2
+----------------------------------------------------------------------------
+Tool = MemoryHandleTool
+"Variable pointer5 that was created in function main was not being free'.
+"
+----------------------------------------------------------------------------
+
+Environment Variable = evar1,evar2
+----------------------------------------------------------------------------
+Tool = MemoryHandleTool
+"Variable shlomi that was created in function main was not being free'.
+Variable pointer5 that was created in function main was not being free'.
+"
+----------------------------------------------------------------------------
+
+Environment Variable = NoEvarTurnedOn
+----------------------------------------------------------------------------
+Tool = MemoryHandleTool
+"Variable pointer5 that was created in function main was not being free'.
+"
+----------------------------------------------------------------------------
+Finished succesfully code is ready at the destination path.
+
